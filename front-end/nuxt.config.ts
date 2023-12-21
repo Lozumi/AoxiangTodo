@@ -23,5 +23,16 @@ export default defineNuxtConfig({
                 ? ['naive-ui', 'vueuc']
               : []
     }
-  }
+  },
+    modules: [
+        'vuetify-nuxt-module'
+    ],
+    vuetify: {
+        moduleOptions: {
+            /* module specific options */
+        },
+        vuetifyOptions: {
+            /* vuetify options */
+        }
+    }
 })
