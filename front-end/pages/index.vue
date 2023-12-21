@@ -1,472 +1,161 @@
 <template>
-  <NConfigProvider inline-theme-disabled>
-    <NMessageProvider>
-      <NNotificationProvider>
-        <NLoadingBarProvider>
-          <NDialogProvider>
-            <NSpace vertical>
-              <Provided />
-              <NButton>Button</NButton>
-              <NInput placeholder="NInput" />
-              <NInputNumber placeholder="NInputNumger" />
-              <NSelect placeholder="NSelect" :options="selectOptions" />
-              <NAutoComplete
-                placeholder="NAutoComplete"
-                :options="selectOptions"
-              />
-              <NCascader placeholder="NCascader" :options="cascaderOptions" />
-              <NMention placeholder="NMention" :options="selectOptions" />
-              <NPopconfirm>
-                <template #trigger>
-                  <NButton>NPopconfirm</NButton>
-                </template>
-              </NPopconfirm>
-              <NPopover>
-                <template #trigger>
-                  <NButton>NPopover</NButton>
-                </template>
-                Popover
-              </NPopover>
-              <NPopselect :options="selectOptions">
-                <NButton>NPopselect</NButton>
-              </NPopselect>
-              <NDropdown :options="treeOptions">
-                <NButton>Dropdown</NButton>
-              </NDropdown>
-              <NTreeSelect :options="treeOptions" />
-              <NTooltip>
-                <template #trigger>
-                  <NButton>Tooltip</NButton>
-                </template>
-                Toooltip
-              </NTooltip>
-              <NTree :data="treeOptions" />
-              <NTimePicker />
-              <NDynamicInput />
-              <NDynamicTags />
-              <NDatePicker />
-              <NColorPicker />
-              <NSwitch />
-              <NSlider />
-              <NCheckbox label="Checkbox" />
-              <NCheckboxGroup>
-                <NSpace>
-                  <NCheckbox label="CheckboxGroup1" value="foo" />
-                  <NCheckbox label="CheckboxGroup2" value="bar" />
-                </NSpace>
-              </NCheckboxGroup>
-              <NCalendar />
-              <NDivider />
-              <NEmpty />
-              <NEl>NEl</NEl>
-              <NGradientText>NGradientText</NGradientText>
-              <NH1 id="NH1">H1</NH1>
-              <NHr />
-              <NA>NA</NA>
-              <NTag>NTag</NTag>
-              <NText>NText</NText>
-              <NBadge :value="999">NBadge</NBadge>
-              <NButtonGroup>
-                <NButton>Button Group</NButton>
-              </NButtonGroup>
-              <NBreadcrumb>
-                <NBreadcrumbItem>NBreadcrumbItem1</NBreadcrumbItem>
-                <NBreadcrumbItem>NBreadcrumbItem2</NBreadcrumbItem>
-              </NBreadcrumb>
-              <NUl>
-                <NLi>Ul Li</NLi>
-              </NUl>
-              <NOl><NLi>Ol Li</NLi></NOl>
-              <NBlockquote>NBlockquote</NBlockquote>
-              <NEllipsis
-                style="max-width: 80px"
-                :tooltip="{ arrowPointToCenter: true }"
-              >
-                NEllipsis.....................
-              </NEllipsis>
-              <NProgress type="circle" :percentage="50" />
-              <NRate />
-              <NPageHeader subtitle="PageHeader Subtitle">
-                <template #title> PageHeader </template>
-              </NPageHeader>
-              <NP id="NP">NP</NP>
-              <NSpin />
-              <NIcon>Icon</NIcon>
-              <NIconWrapper>
-                <NIcon>Icon</NIcon>
-              </NIconWrapper>
-              <NPagination :page-count="100" />
-              <NMenu :options="treeOptions" />
-              <NAlert title="NAlert" type="info"> NAlert </NAlert>
-              <NResult status="404" />
-              <NList>
-                <NListItem>ListItem</NListItem>
-              </NList>
-              <NTime :time="0" type="date" />
-              <NTimeline>
-                <NTimelineItem content="Oops" />
-              </NTimeline>
-              <NThing title="NThing" />
-              <NCollapse default-expanded-names="1" accordion>
-                <NCollapseItem title="NCollapseItem1" name="1">
-                  NCollapseItem1
-                </NCollapseItem>
-                <NCollapseItem title="NCollapseItem2" name="2">
-                  NCollapseItem2
-                </NCollapseItem>
-              </NCollapse>
-              <NAvatar
-                round
-                size="medium"
-                src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-              />
-              <NUpload><NButton>Upload</NButton></NUpload>
-              <NUpload><NUploadDragger>NUploadDragger</NUploadDragger></NUpload>
-              <NImage
-                width="100"
-                src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-              />
+  <v-app>
+    <v-app-bar color="#3A8FB7" app absolute elevate-on-scroll>
+<!--      <img src="/npu-logo.png" alt="NPU"  class="ml-2" style="width: 36px; height: 36px">-->
+      <v-toolbar-title class="white--text text-center mx-2"><strong>食在工大</strong></v-toolbar-title>
+      <v-spacer/>
+      <v-btn to="/" icon class="mx-2">
+        <v-icon>home</v-icon>
+      </v-btn>
 
-              <NInputGroup>
-                <NInput />
-                <NInputGroupLabel>NInputGroupLabel</NInputGroupLabel>
-              </NInputGroup>
-              <NRow>
-                <NCol span="24">NRow + NCol</NCol>
-              </NRow>
-              <NLog :lines="['NLog1', 'NLog2']" />
-              <NCountdown :duration="996" :precision="3" />
-              <NNumberAnimation :from="996" :to="99" />
-              <NStatistic label="NStatistic" value="NStatistic" />
-              <NTable>
-                <thead>
-                  <tr>
-                    <th>NTable</th>
-                    <th>NTable</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>NTable</td>
-                    <td>NTable</td>
-                  </tr>
-                </tbody>
-              </NTable>
-              <NTabs>
-                <NTabPane name="NTabPane1" tab="NTabPane1">NTabPane1</NTabPane>
-                <NTabPane name="NTabPane2" tab="NTabPane2">NTabPane2</NTabPane>
-              </NTabs>
-              <NCard title="NCard" />
-              <NDialog title="NDialog" />
-              <NLayout has-sider>
-                <NLayoutSider>NLayoutSider</NLayoutSider>
-                <NLayoutContent>
-                  <NLayoutHeader>NLayoutHeader</NLayoutHeader>
-                  NLayoutContent
-                  <NLayoutFooter>NLayoutFooter</NLayoutFooter>
-                </NLayoutContent>
-              </NLayout>
-              <NSkeleton height="40px" width="33%" />
-              Modal
-              <NSwitch v-model:value="showModal" />
-              <NModal preset="card" title="NModal" v-model:show="showModal" />
-              Drawer
-              <NSwitch v-model:value="showDrawer" />
-              <NDrawer v-model:show="showDrawer">NDrawer</NDrawer>
-              <NRadio name="NRadio" label="NRadio" />
-              <NRadioGroup name="NRadioGroup">
-                <NRadio value="NRadioGroup1" label="NRadioGroup1" />
-                <NRadio value="NRadioGroup2" label="NRadioGroup2" />
-              </NRadioGroup>
-              <NRadioGroup name="NRadioButtonGroup">
-                <NRadioButton value="NRadioGroup1" label="NRadioGroup1" />
-                <NRadioButton value="NRadioGroup2" label="NRadioGroup2" />
-              </NRadioGroup>
-              <NCarousel autoplay>
-                <NCarouselItem>
-                  <img
-                    class="carousel-img"
-                    src="https://naive-ui.oss-cn-beijing.aliyuncs.com/carousel-img/carousel1.jpeg"
-                  />
-                </NCarouselItem>
-                <NCarouselItem>
-                  <img
-                    class="carousel-img"
-                    src="https://naive-ui.oss-cn-beijing.aliyuncs.com/carousel-img/carousel2.jpeg"
-                  />
-                </NCarouselItem>
-              </NCarousel>
-              <NDescriptions label-placement="top" title="NDescription">
-                <NDescriptionsItem>
-                  <template #label> NDescriptionsItem1 </template>
-                  NDescriptionsItem1
-                </NDescriptionsItem>
-                <NDescriptionsItem label="NDescriptionsItem2">
-                  NDescriptionsItem2
-                </NDescriptionsItem>
-                <NDescriptionsItem label="NDescriptionsItem3">
-                  NDescriptionsItem3
-                </NDescriptionsItem>
-              </NDescriptions>
-              NCollapseTransition
-              <NSwitch v-model:value="showCollapseTransition" />
-              <NCollapseTransition v-model:show="showCollapseTransition">
-                NCollapseTransition<br />
-                NCollapseTransition<br />
-                NCollapseTransition
-              </NCollapseTransition>
-              NForm
-              <NForm>
-                <NFormItem label="FormItem">
-                  <NInput />
-                </NFormItem>
-                <NFormItemRow>
-                  <NFormItemCol label="NFormItemCol" span="12">
-                    <NInput />
-                  </NFormItemCol>
-                </NFormItemRow>
-                <NGrid :cols="4">
-                  <NFormItemGi label="NFormItemGi">
-                    <NInput />
-                  </NFormItemGi>
-                  <NFormItemGridItem label="NFormItemGridItem">
-                    <NInput />
-                  </NFormItemGridItem>
-                  <NGi>NGi</NGi>
-                  <NGridItem>NGridItem</NGridItem>
-                </NGrid>
-              </NForm>
-              <NSteps :current="1">
-                <NStep title="NStep1" description="NStep1" />
-                <NStep title="NStep2" description="NStep2" />
-              </NSteps>
-              <NGlobalStyle />
-              <NDivider>!!! Buggy Zone !!!</NDivider>
-              <!-- If you want scrollbar to show, make sure vue's version >= 3.2.36 -->
-              <NScrollbar style="height: 100px">
-                NScrollbar<br />
-                NScrollbar<br />
-                NScrollbar<br />
-                NScrollbar<br />
-                NScrollbar<br />
-                NScrollbar<br />
-                NScrollbar<br />
-                NScrollbar<br />
-                NScrollbar<br />
-                NScrollbar<br />
-              </NScrollbar>
-              <!-- BUG: doesn't behavior as expected -->
+    </v-app-bar>
 
-              <!-- BUG: position of overflow count isn't correct -->
-              <NAvatarGroup
-                :options="[
-                  {
-                    src: 'https://gw.alipayobjects.com/zos/antfincdn/aPkFc8Sj7n/method-draw-image.svg'
-                  },
-                  {
-                    src: 'https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg'
-                  },
-                  {
-                    src: 'https://gw.alipayobjects.com/zos/antfincdn/aPkFc8Sj7n/method-draw-image.svg'
-                  }
-                ]"
-                :size="40"
-                :max="2"
-              />
-              <NBackTop :visibility-height="500">BackTop</NBackTop>
-              <NDataTable
-                :columns="[
-                  { key: 'label', title: 'Label' },
-                  { key: 'labelX', title: 'LabelX' }
-                ]"
-                :data="selectOptions"
-              />
-              <NImageGroup>
-                <NImage
-                  width="100"
-                  src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-                />
-                <NImage
-                  width="100"
-                  src="https://gw.alipayobjects.com/zos/antfincdn/aPkFc8Sj7n/method-draw-image.svg"
-                />
-              </NImageGroup>
-              <!-- BUG: break & tree data -->
-              <!-- transfer mismatch -->
-              <!-- <NTransfer :options="selectOptions" /> -->
+    <v-main class="bg-fixed" >
+      <v-container>
+        <v-row class="justify-center">
+          <v-col cols="12">
+            <v-card>
+              <v-card-text class="text-center">
+                <p class="nputitle">
+                  <strong>食在工大——食堂订餐配送系统</strong>
+                </p>
+              </v-card-text>
+              <v-divider></v-divider>
+              <v-card-text class="text-center">
+                <p>
+                  西北工业大学软件工程导论课程（2023-2024秋）大作业项目，由Dobug小组作品出品。<br>
+                  项目前端采用Vue 3框架，引入Tailwind CSS美化组件，利用Nuxt、Vuex技术实现快速构建。<br>
+                  因时间、技术有限，仅实现了部分前端功能（主页、餐厅菜单、购物车），餐厅、菜品使用字符串存储。
+                </p>
+              </v-card-text>
+              <v-divider></v-divider>
+              <v-card-actions class="justify-center">
+                <div class="flex items-center">
+                  <div class="github-badge" style="margin-right: 10px;">
+                    <a href="https://www.github.com/Lozumi" target="_blank" title="©2018-2022 洛衣Lozumi" class="white-text">
+                      <span class="badge-subject">Copyright</span><span class="badge-value bg-tianyi">©2018-2023 Lozumi</span>
+                    </a>
+                  </div>
+                  <div class="github-badge" style="margin-right: 10px;">
+                    <a href="http://beian.miit.gov.cn/" target="_blank" title="鄂ICP备 19021090号-1" class="white-text">
+                      <span class="badge-subject">鄂ICP备</span><span class="badge-value bg-miku">19021090号-1</span>
+                    </a>
+                  </div>
+                  <div class="github-badge">
+                    <a href="./" target="_blank" title="版本 V1.0.0" class="white-text">
+                      <span class="badge-subject">部署版本</span><span class="badge-value bg-orange">V1.0.0</span>
+                    </a>
+                  </div>
+                </div>
 
-              <!-- <NAnchor ignore-gap>
-                <NAnchorLink title="NAnchorLink NP" href="#NP" />
-                <NAnchorLink title="NAnchorLink NH1" href="#NH1" />
-              </NAnchor> -->
-              <!-- BUG: break -->
-              <!-- <NWatermark /> -->
-              <!-- BUG: break -->
-              <!-- BUG: break -->
-              <!-- <NAffix :top="120" :trigger-top="60" :listen-to="affixListenTo">
-                <div>NAffix</div>
-              </NAffix> -->
-            </NSpace>
-          </NDialogProvider>
-        </NLoadingBarProvider>
-      </NNotificationProvider>
-    </NMessageProvider>
-  </NConfigProvider>
+              </v-card-actions>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+
+    </v-main>
+
+
+    <v-footer dark absolute bottom="0" left="0" right="0" padless>
+      <v-card color="#3A8FB7" flat class="w-full white--text text-center">
+        <v-card-text>
+          <v-btn v-for="platform in socialIcons" :key="platform.icon"
+                 class="mx-4 white--text" icon
+                 :href="platform.url" rel="noopener"
+          >
+            <v-icon size="24px">{{ platform.icon }}</v-icon>
+          </v-btn>
+        </v-card-text>
+
+        <v-card-text class="white--text">
+          西北工业大学 软件工程导论课程（2023-2024秋）大作业
+          <br>
+          Dobug小组作品
+        </v-card-text>
+      </v-card>
+    </v-footer>
+
+  </v-app>
 </template>
 
-<script lang="ts" setup>
-import {
-  NConfigProvider,
-  NButton,
-  NSpace,
-  NA,
-  NAffix,
-  NAlert,
-  NAnchor,
-  NBackTop,
-  NAutoComplete,
-  NAvatar,
-  NAvatarGroup,
-  NAnchorLink,
-  NBadge,
-  NBlockquote,
-  NBreadcrumb,
-  NBreadcrumbItem,
-  NButtonGroup,
-  NCalendar,
-  NCascader,
-  NCheckbox,
-  NCheckboxGroup,
-  NCol,
-  NCollapse,
-  NCollapseItem,
-  NCollapseTransition,
-  NColorPicker,
-  NCountdown,
-  NCard,
-  NCarousel,
-  NCarouselItem,
-  NDataTable,
-  NDatePicker,
-  NDescriptions,
-  NDescriptionsItem,
-  NDialog,
-  NDialogProvider,
-  NDivider,
-  NDrawer,
-  NDropdown,
-  NDynamicInput,
-  NDynamicTags,
-  NForm,
-  NEl,
-  NEllipsis,
-  NEmpty,
-  NFormItem,
-  NFormItemCol,
-  NFormItemGi,
-  NFormItemGridItem,
-  NFormItemRow,
-  NGi,
-  NGlobalStyle,
-  NGradientText,
-  NGrid,
-  NGridItem,
-  NH1,
-  NHr,
-  NIcon,
-  NIconWrapper,
-  NImage,
-  NImageGroup,
-  NInput,
-  NInputGroup,
-  NInputGroupLabel,
-  NInputNumber,
-  NLayout,
-  NLayoutContent,
-  NLayoutFooter,
-  NLayoutHeader,
-  NLayoutSider,
-  NLi,
-  NList,
-  NListItem,
-  NLoadingBarProvider,
-  NLog,
-  NMention,
-  NMenu,
-  NMessageProvider,
-  NNotificationProvider,
-  NModal,
-  NNumberAnimation,
-  NOl,
-  NP,
-  NPageHeader,
-  NPagination,
-  NPopconfirm,
-  NPopover,
-  NPopselect,
-  NProgress,
-  NRadio,
-  NRadioButton,
-  NRadioGroup,
-  NRate,
-  NResult,
-  NScrollbar,
-  NSelect,
-  NSkeleton,
-  NSlider,
-  NSpin,
-  NStatistic,
-  NStep,
-  NSteps,
-  NSwitch,
-  NTabPane,
-  NTable,
-  NTag,
-  NText,
-  NTabs,
-  NThing,
-  NTime,
-  NTooltip,
-  NTimePicker,
-  NTimeline,
-  NTimelineItem,
-  NTransfer,
-  NTree,
-  NTreeSelect,
-  NUl,
-  NUpload,
-  NUploadDragger,
-  NWatermark,
-  NRow
-} from 'naive-ui'
-import Provided from './Provided.vue'
+<script>
 
-const selectOptions = [
-  { label: 'label1', value: 'value1', key: 'key1', labelX: 'labelX1' },
-  { label: 'label2', value: 'value2', key: 'key2', labelX: 'labelX2' }
-]
-const cascaderOptions = [
-  {
-    label: 'label1',
-    value: 'value1',
-    children: [{ label: 'label2', value: 'value2' }]
-  }
-]
-const treeOptions = [
-  {
-    label: 'label1',
-    key: 'key1',
-    children: [{ label: 'label2', key: 'key2' }]
-  }
-]
-const showModal = ref(false)
-const showDrawer = ref(false)
-const showCollapseTransition = ref(true)
-const affixListenTo = () => document.documentElement
+export default {
+  data() {
+    return {
+      socialIcons: [
+        { icon: 'mdi-qqchat', url: '#' },
+        { icon: 'mdi-wechat', url: '#' },
+        { icon: 'mdi-sina-weibo', url: '#' },
+        { icon: 'mdi-github', url: 'https://www.github.com/Lozumi/NPUFood-Nuxt' },
+      ],
+    }
+  },
+}
 </script>
 
-<style>
-body {
-  padding: 16px;
+<style scoped>
+.nputitle{
+  justify-content: center;
+  font-size: 24px;
 }
+.flex {
+  display: flex;
+  justify-content: center;
+}
+.items-center {
+  align-items: center;
+}
+
+/*底部页脚*/
+.github-badge {
+  display: inline-block;
+  border-radius: 4px;
+  text-shadow: none;
+  font-size: 12px;
+  color: #fff;
+  line-height: 15px;
+  background-color: #abbac3;
+  margin-bottom: 5px
+}
+
+.github-badge .badge-subject {
+  display: inline-block;
+  background-color: #4d4d4d;
+  padding: 4px 4px 4px 6px;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px
+}
+
+.github-badge .badge-value {
+  display: inline-block;
+  padding: 4px 6px 4px 4px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px
+}
+
+.github-badge .bg-orange {
+  background-color: #ffa500
+}
+
+.github-badge .bg-tianyi {
+  background-color: #66CCFF;
+}
+
+.github-badge .bg-miku {
+  background-color: #39C5BB;
+}
+
+.white-text {
+  color: white;
+}
+
+/* Center content in the footer */
+.v-footer {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+}
+
 </style>

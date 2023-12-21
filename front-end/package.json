@@ -15,7 +15,8 @@
     "naive-ui": "^2.36.0",
     "nuxt": "^3.8.2",
     "vue": "^3.3.12",
-    "vue-router": "^4.2.5"
+    "vue-router": "^4.2.5",
+    "vuetify-nuxt-module": "^0.7.3"
   },
   "dependencies": {
     "date-fns-tz": "^2.0.0"
