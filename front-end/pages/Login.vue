@@ -20,7 +20,20 @@
                 hide-details="auto"
             ></v-text-field>
             密码
-            <v-text-field label="请输入密码"></v-text-field>
+            <v-text-field
+                label="请输入密码"
+                :rules="rules"
+                hide-details="auto"
+            ></v-text-field>
+            <v-btn
+                :loading="loading"
+                class="flex-grow-1"
+                height="48"
+                variant="tonal"
+                @click="load"
+            >
+              登入
+            </v-btn>
           </div>
         </v-window-item>
 
@@ -44,6 +57,15 @@
              :rules="rules"
              hide-details="auto"
              ></v-text-field>
+           <v-btn
+               :loading="loading"
+               class="flex-grow-1"
+               height="48"
+               variant="tonal"
+               @click="load"
+           >
+             注册
+           </v-btn>
          </div>
         </v-window-item>
 
@@ -57,12 +79,21 @@
 <script>
 export default {
   data: () => ({
+    loading: false,
     rules: [
-      value => !!value || 'Required.',
-      value => (value && value.length >= 3) || 'Min 3 characters',
+      // value => !!value || 'Required.',
+      // value => (value && value.length >= 3) || 'Min 3 characters',
+        null
+
     ],
     tab: null,
   }),
+  methods: {
+    load () {
+      this.loading = true
+      setTimeout(() => (this.loading = false), 3000)
+    },
+  },
 }
 
 </script>
@@ -76,7 +107,7 @@ body {
 /* v-card样式 */
 .v-card {
   max-width: 400px;/*长度*/
-  margin: 50px auto;/*上方距离*/
+  margin: 100px auto;/*上方距离*/
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
@@ -90,13 +121,13 @@ body {
 
 /* v-tab样式 */
 .v-tab {
-  color: white !important;
+  color: white !important;/*导航栏文字颜色*/
   font-weight: bold;
 }
 
 /* v-tab-active样式 */
 .v-tab--active {
-  background-color: #009688 !important;
+  background-color: #1f1e33 !important;/*这谁？*/
 }
 
 /* v-card-text样式 */
@@ -117,20 +148,32 @@ body {
 /* v-text-field样式 */
 .v-text-field {
   margin-bottom: 15px;
-  background-color :wheat;
+  background-color :whitesmoke;/*输入框颜色*/
 }
 
 .v-text-field__slot label {
   font-size: 14px;
-  color: #616161;
+  color: #1f1e33;/*这谁*/
 }
 
 .v-text-field__slot input {
   font-size: 16px;
   color: #212121;
 }
+.center-btn {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
 
+@media (max-width: 600px) {
+  .center-btn {
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
 .v-text-field__slot .v-messages {
-  color: red;
+  color: red;/*输入有误会提示，但是如果产生提示输入框背景色会溢出*/
 }
 </style>
