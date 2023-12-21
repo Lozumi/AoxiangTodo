@@ -4,32 +4,54 @@
         v-model="tab"
         bg-color="primary"
     >
-      <v-tab value="one">Item One</v-tab>
-      <v-tab value="two">Item Two</v-tab>
+      <v-tab value="login">登录</v-tab>
+      <v-tab value="register">注册</v-tab>
     </v-tabs>
 
     <v-card-text>
       <v-window v-model="tab">
-        <v-window-item value="one">
-          登录
+        <v-window-item value="login">
+
+          <div>
+            用户名
+            <v-text-field
+                label="请输入用户名"
+                :rules="rules"
+                hide-details="auto"
+            ></v-text-field>
+            密码
+            <v-text-field label="请输入密码"></v-text-field>
+          </div>
         </v-window-item>
 
-        <v-window-item value="two">
-         注册
+        <v-window-item value="register">
+         <div>
+           用户名
+           <v-text-field
+             label="输入用户名"
+             :rules="rules"
+             hide-details="auto"
+             ></v-text-field>
+           设置密码
+           <v-text-field
+             label="输入密码"
+             :rules="rules"
+             hide-details="auto"
+             ></v-text-field>
+           确认密码
+           <v-text-field
+             label="确认密码"
+             :rules="rules"
+             hide-details="auto"
+             ></v-text-field>
+         </div>
         </v-window-item>
 
       </v-window>
     </v-card-text>
   </v-card>
 
-  <div>
-    <v-text-field
-        label="Main input"
-        :rules="rules"
-        hide-details="auto"
-    ></v-text-field>
-    <v-text-field label="Another input"></v-text-field>
-  </div>
+
 
 
 </template>
