@@ -1,4 +1,8 @@
 <template>
+  <v-card
+      class="background-image">
+    1
+  </v-card>
   <v-card>
     <v-tabs
         v-model="tab"
@@ -38,35 +42,35 @@
         </v-window-item>
 
         <v-window-item value="register">
-         <div>
-           用户名
-           <v-text-field
-             label="输入用户名"
-             :rules="rules"
-             hide-details="auto"
-             ></v-text-field>
-           设置密码
-           <v-text-field
-             label="输入密码"
-             :rules="rules"
-             hide-details="auto"
-             ></v-text-field>
-           确认密码
-           <v-text-field
-             label="确认密码"
-             :rules="rules"
-             hide-details="auto"
-             ></v-text-field>
-           <v-btn
-               :loading="loading"
-               class="flex-grow-1"
-               height="48"
-               variant="tonal"
-               @click="load"
-           >
-             注册
-           </v-btn>
-         </div>
+          <div>
+            用户名
+            <v-text-field
+                label="输入用户名"
+                :rules="rules"
+                hide-details="auto"
+            ></v-text-field>
+            设置密码
+            <v-text-field
+                label="输入密码"
+                :rules="rules"
+                hide-details="auto"
+            ></v-text-field>
+            确认密码
+            <v-text-field
+                label="确认密码"
+                :rules="rules"
+                hide-details="auto"
+            ></v-text-field>
+            <v-btn
+                :loading="loading"
+                class="flex-grow-1"
+                height="48"
+                variant="tonal"
+                @click="load"
+            >
+              注册
+            </v-btn>
+          </div>
         </v-window-item>
 
       </v-window>
@@ -83,13 +87,13 @@ export default {
     rules: [
       // value => !!value || 'Required.',
       // value => (value && value.length >= 3) || 'Min 3 characters',
-        null
+      null
 
     ],
     tab: null,
   }),
   methods: {
-    load () {
+    load() {
       this.loading = true
       setTimeout(() => (this.loading = false), 3000)
     },
@@ -106,12 +110,12 @@ body {
 
 /* v-card样式 */
 .v-card {
-  max-width: 400px;/*长度*/
-  margin: 100px auto;/*上方距离*/
+  max-width: 400px; /*长度*/
+  margin: 100px auto; /*上方距离*/
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
-  background-color: white;/*card 背景色*/
+  background-color: white; /*card 背景色*/
 }
 
 /* v-tabs样式 */
@@ -121,13 +125,13 @@ body {
 
 /* v-tab样式 */
 .v-tab {
-  color: white !important;/*导航栏文字颜色*/
+  color: white !important; /*导航栏文字颜色*/
   font-weight: bold;
 }
 
 /* v-tab-active样式 */
 .v-tab--active {
-  background-color: #1f1e33 !important;/*这谁？*/
+  background-color: #1f1e33 !important; /*这谁？*/
 }
 
 /* v-card-text样式 */
@@ -148,18 +152,19 @@ body {
 /* v-text-field样式 */
 .v-text-field {
   margin-bottom: 15px;
-  background-color :whitesmoke;/*输入框颜色*/
+  background-color: whitesmoke; /*输入框颜色*/
 }
 
 .v-text-field__slot label {
   font-size: 14px;
-  color: #1f1e33;/*这谁*/
+  color: #1f1e33; /*这谁*/
 }
 
 .v-text-field__slot input {
   font-size: 16px;
   color: #212121;
 }
+
 .center-btn {
   margin-left: auto;
   margin-right: auto;
@@ -173,7 +178,8 @@ body {
     margin-right: auto;
   }
 }
+
 .v-text-field__slot .v-messages {
-  color: red;/*输入有误会提示，但是如果产生提示输入框背景色会溢出*/
+  color: red; /*输入有误会提示，但是如果产生提示输入框背景色会溢出*/
 }
 </style>
