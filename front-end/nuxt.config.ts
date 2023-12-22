@@ -11,7 +11,8 @@ export default defineNuxtConfig({
               'vueuc',
               '@css-render/vue3-ssr',
               '@juggle/resize-observer',
-                'date-fns-tz'
+                'date-fns-tz',
+                '@nuxtjs/tailwindcss'
             ]
             : ['@juggle/resize-observer']
   },
