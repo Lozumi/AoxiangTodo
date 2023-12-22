@@ -41,10 +41,9 @@
                 <v-btn
                     :loading="loading"
                     class="flex-grow-1"
-
                     height="48"
-
                     variant="tonal"
+                    align-end
                     @click="load"
 
                 >
@@ -93,6 +92,7 @@
                     class="flex-grow-1"
                     height="48"
                     variant="tonal"
+                    align-end
                     @click="load"
                 >
                   注册
