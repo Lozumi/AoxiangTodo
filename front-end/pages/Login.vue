@@ -1,14 +1,19 @@
 <template>
-  <v-card
-      class="background-image">
-    1
-  </v-card>
+
   <v-card>
+    <v-row no-gutters>
+      <v-col cols="6" class="d-flex">
+        <v-img src="/static/ax.png"  height="100%" max-width="100%" />
+      </v-col>
+      <v-col cols="6">
+
+
     <v-tabs
         v-model="tab"
         bg-color="primary"
+        align-tabs="center"
     >
-      <v-tab value="login">登录</v-tab>
+      <v-tab value="login"> 登录</v-tab>
       <v-tab value="register">注册</v-tab>
     </v-tabs>
 
@@ -17,9 +22,10 @@
         <v-window-item value="login">
 
           <div>
-            用户名
+            账号
             <v-text-field
-                label="请输入用户名"
+
+                label="请输入账号"
                 :rules="rules"
                 hide-details="auto"
             ></v-text-field>
@@ -29,12 +35,16 @@
                 :rules="rules"
                 hide-details="auto"
             ></v-text-field>
+
             <v-btn
                 :loading="loading"
                 class="flex-grow-1"
+
                 height="48"
+
                 variant="tonal"
                 @click="load"
+
             >
               登入
             </v-btn>
@@ -43,23 +53,33 @@
 
         <v-window-item value="register">
           <div>
+            账号
+            <v-text-field
+                label="输入账号"
+                :rules="rules"
+                hide-details="auto"
+                class="custom-height custom-input"
+            ></v-text-field>
             用户名
             <v-text-field
                 label="输入用户名"
                 :rules="rules"
                 hide-details="auto"
+                class="custom-height custom-input"
             ></v-text-field>
             设置密码
             <v-text-field
                 label="输入密码"
                 :rules="rules"
                 hide-details="auto"
+                class="custom-height custom-input"
             ></v-text-field>
             确认密码
             <v-text-field
                 label="确认密码"
                 :rules="rules"
                 hide-details="auto"
+                class="custom-height custom-input"
             ></v-text-field>
             <v-btn
                 :loading="loading"
@@ -75,6 +95,9 @@
 
       </v-window>
     </v-card-text>
+
+    </v-col>
+    </v-row>
   </v-card>
 
 
@@ -110,8 +133,8 @@ body {
 
 /* v-card样式 */
 .v-card {
-  max-width: 400px; /*长度*/
-  margin: 100px auto; /*上方距离*/
+  max-width: 800px; /*长度*/
+  margin: 80px auto; /*上方距离*/
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
@@ -138,6 +161,9 @@ body {
 .v-card-text {
   padding: 0;
 }
+.custom-height {
+  height: 52px; /* 或者你想要的任何较小的高度 */
+}
 
 /* v-window样式 */
 .v-window {
@@ -151,7 +177,7 @@ body {
 
 /* v-text-field样式 */
 .v-text-field {
-  margin-bottom: 15px;
+  margin-bottom: 18px;
   background-color: whitesmoke; /*输入框颜色*/
 }
 
