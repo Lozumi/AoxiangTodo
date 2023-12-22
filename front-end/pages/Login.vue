@@ -48,6 +48,18 @@
             >
               登入
             </v-btn>
+            <v-btn
+                :loading="loading"
+                class="flex-grow-1"
+                color="medium-emphasis"
+                height="48"
+
+                variant="text"
+                @click="load"
+
+            >
+              注册
+            </v-btn>
           </div>
         </v-window-item>
 
