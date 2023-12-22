@@ -1,3 +1,5 @@
+package shared;
+
 /**
  * @author 贾聪毅
  */

@@ -1,3 +1,5 @@
+package shared;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -259,6 +261,7 @@ public class ToDoWorkItem implements JsonConvertable {
 
     /**
      * 从Json字节流中读取指定数量的字节，然后从字节数组构造一个ToDoWorkItem对象。
+     *
      * @param stream  Json字节输入流。
      * @param expectedLength 预期的字节长度。如果该值小于等于0，则读取流的所有字节。
      * @return 新构造的ToDoWorkItem对象。失败返回null，并尝试回溯流数据到未调用此方法前的状态。
