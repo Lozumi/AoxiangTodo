@@ -8,107 +8,102 @@
       <v-col cols="6">
 
 
-    <v-tabs
-        v-model="tab"
-        bg-color="primary"
-        align-tabs="center"
-    >
-      <v-tab value="login"> 登录</v-tab>
-      <v-tab value="register">注册</v-tab>
-    </v-tabs>
+        <v-tabs
+            v-model="tab"
+            color="primary"
+            align-tabs="end"
+        >
+          <v-tab value="login"> 登录</v-tab>
+          <v-tab value="register">注册</v-tab>
+        </v-tabs>
 
-    <v-card-text>
-      <v-window v-model="tab">
-        <v-window-item value="login">
+        <v-card-text>
+          <v-window v-model="tab">
+            <v-window-item value="login">
 
-          <div>
-            账号
-            <v-text-field
+              <div>
+                <div class="text-h6 mb-1">
+                  LOGIN
+                </div>
+                <v-text-field
 
-                label="请输入账号"
-                :rules="rules"
-                hide-details="auto"
-            ></v-text-field>
-            密码
-            <v-text-field
-                label="请输入密码"
-                :rules="rules"
-                hide-details="auto"
-            ></v-text-field>
+                    label="请输入账号"
+                    :rules="rules"
+                    hide-details="auto"
+                ></v-text-field>
 
-            <v-btn
-                :loading="loading"
-                class="flex-grow-1"
+                <v-text-field
+                    label="请输入密码"
+                    :rules="rules"
+                    hide-details="auto"
+                ></v-text-field>
 
-                height="48"
+                <v-btn
+                    :loading="loading"
+                    class="flex-grow-1"
 
-                variant="tonal"
-                @click="load"
+                    height="48"
 
-            >
-              登入
-            </v-btn>
-            <v-btn
-                :loading="loading"
-                class="flex-grow-1"
-                color="medium-emphasis"
-                height="48"
+                    variant="tonal"
+                    @click="load"
 
-                variant="text"
-                @click="load"
+                >
+                  登入
+                </v-btn>
 
-            >
-              注册
-            </v-btn>
-          </div>
-        </v-window-item>
 
-        <v-window-item value="register">
-          <div>
-            账号
-            <v-text-field
-                label="输入账号"
-                :rules="rules"
-                hide-details="auto"
-                class="custom-height custom-input"
-            ></v-text-field>
-            用户名
-            <v-text-field
-                label="输入用户名"
-                :rules="rules"
-                hide-details="auto"
-                class="custom-height custom-input"
-            ></v-text-field>
-            设置密码
-            <v-text-field
-                label="输入密码"
-                :rules="rules"
-                hide-details="auto"
-                class="custom-height custom-input"
-            ></v-text-field>
-            确认密码
-            <v-text-field
-                label="确认密码"
-                :rules="rules"
-                hide-details="auto"
-                class="custom-height custom-input"
-            ></v-text-field>
-            <v-btn
-                :loading="loading"
-                class="flex-grow-1"
-                height="48"
-                variant="tonal"
-                @click="load"
-            >
-              注册
-            </v-btn>
-          </div>
-        </v-window-item>
+              </div>
+            </v-window-item>
 
-      </v-window>
-    </v-card-text>
+            <v-window-item value="register">
+              <div class="text-h6 mb-1">
+                REGISTER
+              </div>
+              <div>
 
-    </v-col>
+                <v-text-field
+                    label="设置账号"
+                    :rules="rules"
+                    hide-details="auto"
+                    class="custom-height custom-input"
+                ></v-text-field>
+
+                <v-text-field
+                    label="设置用户名"
+                    :rules="rules"
+                    hide-details="auto"
+                    class="custom-height custom-input"
+                ></v-text-field>
+
+                <v-text-field
+                    label="设置密码"
+                    :rules="rules"
+                    hide-details="auto"
+                    class="custom-height custom-input"
+                ></v-text-field>
+
+                <v-text-field
+                    label="确认密码"
+                    :rules="rules"
+                    hide-details="auto"
+                    class="custom-height custom-input"
+                ></v-text-field>
+                <v-btn
+                    :loading="loading"
+                    class="flex-grow-1"
+                    height="48"
+                    variant="tonal"
+                    @click="load"
+                >
+                  注册
+                </v-btn>
+              </div>
+            </v-window-item>
+
+          </v-window>
+        </v-card-text>
+
+      </v-col>
     </v-row>
   </v-card>
 
@@ -160,7 +155,7 @@ body {
 
 /* v-tab样式 */
 .v-tab {
-  color: white !important; /*导航栏文字颜色*/
+  color: palevioletred !important; /*导航栏文字颜色*/
   font-weight: bold;
 }
 
@@ -190,7 +185,7 @@ body {
 /* v-text-field样式 */
 .v-text-field {
   margin-bottom: 18px;
-  background-color: whitesmoke; /*输入框颜色*/
+  background-color: white; /*输入框颜色*/
 }
 
 .v-text-field__slot label {

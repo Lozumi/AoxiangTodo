@@ -9,6 +9,9 @@
       <NuxtPage />
     </nuxtLayout>
   </NConfigProvider>
+
+
+
 </template>
 <script setup>
 import { zhCN, dateZhCN, NConfigProvider } from "naive-ui";
@@ -29,4 +32,7 @@ const themeOverrides = {
     textColor: "#FF763B",
   }
 };
+
+
 </script>
+
