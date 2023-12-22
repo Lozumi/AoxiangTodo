@@ -1,5 +1,8 @@
 package User;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class User{
 
     /**
@@ -80,7 +83,21 @@ public class User{
      *
      * @return 加密过的密码（作为唯一识别，系统中不出现密码的明文对比）
      */
-//    public String getEncryptedPassword(){
-//        return
-//    }
+    public String getEncryptedPassword(String input) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        md.update(this.password.getBytes());
+        byte[] byteData = md.digest();
+
+        // 将字节数组转换为十六进制字符串
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : byteData) {
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+
+        return hexString.toString();
+    }
 }
