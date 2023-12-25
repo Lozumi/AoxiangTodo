@@ -27,7 +27,7 @@ export default defineNuxtConfig({
   },
     modules: [
         'vuetify-nuxt-module',
-        'nuxt-socket-io'
+
     ],
     vuetify: {
         moduleOptions: {
