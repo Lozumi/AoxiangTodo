@@ -196,7 +196,7 @@ public class PomodoroRecordCollection implements List<PomodoroRecord> {
      */
     @Override
     public boolean removeAll(Collection c) {
-        pomodoroRecords.remove(c);
+        return pomodoroRecords.remove(c);
     }
 
     /**
