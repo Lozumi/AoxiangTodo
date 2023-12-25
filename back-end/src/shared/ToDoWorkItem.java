@@ -2,11 +2,8 @@ package shared;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import util.JsonUtility;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -21,7 +18,7 @@ public class ToDoWorkItem implements JsonConvertable {
     int innerId, importancePriority, emergencyPriority;
     String title, subtitle, description;
     Instant createTime, startTime, deadLine;
-    WorkItemStatus Status;
+    WorkItemStatus status;
     List<ToDoWorkItem> subToDoWorkItems;
     List<PomodoroRecord> pomodoroRecords;
 
@@ -190,7 +187,7 @@ public class ToDoWorkItem implements JsonConvertable {
      * @return 事项的状态（未开始、激活、已超时......）。
      */
     public WorkItemStatus getStatus() {
-        return Status;
+        return status;
     }
 
     /**
@@ -199,7 +196,7 @@ public class ToDoWorkItem implements JsonConvertable {
      * @param status 事项状态的枚举值之一。
      */
     public void setStatus(WorkItemStatus status) {
-        Status = status;
+        this.status = status;
     }
 
     /**

@@ -61,7 +61,7 @@ public class BackEndServer {
 
     private void listenLoop() throws IOException {
         while (!aborting){
-            Socket clientSocket = serverSocket.accept();
+            Socket clientSocket = serverSocket.accept(); //接收到后端连接请求
             startServerThread(clientSocket);
         }
     }
