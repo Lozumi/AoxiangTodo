@@ -19,27 +19,27 @@ public class ToDoWorkItem implements JsonConvertable {
     String title, subtitle, description;
     Instant createTime, startTime, deadLine;
     WorkItemStatus status;
-    List<ToDoWorkItem> subToDoWorkItems;
-    List<PomodoroRecord> pomodoroRecords;
+    List<Integer> subToDoWorkItemInnerIdList;
+    List<Integer> pomodoroRecordInnerIdList;
 
-    /**
-     * 获取子待办事项列表。
-     *
-     * @return 子待办事项列表，保证该列表始终不为 null。
-     */
-    public List<ToDoWorkItem> getSubToDoWorkItems() {
-        return subToDoWorkItems;
-    }
+//    /**
+//     * 获取子待办事项列表。
+//     *
+//     * @return 子待办事项列表，保证该列表始终不为 null。
+//     */
+//    public List<ToDoWorkItem> getSubToDoWorkItems() {
+//        return subToDoWorkItems;
+//    }
 
-    /**
-     * 获取与该事件关联的番茄钟记录。
-     *
-     * @return 番茄钟记录。保证该列表始终不为 null。
-     */
-
-    public List<PomodoroRecord> getPomodoroRecords() {
-        return pomodoroRecords;
-    }
+//    /**
+//     * 获取与该事件关联的番茄钟记录。
+//     *
+//     * @return 番茄钟记录。保证该列表始终不为 null。
+//     */
+//
+//    public List<PomodoroRecord> getPomodoroRecords() {
+//        return pomodoroRecords;
+//    }
 
     /**
      * 获取事项的内部Id。
@@ -204,18 +204,18 @@ public class ToDoWorkItem implements JsonConvertable {
      *
      * @param innerId          内部Id。
      * @param createTime       事项创建时间。
-     * @param subToDoWorkItems 子待办列表。
-     * @param pomodoroRecords  番茄钟记录列表。
+     * @param subToDoWorkItemInnerIdList 子待办引用列表（通过innerId）。
+     * @param pomodoroRecordInnerIdList  番茄钟引用列表（通过innerId）。
      */
     @JsonCreator
     private ToDoWorkItem(@JsonProperty("innerId") int innerId,
                          @JsonProperty("createTime") Instant createTime,
-                         @JsonProperty("subToDoWorkItems") List<ToDoWorkItem> subToDoWorkItems,
-                         @JsonProperty("pomodoroRecords") List<PomodoroRecord> pomodoroRecords) {
+                         @JsonProperty("subToDoWorkItemInnerIdList") List<Integer> subToDoWorkItemInnerIdList,
+                         @JsonProperty("pomodoroRecordInnerIdList") List<Integer> pomodoroRecordInnerIdList) {
         this.innerId = innerId;
         this.createTime = createTime;
-        this.subToDoWorkItems = subToDoWorkItems;
-        this.pomodoroRecords = pomodoroRecords;
+        this.subToDoWorkItemInnerIdList = subToDoWorkItemInnerIdList;
+        this.pomodoroRecordInnerIdList = pomodoroRecordInnerIdList;
     }
 
     /**
