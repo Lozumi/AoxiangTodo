@@ -6,6 +6,7 @@ import unittest.SocketTest;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Vector;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -17,5 +18,6 @@ public class Main {
         SocketTest test = new SocketTest(startupInfo);
         test.connect();
         var response = test.tryRequest(new RequestPacket());
+
     }
 }
