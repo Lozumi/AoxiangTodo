@@ -21,6 +21,8 @@
     "vuetify-nuxt-module": "^0.7.3"
   },
   "dependencies": {
-    "date-fns-tz": "^2.0.0"
+    "@pinia/nuxt": "^0.5.1",
+    "date-fns-tz": "^2.0.0",
+    "pinia": "^2.1.7"
   }
 }
