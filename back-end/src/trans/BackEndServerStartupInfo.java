@@ -14,7 +14,7 @@ public record BackEndServerStartupInfo(String address, int port, int maxConnecti
      * 获取该实例包含的InetSocketAddress对象。
      * @return InetSocketAddress对象。
      */
-    InetSocketAddress getSocketAddress() {
+    public InetSocketAddress getSocketAddress() {
         return new InetSocketAddress(address, port);
     }
 }

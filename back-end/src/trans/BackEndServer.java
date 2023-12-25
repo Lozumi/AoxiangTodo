@@ -54,19 +54,19 @@ public class BackEndServer {
         disposed = true;
     }
 
-    void initialize() throws IOException {
-        serverSocket = new ServerSocket(startupInfo.port(), startupInfo.maxConnection());
+    private void initialize() throws IOException {
+        serverSocket = new ServerSocket();
         serverSocket.bind(startupInfo.getSocketAddress());
     }
 
-    void listenLoop() throws IOException {
+    private void listenLoop() throws IOException {
         while (!aborting){
             Socket clientSocket = serverSocket.accept();
             startServerThread(clientSocket);
         }
     }
 
-    void startServerThread(Socket clientSocket) throws IOException{
+    private void startServerThread(Socket clientSocket) throws IOException{
         //针对clientSocket运行服务线程。
         var backgroundRunnable = new BackEndServerThread(clientSocket);
         Thread serveThread = new Thread(backgroundRunnable);

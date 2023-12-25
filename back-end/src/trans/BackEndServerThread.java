@@ -38,6 +38,17 @@ public class BackEndServerThread implements Runnable {
             try {
                 int requestLength = inputStream.readInt();
                 RequestPacket requestPacket = RequestPacket.fromJsonStream(inputStream,requestLength);
+
+                //编码响应
+                ResponsePacket responsePacket = new ResponsePacket();
+                responsePacket.setMessage("该模块尚未实现。");
+                responsePacket.setStatus(ResponseStatus.Failure);
+                byte[] responseBytes = responsePacket.toJsonBytes();
+
+                //发送响应
+                int responseLength = responseBytes.length;
+                outputStream.writeInt(responseLength);
+                outputStream.write(responseBytes);
             }catch (IOException ex)
             {
                 System.err.printf("与客户端通讯时发生IO异常：%s\n",ex.getMessage());
