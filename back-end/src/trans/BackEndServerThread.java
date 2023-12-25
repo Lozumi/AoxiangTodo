@@ -12,8 +12,21 @@ public class BackEndServerThread implements Runnable {
     DataOutputStream outputStream;
     boolean aborting = false;
 
+    /**
+     * 将线程标记为退出状态并关闭所有套接字输入输出流。
+     */
     public void abort() {
         aborting = true;
+        inputStream = null;
+        outputStream = null;
+        try {
+            clientSocket.shutdownInput();
+            clientSocket.shutdownOutput();
+        }
+        catch (IOException exception)
+        {
+            System.err.printf("尝试关闭服务器时发生下述异常：%s\n",exception.getMessage());
+        }
     }
 
     /**
