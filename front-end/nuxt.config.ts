@@ -27,7 +27,8 @@ export default defineNuxtConfig({
     }
   },
     modules: [
-        'vuetify-nuxt-module'
+        'vuetify-nuxt-module',
+
     ],
     vuetify: {
         moduleOptions: {
@@ -36,5 +37,8 @@ export default defineNuxtConfig({
         vuetifyOptions: {
             /* vuetify options */
         }
-    }
-})
+    },
+
+}
+
+)
