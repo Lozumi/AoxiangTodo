@@ -13,14 +13,7 @@
       </div>
 
       <div class="column middle">
-        <div>
-          <v-text-field
-              class="create-task"
-              label="Enter the task you want to do."
-              :rules="rules"
-              hide-details="auto"
-          ></v-text-field>
-        </div>
+
         <v-card
             class="list-card"
             max-width="700"
@@ -93,7 +86,7 @@
             <v-list-item value="sound"
                          class="hover">
               <template v-slot:prepend="{ isActive }">
-                <v-list-item-action start>
+                <v-list-item-action start >
                   <v-checkbox-btn :model-value="isActive"></v-checkbox-btn>
                 </v-list-item-action>
               </template>
@@ -219,14 +212,7 @@ body {
   margin-bottom: 20px;
 }
 
-.create-task{
-  margin-left: 50px;
-  margin-top: 3px;
-  width:700px;
-  max-height: 50px;
-  background-color:#ffffff;
 
-}
 
 .list-card {
   margin-left: 50px;
