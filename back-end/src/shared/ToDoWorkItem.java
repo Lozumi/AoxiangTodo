@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import util.JsonUtility;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -237,15 +238,7 @@ public class ToDoWorkItem implements JsonConvertable {
      * @return 新构造的ToDoWorkItem对象，失败返回null。
      */
     public static ToDoWorkItem fromJsonString(String json) {
-        ObjectMapper mapper = SharedConfigurations.getDefaultObjectMapper();
-        ToDoWorkItem obj = null;
-
-        try {
-            obj = mapper.readValue(json, ToDoWorkItem.class);
-        } catch (JsonProcessingException e) {
-            System.err.println(e.getMessage());
-        }
-        return obj;
+        return JsonUtility.objectFromJsonString(json, ToDoWorkItem.class);
     }
 
     /**
@@ -267,34 +260,6 @@ public class ToDoWorkItem implements JsonConvertable {
      * @return 新构造的ToDoWorkItem对象。失败返回null，并尝试回溯流数据到未调用此方法前的状态。
      */
     public static ToDoWorkItem fromJsonStream(InputStream stream, int expectedLength) {
-        try {
-            if (expectedLength <= 0) expectedLength = stream.available(); //如果预期字节长度小于等于0，则读取所有字节。
-            stream.mark(expectedLength); //标记流当前位置，在失败时尝试回溯。
-        } catch (IOException e) {
-            System.err.println(e.getMessage()); //在尝试读取前就发生了异常，打印异常信息。
-            return null;
-        }
-
-        try {
-            byte[] bytes = stream.readNBytes(expectedLength);
-            return fromJsonBytes(bytes);      //尝试从字节流构造对象并返回。
-        } catch (IOException e) {
-            try {
-                stream.reset(); //读取字节流发生异常，尝试回溯。
-            } catch (IOException ex) {
-                System.out.printf("从流构造ToDoWorkItem时发生异常：%s\n尝试回溯时发生异常：%s\n" ,e.getMessage(),ex.getMessage()); //回溯失败，打印异常信息。
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 从Json字节流中读取所有字节，然后构造ToDoWorkItem对象。
-     * 除非确定所有数据都已经写入stream，否则应避免使用此方法，否则可能导致读取的字节数组不完整。
-     * @param stream 字节输入流。
-     * @return 新构造的对象。失败返回null，并尝试将流回溯至调用此方法前的状态。
-     */
-    public static ToDoWorkItem fromJsonStream(InputStream stream){
-        return fromJsonStream(stream,-1); //指定-1，读取所有字节。
+        return JsonUtility.objectFromInputStream(stream,expectedLength, ToDoWorkItem.class);
     }
 }
