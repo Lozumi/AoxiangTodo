@@ -8,6 +8,6 @@ import java.util.ArrayList;
 
 public class AoXiangToDoListSystem {
     User currentUser;
-    ArrayList<ToDoWorkItem> toDoWorkItems = new ArrayList<>();
-    ArrayList<PomodoroRecord> pomodoroRecords = new ArrayList<>();
+    ToDoWorkItemCollection toDoWorkItemCollection = new ToDoWorkItemCollection();
+
 }
