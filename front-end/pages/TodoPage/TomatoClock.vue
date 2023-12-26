@@ -12,6 +12,7 @@
       </button>
       <button :class="{  whiteButton: !recordButtonActive,active: recordButtonActive }" @click="handleRecord">专注记录</button>
     </aside>
+
     <main>
       <div class="countdown-container">
         <div class="countdown">
@@ -19,7 +20,8 @@
               class="align-end text-white pulse-animation"
               height="400"
               width="400"
-              src="https://cdn.vuetifyjs.com/images/cards/docks.jpg"
+              src="/static/tomato_2.png"
+              opacity: 0.9;
               cover
           >
             <v-card-title>专注中</v-card-title>
@@ -28,18 +30,15 @@
             {{ countdownTime }}
           </div>
         </div>
+
         <v-dialog v-model="dialog1"
                   max-width="290">
           <v-card>
             <v-card-title class="headline">
-              {{ focusButtonActive ?
-                '番茄专注' :
-                '放弃专注' }}
+              {{ focusButtonActive ? '番茄专注' :'放弃专注' }}
             </v-card-title>
             <v-card-text>
-              {{focusButtonActive ?
-                '专注时长25分钟，建议休息5分钟' :
-                '再坚持一下吧'}}
+              {{focusButtonActive ? '专注时长25分钟，建议休息5分钟' :'再坚持一下吧'}}
             </v-card-text>
             <v-card-actions v-if="!modifyTimeClicked && focusButtonActive">
               <v-btn color="blue darken-1"
@@ -87,11 +86,10 @@
                       :key="i"
                       title=" "
                       text="  "
-                      ></v-expansion-panel>
+                  ></v-expansion-panel>
                 </v-expansion-panels>
 
                 <div class="text-subtitle-2 mt-4 mb-2">昨天</div>
-
                 <v-expansion-panels variant="accordion">
                   <v-expansion-panel
                       v-for="i in 3"
@@ -200,8 +198,8 @@ button {
 }
 
 button.active {
-  background-color: #00b2ff;
-  color: white;
+  background-color: #ffffff;
+  color: black;
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); /* 添加阴影效果 */
 }
 
@@ -216,12 +214,29 @@ button.whiteButton{
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); /* 添加阴影效果 */
 }
 
+
 .countdown-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 80vh;
-  background-color: rgba(215, 209, 165, 0.98);
+  height: 90vh;
+  z-index: 0;
+
+}
+
+.countdown-container::before{
+  content: "";
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-image: url(https://cdn.vuetifyjs.com/images/cards/docks.jpg);
+  background-position: center;
+  background-size: cover;
+  opacity: 0.5; /*可选，设置图片的透明度*/
 }
 
 .countdown {
@@ -248,7 +263,7 @@ button.whiteButton{
   }
   50% {
     transform: scale(1.1);
-    box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+    box-shadow: 0 0 0 0  rgba(0, 0, 0, 0);
   }
   100% {
     transform: scale(1);
