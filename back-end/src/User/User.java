@@ -2,7 +2,6 @@ package User;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -20,15 +19,11 @@ public class User {
     String userName, account, password, token;
     UserStatus userStatus;
 
-    public User(String userName, String account, String password,String token) throws ConnectException {
+    public User(String userName, String account, String password,String token){
         this.userName = userName;
         this.account = account;
         this.password = password;
         this.token = token;
-
-        //Server.sendRegsiterInformation(userName, account, password);
-        throw new ConnectException("链接服务器错误");
-
     }
 
     /**
@@ -136,26 +131,6 @@ public class User {
     }
 
     /**
-     * 注册用户，并检查注册信息的格式是否正确
-     *
-     * @param userName 用户名
-     * @param account 账号
-     * @param password 密码
-     * @return 创建新用户
-     * @throws FormatException 格式错误
-     */
-    public static User register(String userName, String account, String password)throws FormatException {
-        if(!isValidPassword(password)) {
-            throw new FormatException("密码格式错误");
-        }else if(!isValidAccount(account)){
-            throw new FormatException("账户格式错误");
-        }else {
-            //return new User(userName,account,password);
-            return null;
-        }
-    }
-
-    /**
      * 校验密码格式
      * 格式要求：可见的ASCII字符，长度在8-32个字符之间，必须同时包含字母、数字、符号三个种类的字符
      *
@@ -190,22 +165,5 @@ public class User {
         Matcher matcher = pattern.matcher(account);
 
         return matcher.matches();
-    }
-
-    /**
-     *
-     */
-    public void logOff(){
-        this.userStatus = UserStatus.Offline;
-    }
-
-    public static User login(String account, String Password){
-        //向服务器发送登录信息
-        //Server.sendLoginMessage(String accont, String Password);
-        //获取服务器返回用户信息
-        // String[] userInfo = Server.getUserInfo();
-        // return new User(userInfo[0], userInfo[1], userInfo[2],userInfo[3]);
-        return null;
-
     }
 }

@@ -58,7 +58,7 @@ public class Pomodoro {
 
     /**
      * 返回番茄钟信息
-     * @param startTime 开始时 间
+     * @param startTime 开始时间
      * @param endTime 结束时间
      * @param pomodoroStatus 番茄状态
      * @return 番茄时间
