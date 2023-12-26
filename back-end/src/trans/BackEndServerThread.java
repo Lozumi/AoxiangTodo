@@ -1,6 +1,8 @@
 package trans;
 
 import shared.SharedConfigurations;
+import sys.AoXiangToDoListSystem;
+import sys.SystemController;
 
 import java.io.*;
 import java.net.Socket;
@@ -30,7 +32,7 @@ public class BackEndServerThread implements Runnable {
     }
 
     /**
-     * Runs this operation.
+     * 运行该后端服务线程。
      */
     @Override
     public void run(){
@@ -39,10 +41,12 @@ public class BackEndServerThread implements Runnable {
                 int requestLength = inputStream.readInt();
                 RequestPacket requestPacket = RequestPacket.fromJsonStream(inputStream,requestLength);
 
+                ResponsePacket responsePacket;
+                responsePacket = AoXiangToDoListSystem.getInstance().getSystemController().invokeRequestHandler(requestPacket,"default");
                 //编码响应
-                ResponsePacket responsePacket = new ResponsePacket();
-                responsePacket.setMessage("该模块尚未实现。");
-                responsePacket.setStatus(ResponseStatus.Failure);
+                //ResponsePacket responsePacket = new ResponsePacket();
+//                responsePacket.setMessage("该模块尚未实现。");
+//                responsePacket.setStatus(ResponseStatus.Failure);
                 byte[] responseBytes = responsePacket.toJsonBytes();
 
                 //发送响应
