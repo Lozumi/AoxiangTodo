@@ -3,7 +3,7 @@
   <v-card>
     <v-row no-gutters>
       <v-col cols="6" class="d-flex">
-        <v-img src="/static/ax.png"  height="100%" max-width="100%" />
+        <v-img src="/static/ckw.jpg"  height="100%" max-width="100%" />
       </v-col>
       <v-col cols="6">
 
@@ -192,7 +192,12 @@ export default {
           alert("请填写完整且正确的注册信息");
         }
       } else {
-        alert("请填写完整且正确的注册信息");
+        for (const field in this.$v.$invalid) {
+          if (this.$v[field].$dirty) {
+            alert(`${field} 输入有误，请检查`);
+            break;
+          }
+        }
       }
     },
     toRegister() {
