@@ -1,4 +1,3 @@
-html
 <template>
   <div id="app">
     <div>
@@ -9,13 +8,27 @@ html
   </div>
 </template>
 
+
 <script>
-import { defineComponent, ref, provide, onMounted, onBeforeUnmount, watchEffect } from 'vue';
-import { useFetch } from '@nuxtjs/composition-api';
+import { defineComponent, ref, provide,  watchEffect } from 'vue';
+
 import MyList from "../components/MyList.vue";
 import MyFooter from "../components/MyFooter.vue";
 import MyHeader from "../components/MyHeader.vue";
-import { inject } from 'vue';
+
+import { onMounted, inject } from 'vue'
+
+const eventBus = inject('eventBus')
+
+const todoId = ref('Todo222')
+
+onMounted(() => {
+  if (eventBus) {
+    eventBus.emit('todo-mounted', todoId.value)
+  } else {
+    console.error('Event bus is not injected')
+  }
+})
 
 export default defineComponent({
   name: "App",
@@ -98,8 +111,12 @@ export default defineComponent({
     };
   },
 
+
   mounted() {
-    const bus = this.$options.context.appContext.config.globalProperties.$bus;
+    if (this.$bus) {
+      this.$bus.$emit('some-event', data)
+    }
+    const bus = this.$options.context.$bus;
     bus.$on('recieve', this.recieve);
     bus.$on('checkTodo', this.checkTodo);
     bus.$on('handleMove', this.handleMove);
@@ -109,8 +126,8 @@ export default defineComponent({
     bus.$on('changeisshowitem', this.changeisshowitem);
   },
 
-  beforeUnmount() {
-    const bus = this.$options.context.appContext.config.globalProperties.$bus;
+  beforeDestroy() {
+    const bus = this.$options.context.$bus;
     bus.$off('checkTodo');
     bus.$off('handleMove');
     bus.$off('recieve');
@@ -134,3 +151,8 @@ button {
   margin: 5px 10px;
 }
 </style>
+
+
+
+
+

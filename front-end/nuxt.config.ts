@@ -1,59 +1,49 @@
-// import { defineNuxtConfig } from 'nuxt'
+//import { defineNuxtConfig } from 'nuxt'
 //
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
+
 export default defineNuxtConfig({
-    builder: undefined,
-    $development: undefined,
-        $env: undefined,
-        $meta: undefined, $production: undefined, $test: undefined, appConfig: undefined, build: {
-            transpile:
-                process.env.NODE_ENV === 'production'
-                    ? [
-                        'naive-ui',
-                        'vueuc',
-                        '@css-render/vue3-ssr',
-                        '@juggle/resize-observer',
-                        'date-fns-tz',
-                        '@nuxtjs/tailwindcss',
 
-                    ]
-                    : ['@juggle/resize-observer']
-        },
-        devtools: {enabled: true},
+        plugins: ['~/plugins/event-bus.js'],
+  devtools: { enabled: true },
+  build: {
+    transpile:
+        process.env.NODE_ENV === 'production'
+            ? [
+              'naive-ui',
+              'vueuc',
+              '@css-render/vue3-ssr',
+              '@juggle/resize-observer',
+                'date-fns-tz',
+                '@nuxtjs/tailwindcss',
 
+            '@pinia/nuxt'
+            ]
+            : ['@juggle/resize-observer']
+  },
+  vite: {
+    optimizeDeps: {
+      include:
+          process.env.NODE_ENV === 'development'
+              // ? ['naive-ui', 'vueuc', 'date-fns-tz/esm/formatInTimeZone']
+                ? ['naive-ui', 'vueuc']
+              : []
+    }
+  },
     modules: [
         'vuetify-nuxt-module',
-        'nuxt-socket-io',
-        '@nuxtjs/composition-api',
-        '@nuxtjs/axios',
-        '@nuxtjs/proxy',
+
     ],
-        io: {
-            // module options
-            sockets: [{
-                name: 'main',
-                url: 'http://localhost:3000'
-            }]
+    vuetify: {
+        moduleOptions: {
+            /* module specific options */
         },
-
-        telemetry: undefined,
-        vite: {
-            optimizeDeps: {
-                include:
-                    process.env.NODE_ENV === 'development'
-                        // ? ['naive-ui', 'vueuc', 'date-fns-tz/esm/formatInTimeZone']
-                        ? ['naive-ui', 'vueuc']
-                        : []
-            }
-        },
-        vuetify: {
-            moduleOptions: {
-                /* module specific options */
-            },
-            vuetifyOptions: {
-                /* vuetify options */
-            }
+        vuetifyOptions: {
+            /* vuetify options */
         }
+    },
 
-    }
+}
+
 )

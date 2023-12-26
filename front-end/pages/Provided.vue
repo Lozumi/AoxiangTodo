@@ -16,11 +16,16 @@ import {
   NButton,
   NSpace
 } from 'naive-ui'
+import MyHeader from "~/components/Todo/MyHeader.vue";
 
 const message = useMessage()
 const notification = useNotification()
 const dialog = useDialog()
 const loadingBar = useLoadingBar()
+const routes = [
+  {path: '/MyHeader', component:MyHeader
+  },
+]
 
 const cb1 = () => {
   message.info('message')

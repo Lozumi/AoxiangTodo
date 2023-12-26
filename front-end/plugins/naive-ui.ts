@@ -14,7 +14,7 @@ export default defineNuxtPlugin((nuxtApp) => {
             }
             const originalMeta = originalRenderMeta()
             if ('then' in originalMeta) {
-                return originalMeta.then((resolvedOriginalMeta: { [x: string]: string }) => {
+                return originalMeta.then((resolvedOriginalMeta:any) => {
                     return {
                         ...resolvedOriginalMeta,
                         headTags: resolvedOriginalMeta['headTags'] + collect()
