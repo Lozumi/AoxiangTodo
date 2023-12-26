@@ -2,8 +2,10 @@
 //
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-        devtools: {enabled: true},
-        build: {
+    builder: undefined,
+    $development: undefined,
+        $env: undefined,
+        $meta: undefined, $production: undefined, $test: undefined, appConfig: undefined, build: {
             transpile:
                 process.env.NODE_ENV === 'production'
                     ? [
@@ -12,10 +14,29 @@ export default defineNuxtConfig({
                         '@css-render/vue3-ssr',
                         '@juggle/resize-observer',
                         'date-fns-tz',
-                        '@nuxtjs/tailwindcss'
+                        '@nuxtjs/tailwindcss',
+
                     ]
                     : ['@juggle/resize-observer']
         },
+        devtools: {enabled: true},
+
+    modules: [
+        'vuetify-nuxt-module',
+        'nuxt-socket-io',
+        '@nuxtjs/composition-api',
+        '@nuxtjs/axios',
+        '@nuxtjs/proxy',
+    ],
+        io: {
+            // module options
+            sockets: [{
+                name: 'main',
+                url: 'http://localhost:3000'
+            }]
+        },
+
+        telemetry: undefined,
         vite: {
             optimizeDeps: {
                 include:
@@ -25,17 +46,6 @@ export default defineNuxtConfig({
                         : []
             }
         },
-        modules: [
-            'vuetify-nuxt-module',
-            'nuxt-socket-io'
-        ],
-        io: {
-            // module options
-            sockets: [{
-                name: 'main',
-                url: 'http://localhost:19132'
-            }]
-        },
         vuetify: {
             moduleOptions: {
                 /* module specific options */
@@ -43,7 +53,7 @@ export default defineNuxtConfig({
             vuetifyOptions: {
                 /* vuetify options */
             }
-        },
+        }
 
     }
 )
