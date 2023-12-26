@@ -1,4 +1,4 @@
-package User;
+package user;
 
 /**
  * @author 李振国

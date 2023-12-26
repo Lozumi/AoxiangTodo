@@ -1,13 +1,18 @@
 package sys;
 
-import User.User;
 import shared.PomodoroRecord;
-import shared.ToDoWorkItem;
-
-import java.util.ArrayList;
+import user.User;
 
 public class AoXiangToDoListSystem {
     User currentUser;
+    PomodoroRecordCollection pomodoroRecordsCollection = new PomodoroRecordCollection();
     ToDoWorkItemCollection toDoWorkItemCollection = new ToDoWorkItemCollection();
 
+    public PomodoroRecordCollection getPomodoroRecordsCollection() {
+        return pomodoroRecordsCollection;
+    }
+
+    public ToDoWorkItemCollection getToDoWorkItemCollection() {
+        return toDoWorkItemCollection;
+    }
 }
