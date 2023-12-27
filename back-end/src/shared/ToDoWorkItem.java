@@ -15,6 +15,7 @@ import java.util.List;
  */
 public class ToDoWorkItem implements JsonConvertable {
     //属性定义
+    int layer; //从1开始
     int innerId, importancePriority, emergencyPriority;
     String title, subtitle, description;
     Instant createTime, startTime, deadLine;
@@ -22,24 +23,21 @@ public class ToDoWorkItem implements JsonConvertable {
     List<Integer> subToDoWorkItemInnerIdList;
     List<Integer> pomodoroRecordInnerIdList;
 
-//    /**
-//     * 获取子待办事项列表。
-//     *
-//     * @return 子待办事项列表，保证该列表始终不为 null。
-//     */
-//    public List<ToDoWorkItem> getSubToDoWorkItems() {
-//        return subToDoWorkItems;
-//    }
+    /**
+     * 获取层级（1为顶层，递增）。
+     * @return 层级。
+     */
+    public int getLayer() {
+        return layer;
+    }
 
-//    /**
-//     * 获取与该事件关联的番茄钟记录。
-//     *
-//     * @return 番茄钟记录。保证该列表始终不为 null。
-//     */
-//
-//    public List<PomodoroRecord> getPomodoroRecords() {
-//        return pomodoroRecords;
-//    }
+    /**
+     * 设置层级。
+     * @param layer 层级。
+     */
+    public void setLayer(int layer) {
+        this.layer = layer;
+    }
 
     /**
      * 获取事项的内部Id。
