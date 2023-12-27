@@ -264,4 +264,12 @@ public class ToDoWorkItem implements JsonConvertable {
     public static ToDoWorkItem fromJsonStream(InputStream stream, int expectedLength) {
         return JsonUtility.objectFromInputStream(stream,expectedLength, ToDoWorkItem.class);
     }
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof ToDoWorkItem item){
+            return this.innerId==item.getInnerId();
+        }
+
+        return false;
+    }
 }
