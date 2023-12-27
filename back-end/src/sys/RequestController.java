@@ -86,6 +86,12 @@ public class RequestController {
         return packet;
     }
 
+    /**
+     * 处理用户登出请求
+     * @param request 请求
+     * @param userData 附加信息
+     * @return 响应对象
+     */
     public static ResponsePacket processUserLogout(RequestPacket request, RequestHandlerData userData){
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
@@ -96,6 +102,30 @@ public class RequestController {
             packet.setMessage(errString);
             return packet;
         }
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        packet.setStatus(ResponseStatus.Success);
+        return packet;
+    }
+
+    public static ResponsePacket processUserModifyInformation(RequestPacket request, RequestHandlerData userData){
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+
+        User newUser = User.fromJsonString(request.getContent());
+        if(newUser == null)
+        {
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为User",request.getContent()));
+            return packet;
+        }
+
+        String jsonString;
+        try{jsonString = newUser.toJsonString();
+        }catch (IOException ioException){
+            var errString = "内部错误：内部发生转换错误。";
+            packet.setMessage(errString);
+            return packet;
+        }
+        packet.setContent(jsonString);
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         packet.setStatus(ResponseStatus.Success);
         return packet;
