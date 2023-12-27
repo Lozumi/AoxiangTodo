@@ -197,33 +197,40 @@ public class ToDoWorkItem implements JsonConvertable {
         this.status = status;
     }
 
+    public void setInnerId(int innerId) {
+        this.innerId = innerId;
+    }
+
+    public void setCreateTime(Instant createTime) {
+        this.createTime = createTime;
+    }
+
+    public List<Integer> getSubToDoWorkItemInnerIdList() {
+        return subToDoWorkItemInnerIdList;
+    }
+
+    public List<Integer> getPomodoroRecordInnerIdList() {
+        return pomodoroRecordInnerIdList;
+    }
+
     /**
      * 供类内部和JSON反序列化使用的构造器。
      *
-     * @param innerId          内部Id。
-     * @param createTime       事项创建时间。
      * @param subToDoWorkItemInnerIdList 子待办引用列表（通过innerId）。
      * @param pomodoroRecordInnerIdList  番茄钟引用列表（通过innerId）。
      */
     @JsonCreator
-    private ToDoWorkItem(@JsonProperty("innerId") int innerId,
-                         @JsonProperty("createTime") Instant createTime,
-                         @JsonProperty("subToDoWorkItemInnerIdList") List<Integer> subToDoWorkItemInnerIdList,
+    private ToDoWorkItem(@JsonProperty("subToDoWorkItemInnerIdList") List<Integer> subToDoWorkItemInnerIdList,
                          @JsonProperty("pomodoroRecordInnerIdList") List<Integer> pomodoroRecordInnerIdList) {
-        this.innerId = innerId;
-        this.createTime = createTime;
         this.subToDoWorkItemInnerIdList = subToDoWorkItemInnerIdList;
         this.pomodoroRecordInnerIdList = pomodoroRecordInnerIdList;
     }
 
     /**
      * 构造一个待办事项对象。
-     *
-     * @param innerId    事项内部Id，之后不可变。
-     * @param createTime 事项创建时间，之后不可变。
      */
-    public ToDoWorkItem(int innerId, Instant createTime) {
-        this(innerId, createTime, new ArrayList<>(), new ArrayList<>());
+    public ToDoWorkItem() {
+        this(new ArrayList<>(), new ArrayList<>());
     }
 
     /**

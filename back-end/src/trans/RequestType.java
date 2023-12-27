@@ -3,6 +3,7 @@ package trans;
 public enum RequestType {
     None,
     EnumerateToDoWorkList,
+    QueryToDoWork,
     CreateToDoWork,
     EditToDoWork,
     DeleteToDoWork,
