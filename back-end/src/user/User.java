@@ -1,11 +1,15 @@
 package user;
 
+import shared.JsonConvertable;
+import util.JsonUtility;
+
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-public class User {
+public class User implements JsonConvertable {
 
     /**
      * 属性定义
@@ -19,12 +23,6 @@ public class User {
     String userName, account, password, token;
     UserStatus userStatus;
 
-    public User(String userName, String account, String password,String token){
-        this.userName = userName;
-        this.account = account;
-        this.password = password;
-        this.token = token;
-    }
 
     /**
      * 设置用户账号
@@ -134,10 +132,9 @@ public class User {
      * 校验密码格式
      * 格式要求：可见的ASCII字符，长度在8-32个字符之间，必须同时包含字母、数字、符号三个种类的字符
      *
-     * @param password 密码
      * @return 格式是否正确
      */
-    public static boolean isValidPassword(String password) {
+    public boolean isValidPassword() {
         // 密码长度限制：8到32个字符
         int minLength = 8;
         int maxLength = 32;
@@ -147,12 +144,12 @@ public class User {
                 + minLength + "," + maxLength + "}$";
 
         Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(password);
+        Matcher matcher = pattern.matcher(this.password);
 
         return matcher.matches();
     }
 
-    public static boolean isValidAccount(String account){
+    public boolean isValidAccount(){
         // 账号长度限制：8-32个字符
         int minLength = 8;
         int maxLength = 32;
@@ -162,8 +159,42 @@ public class User {
                 + minLength + "," + maxLength + "}$";
 
         Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(account);
+        Matcher matcher = pattern.matcher(this.account);
 
         return matcher.matches();
     }
+
+
+    /**
+     * 从Json字符串构造一个User对象。
+     *
+     * @param json json字符串。
+     * @return 新构造的User对象，失败返回null。
+     */
+    public static User fromJsonString(String json) {
+        return JsonUtility.objectFromJsonString(json, User.class);
+    }
+
+    /**
+     * 从Json字节数组构造一个User对象。
+     *
+     * @param bytes json字节数组。
+     * @return 新构造的User对象，失败返回null。
+     */
+    public static User fromJsonBytes(byte[] bytes) {
+        return fromJsonString(new String(bytes));
+    }
+
+
+    /**
+     * 从Json字节流中读取指定数量的字节，然后从字节数组构造一个User对象。
+     *
+     * @param stream  Json字节输入流。
+     * @param expectedLength 预期的字节长度。如果该值小于等于0，则读取流的所有字节。
+     * @return 新构造的User对象。失败返回null，并尝试回溯流数据到未调用此方法前的状态。
+     */
+    public static User fromJsonStream(InputStream stream, int expectedLength) {
+        return JsonUtility.objectFromInputStream(stream,expectedLength, User.class);
+    }
+
 }

@@ -10,14 +10,14 @@ public class UserRegister {
      * @return 创建新用户
      * @throws FormatException 格式错误
      */
-    public static User register(String userName, String account, String password)throws FormatException {
-        if(!User.isValidPassword(password)) {
-            throw new FormatException("密码格式错误");
-        }else if(!User.isValidAccount(account)){
-            throw new FormatException("账户格式错误");
-        }else {
-            //return new User(userName,account,password);
-            return null;
-        }
-    }
+//    public static User register(String userName, String account, String password)throws FormatException {
+//        if(!User.isValidPassword(password)) {
+//            throw new FormatException("密码格式错误");
+//        }else if(!User.isValidAccount(account)){
+//            throw new FormatException("账户格式错误");
+//        }else {
+//            //return new User(userName,account,password);
+//            return null;
+//        }
+//    }
 }

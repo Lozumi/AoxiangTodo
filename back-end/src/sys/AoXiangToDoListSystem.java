@@ -24,4 +24,6 @@ public class AoXiangToDoListSystem {
     public ToDoWorkItemCollection getToDoWorkItemCollection() {
         return toDoWorkItemCollection;
     }
+    public User getCurrentUser(){return currentUser;}
+    public void userLogout(){this.currentUser=null;}
 }
