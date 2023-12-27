@@ -1,5 +1,6 @@
 package sys;
 
+import com.fasterxml.jackson.core.json.async.NonBlockingUtf8JsonParserBase;
 import shared.ToDoWorkItem;
 import trans.RequestPacket;
 import trans.ResponsePacket;
@@ -95,6 +96,27 @@ public class RequestController {
          packet.setMessage(Messages.ZH_CN.SUCCESS);
          packet.setStatus(ResponseStatus.Success);
          return packet;
+    }
+    public static ResponsePacket processDeleteToDoWorkRequest(RequestPacket request,RequestHandlerData userData){
+        ResponsePacket packet  = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+        int innerId;
+        try{
+            innerId = Integer.parseInt(request.getContent());
+        }catch (NumberFormatException numberFormatException)
+        {
+            packet.setMessage(String.format("参数错误：%s",numberFormatException.getMessage()));
+            return packet;
+        }
+        var collection = getSystemToDoWorkItemCollection();
+        boolean bo = collection.removeIf(item->item.getInnerId()==innerId);
+        if(!bo){
+            packet.setMessage(String.format("参数错误：系统中找不到innerId为%s的待办事项。",innerId));
+            return packet;
+        }
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        packet.setStatus(ResponseStatus.Success);
+        return packet;
     }
 
     private static ToDoWorkItemCollection getSystemToDoWorkItemCollection()
