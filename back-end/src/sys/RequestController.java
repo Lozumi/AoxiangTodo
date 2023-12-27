@@ -1,9 +1,11 @@
 package sys;
 
+import shared.SharedConfigurations;
 import shared.ToDoWorkItem;
 import trans.RequestPacket;
 import trans.ResponsePacket;
 import trans.ResponseStatus;
+import util.JsonUtility;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -95,6 +97,19 @@ public class RequestController {
          packet.setMessage(Messages.ZH_CN.SUCCESS);
          packet.setStatus(ResponseStatus.Success);
          return packet;
+    }
+
+    public static ResponsePacket processEnumerateToDoWorkItemListRequest(RequestPacket request, RequestHandlerData userData)
+    {
+        ResponsePacket packet = new ResponsePacket();
+
+        var collection = getSystemToDoWorkItemCollection();
+        var itemsArray = collection.toArray();
+        String json = JsonUtility.objectToJsonString(itemsArray);
+        packet.setContent(json);
+        packet.setStatus(ResponseStatus.Success);
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        return packet;
     }
 
     private static ToDoWorkItemCollection getSystemToDoWorkItemCollection()

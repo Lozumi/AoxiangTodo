@@ -7,6 +7,7 @@ import shared.ToDoWorkItem;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.time.Period;
 
 public class JsonUtility {
@@ -46,6 +47,24 @@ public class JsonUtility {
             }
         }
         return null;
+    }
+
+    public static String objectToJsonString(Object object)
+    {
+        var objectMapper = SharedConfigurations.getDefaultObjectMapper();
+        StringWriter writer = new StringWriter();
+        try {
+            objectMapper.writeValue(writer,object);
+        }catch (Exception exception)
+        {
+            return "error";
+        }
+        return writer.toString();
+    }
+
+    public static byte[] objectToJsonBytes(Object object)
+    {
+        return objectToJsonString(object).getBytes();
     }
 
     private JsonUtility() {

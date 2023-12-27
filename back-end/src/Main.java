@@ -18,6 +18,7 @@ public class Main {
         var controller = AoXiangToDoListSystem.getInstance().getSystemController();
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.CreateToDoWork, RequestController::processToDoWorkCreation));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.QueryToDoWork,RequestController::processQueryToDoWorkRequest));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EnumerateToDoWorkList,RequestController::processEnumerateToDoWorkItemListRequest));
 
         System.out.println("test: server begins running");
         SocketTest test = new SocketTest(startupInfo);
@@ -32,9 +33,11 @@ public class Main {
         item.setDescription("测试描述");
         request.setContent(item.toJsonString());
         var response = test.tryRequest(request);
+        test.tryRequest(request);
+        test.tryRequest(request);
 
         RequestPacket packet = new RequestPacket();
-        packet.setRequestType(RequestType.QueryToDoWork);
+        packet.setRequestType(RequestType.EnumerateToDoWorkList);
         packet.setContent(response.getContent());
         var queryResponse = test.tryRequest(packet);
         System.out.println(response.toJsonString());
