@@ -1,5 +1,6 @@
 import shared.ToDoWorkItem;
 import sys.AoXiangToDoListSystem;
+import sys.RequestController;
 import sys.RequestHandlerInfo;
 import trans.*;
 import unittest.SocketTest;
@@ -15,20 +16,15 @@ public class Main {
         server.run();
 
         var controller = AoXiangToDoListSystem.getInstance().getSystemController();
-        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.ConfigureBackEnd,(p,u)->
-        {
-            var responsePacket = new ResponsePacket();
-            responsePacket.setStatus(ResponseStatus.Success);
-            responsePacket.setMessage("NMSL");
-            return responsePacket;
-        }));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.UserLogin, RequestController::processUserLogin));
 
         System.out.println("test: server begins running");
         SocketTest test = new SocketTest(startupInfo);
         test.connect();
         var request = new RequestPacket();
-        request.setRequestType(RequestType.ConfigureBackEnd);
+        request.setRequestType(RequestType.UserLogin);
         var response = test.tryRequest(request);
-        response = test.tryRequest(request);
+
+        System.out.println(response.toJsonString());
     }
 }
