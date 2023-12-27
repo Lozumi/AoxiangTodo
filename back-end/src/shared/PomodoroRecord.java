@@ -33,7 +33,7 @@ public class PomodoroRecord {
         return pomodoroStatus;
     }
 
-    Duration getDuration() {
+    public Duration getDuration() {
         return Duration.between(startTime, endTime);
     }
 

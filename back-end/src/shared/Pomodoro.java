@@ -14,23 +14,10 @@ public class Pomodoro {
      * 状态
      * 番茄钟信息
      */
-
-    Instant startTime;
-    Instant endTime;
+    int workTime,restTime;
     PomodoroStatus pomodoroStatus;
     PomodoroRecord pomodoroRecord;
-    static int inner;
 
-    /**
-     * 构造函数
-     *
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     */
-    public Pomodoro(Instant startTime,Instant endTime){
-        this.startTime = startTime;
-        this.endTime = endTime;
-    }
 
     /**
      * 设置 状态
@@ -40,21 +27,6 @@ public class Pomodoro {
         this.pomodoroStatus = pomodoroStatus;
     }
 
-    /**
-     * 设置开始时间
-     * @param startTime
-     */
-    public void setStartTime(Instant startTime) {
-        this.startTime = startTime;
-    }
-
-    /**
-     * 设置截止时间
-     * @param endTime 结束时间
-     */
-    public void setEndTime(Instant endTime) {
-        this.endTime = endTime;
-    }
 
     /**
      * 返回番茄钟信息
@@ -66,5 +38,37 @@ public class Pomodoro {
     public PomodoroRecord getPomodoroRecord(int innerId,Instant startTime,Instant endTime,PomodoroStatus pomodoroStatus) {
         this.pomodoroRecord = new PomodoroRecord(innerId,startTime,endTime,pomodoroStatus);
         return pomodoroRecord;
+    }
+
+    /**
+     * 设置休息时间
+     * @param restTime 休息时间
+     */
+    public void setRestTime(int restTime) {
+        this.restTime = restTime;
+    }
+
+    /**
+     * 设置工作时间
+     * @param workTime 工作时间
+     */
+    public void setWorkTime(int workTime) {
+        this.workTime = workTime;
+    }
+
+    /**
+     * 返回休息时间
+     * @return 休息时间
+     */
+    public int getRestTime() {
+        return restTime;
+    }
+
+    /**
+     * 返回工作时间
+     * @return 工作时间
+     */
+    public int getWorkTime() {
+        return workTime;
     }
 }
