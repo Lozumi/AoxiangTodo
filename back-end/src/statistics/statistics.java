@@ -138,6 +138,5 @@ public class statistics {
      */
     public long getYesterdayPomodoroMinutes() {
         return yesterdayPomodoroMinutes;
-    }    /**
-
+    }
 }
