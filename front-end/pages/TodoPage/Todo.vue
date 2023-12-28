@@ -17,10 +17,6 @@
 
           <v-col cols="auto">
             <div class="spacer"></div>
-            <v-btn  icon="mdi-minus"
-                size="small"
-                @click="subSelectedItem">
-            </v-btn>
           </v-col>
 
         </v-card>
@@ -33,6 +29,15 @@
             class="list-card"
             max-width="700"
         >
+          <v-text-field
+              v-model="newItemText"
+              label="输入要创建的待办并按回车创建"
+              :rules="rules"
+              hide-details="auto"
+              class="custom-input"
+              @keydown.enter="addNewItemFromInput"
+
+          ></v-text-field>
           <v-divider></v-divider>
 
           <v-list lines="two"
@@ -40,71 +45,10 @@
                   class="list1"
                   density="compact"
           >
-            <v-list-subheader>General</v-list-subheader>
+            <v-list-subheader
+            class="TodoTitle">最近待办</v-list-subheader>
 
             <v-divider></v-divider>
-<!--            先给一个事项的示例-->
-
-            <v-list-item value="notifications"
-                         class="hover"
-                         @click="onExampleClick">
-              <template v-slot:prepend>
-                <v-list-item-action >
-                  <v-checkbox-btn
-                      @click.stop
-                      v-model="isExampleChecked"
-                  ></v-checkbox-btn>
-                </v-list-item-action>
-              </template>
-
-              <template v-slot:append>
-                <v-btn
-                    ref="btnInfo"
-                    color="grey-lighten-1"
-                    icon="mdi-information"
-                    variant="text"
-                    @click="onBtnClick"
-                ></v-btn>
-              </template>
-
-              <v-list-item-title
-                  :class="{ 'strike-through': isExampleChecked }">
-                Notifications
-              </v-list-item-title>
-              <v-list-item-subtitle
-                  :class="{ 'strike-through': isExampleChecked }">
-                Notify me about updates to apps or games that I downloaded
-              </v-list-item-subtitle>
-
-              <v-list v-model:opened="open"
-                      density="compact"
-                      class="custom-list"
-              >
-                <!--v-list-group 是Vuetify中的一个子组件，用于创建可展开或折叠的列表组。-->
-                <v-list-group value="Admin"
-                              density="compact"
-                              class="custom-list-group"
-                >
-                  <template v-slot:activator="{ props }">
-                    <v-list-item
-                        v-bind="props"
-                        title="Admin"
-                    ></v-list-item>
-                  </template>
-
-                  <v-list-item
-                      v-for="([title, icon], i) in admins"
-                      :key="i"
-                      :title="title"
-                      :prepend-icon="icon"
-                      :value="title"
-
-                  ></v-list-item>
-                </v-list-group>
-
-              </v-list>
-            </v-list-item>
-
 
             <!-- 新增项 -->
             <v-list-item
@@ -115,28 +59,43 @@
                 @click="onItemOrBtnClick(item)"
             >
               <template v-slot:prepend>
+
                 <v-list-item-action>
-                  <v-checkbox-btn @click.stop v-model="item.isChecked"></v-checkbox-btn>
+                  <v-checkbox-btn
+                      @click.stop
+                      v-model="item.isChecked">
+                  </v-checkbox-btn>
                 </v-list-item-action>
+<!--      item.isChecked       找到复选框被选中的item并赋值，方便后续指针删除该item-->
               </template>
 
               <template v-slot:append>
+                <v-btn
+                    icon="mdi-minus"
+                    size="x-small"
+                    style="font-size: 15px"
+                    position="relative"
+                    @click="subSelectedItem">
+                </v-btn>
                 <v-btn
                     :ref="'btnInfo' + index"
                     color="grey-lighten-1"
                     icon="mdi-information"
                     variant="text"
+                    style="font-size: 20px;"
                     @click="onBtnClick(item,$event)"
                 ></v-btn>
               </template>
 
               <v-list-item-title :class="{ 'strike-through': item.isChecked }">
-                New Item
+                {{item.title}}
               </v-list-item-title>
 
               <v-list-item-subtitle :class="{ 'strike-through': item.isChecked }">
-                New Item Subtitle
+                {{item.subtitle}}
               </v-list-item-subtitle>
+
+
             </v-list-item>
 
           </v-list>
@@ -149,21 +108,16 @@
 <script>
 export default {
   data: () => ({
-    admins: [
-      ['Management', 'mdi-account-multiple-outline'],
-      ['Settings', 'mdi-cog-outline'],
-    ],
     items: [],
-    isExampleChecked: false,
-    buttonClicked: false,
+    newItemText:'',
   }),
 
+  created(){
+    this.addNewItem({title:'待办示例',subtitle:'此处显示该待办的备注~'});
+    this.addNewItem({title:'尝试创建一个待办',subtitle:'开始你的待办旅途吧！'});
+  },
+
   methods: {
-    onExampleClick() {
-      console.log('Sound item clicked');
-      this.someData = 'Sound item was clicked';
-      this.$emit('item-clicked', this.someData);
-    },
 
     onItemOrBtnClick(item, event) {
       event.stopPropagation();
@@ -178,23 +132,32 @@ export default {
       console.log('Button clicked:', item);
       // 处理按钮点击的逻辑
     },
-
-    addNewItem() {
+    // 此处的传入的title应该是输入栏的文字
+    //然后同时创建的新的待办要加入数据库当中
+    addNewItem({ title=null , subtitle = 'None' } = {}) {
       this.items.push({
+        title,
+        subtitle,
         isChecked: false,
       });
     },
 
-    subSelectedItem() {
+    subSelectedItem(event) {
+      event.stopPropagation();
       const selectedItem = this.items.find(item => item.isChecked);
-
-      // 如果找到被选中的项，则从数组中删除
       if (selectedItem) {
         const index = this.items.indexOf(selectedItem);
         this.items.splice(index, 1);
       }
+        },
+
+    addNewItemFromInput() {
+      if (this.newItemText.trim() !== '') {
+        this.addNewItem({ title: this.newItemText });
+        this.newItemText = ''; // 清空输入框
+      }
     },
-  },
+    },
 }
 </script>
 
@@ -254,18 +217,12 @@ body {
   height:16px;
 }
 
+.TodoTitle{
+  text-align: center;
+  font-size: large;
+}
 .list-card {
   margin-left: 50px;
-}
-
-.custom-list-group {
-  /* 自定义样式规则，根据需要调整大小 */
-  width: 500px;
-}
-
-.custom-list {
-  /* 自定义列表项样式规则，根据需要调整大小 */
-  width: 500px;
 }
 
 .hover:hover {
