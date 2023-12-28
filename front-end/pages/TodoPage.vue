@@ -25,6 +25,10 @@
         <v-list-item class="nav-item" @click="$router.push('/TodoPage/TomatoClock')">
           <v-list-item-title class="white--text">番茄时钟</v-list-item-title>
         </v-list-item>
+        <v-divider class="white--text"></v-divider>
+        <v-list-item class="nav-item" @click="$router.push('/TodoPage/PostTest')">
+          <v-list-item-title class="white--text">网络测试</v-list-item-title>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
