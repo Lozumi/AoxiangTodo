@@ -10,11 +10,14 @@
       >
         {{ focusButtonActive ? '放弃专注' : '开始专注' }}
       </button>
-      <button :class="{  whiteButton: !recordButtonActive,active: recordButtonActive }" @click="handleRecord">专注记录</button>
+      <button :class="{  whiteButton: !recordButtonActive,active: recordButtonActive }"
+              @click="handleRecord">专注记录</button>
     </aside>
 
     <main>
+
       <div class="countdown-container">
+<!--        /*countdown显示专注中还可再优化*/-->
         <div class="countdown">
           <v-img
               class="align-end text-white pulse-animation"
@@ -31,22 +34,23 @@
           </div>
         </div>
 
-        <v-dialog v-model="dialog1"
-                  max-width="290">
+        <v-dialog v-model="dialog1" max-width="290">
           <v-card>
             <v-card-title class="headline">
               {{ focusButtonActive ? '番茄专注' :'放弃专注' }}
             </v-card-title>
             <v-card-text>
-              {{focusButtonActive ? '专注时长25分钟，建议休息5分钟' :'再坚持一下吧'}}
+              {{focusButtonActive ? '专注时长25分钟，建议休息5分钟' :'确认退出并终止计时吗？'}}
             </v-card-text>
             <v-card-actions v-if="!modifyTimeClicked && focusButtonActive">
-              <v-btn color="blue darken-1"
-                     @click="dialog1 = false">默认</v-btn>
-              <v-btn color="blue darken-1"
-                     @click="handleModifyTimeClick">
+              <v-btn color="blue darken-1" @click="dialog1 = false">默认</v-btn>
+              <v-btn color="blue darken-1" @click="handleModifyTimeClick">
                 修改时间
               </v-btn>
+            </v-card-actions>
+            <v-card-actions v-if="!modifyTimeClicked && !focusButtonActive">
+              <v-btn color="red" @click="confirmGiveUpFocus">确认放弃</v-btn>
+              <v-btn color="green" @click="continueCountdown">继续计时</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -126,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const countdownTime = ref('25:00');
 const focusButtonActive = ref(false);
@@ -144,6 +148,8 @@ watch(selectedTime, (newValue) => {
   }
 });
 
+let countdownTimer: NodeJS.Timeout | null = null;
+
 const handleTimeSelection = () => {
   // 处理时间选择逻辑
   console.log('选择的时间：', selectedTime.value);
@@ -156,7 +162,12 @@ const handleFocus = () => {
   if (!focusButtonActive.value) {
     dialog1.value = true;
   }
-  // 处理开始/放弃专注逻辑
+  if (focusButtonActive.value) {
+    startCountdown();
+  } else if (countdownTimer !== null) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
 };
 
 const handleRecord = () => {
@@ -170,12 +181,51 @@ const handleModifyTimeClick = () => {
   dialog1.value = false;
   dialog2.value = true; // 弹出卡片
 };
-</script>
 
+const confirmGiveUpFocus = () => {
+  focusButtonActive.value = false;
+  countdownTime.value = '25:00';
+  dialog1.value = false;
+  if (countdownTimer !== null) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+};
+
+const continueCountdown = () => {
+  focusButtonActive.value = true;
+  dialog1.value = false;
+  if (countdownTimer === null) {
+    startCountdown();
+  }
+};
+
+const startCountdown = () => {
+  const [minutes, seconds] = countdownTime.value.split(':');
+  let totalSeconds = parseInt(minutes!) * 60 + parseInt(seconds!);
+
+  countdownTimer = setInterval(() => {
+    totalSeconds -= 1;
+    const remainingMinutes = Math.floor(totalSeconds / 60);
+    const remainingSeconds = totalSeconds % 60;
+
+    countdownTime.value = `${remainingMinutes.toString().padStart(2, '0')}:${remainingSeconds
+        .toString()
+        .padStart(2, '0')}`;
+
+    if (totalSeconds <= 0) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+      focusButtonActive.value = false;
+      dialog1.value = true;
+    }
+  }, 1000);
+};
+</script>
 <style scoped>
 header {
   text-align: center;
-  background-color: #4CAF50; /* 修改背景颜色 */
+  background-color: #1f1e33; /* 修改背景颜色 */
   color: white; /* 修改文字颜色 */
   height: 10vh;
   padding: 20px;

@@ -62,45 +62,45 @@
               </div>
 
 
-                <v-text-field
-                    label="请设置账号"
-                    :rules="usernameRules"
-                    hide-details="auto"
-                    v-model="registerUsername"
-                ></v-text-field>
+              <v-text-field
+                  label="请设置账号"
+                  :rules="usernameRules"
+                  hide-details="auto"
+                  v-model="registerUsername"
+              ></v-text-field>
 
-                <v-text-field
-                    label="设置用户名"
-                    :rules="usernameRules"
-                    hide-details="auto"
-                    v-model="registerDisplayName"
-                ></v-text-field>
+              <v-text-field
+                  label="设置用户名"
+                  :rules="usernameRules"
+                  hide-details="auto"
+                  v-model="registerDisplayName"
+              ></v-text-field>
 
-                <v-text-field
-                    label="设置密码"
-                    :rules="passwordRules"
-                    type = "password"
-                    hide-details="auto"
-                    v-model="registerPassword"
-                ></v-text-field>
+              <v-text-field
+                  label="设置密码"
+                  :rules="passwordRules"
+                  type = "password"
+                  hide-details="auto"
+                  v-model="registerPassword"
+              ></v-text-field>
 
-                <v-text-field
-                    label="确认密码"
-                    :rules="confirmPasswordRules"
-                    type = "password"
-                    hide-details="auto"
-                    v-model="confirmRegisterPassword"
-                ></v-text-field>
-                <v-btn
-                    :loading="loading"
-                    class="flex-grow-1"
-                    height="48"
-                    variant="tonal"
-                    align-end
-                    @click="register"
-                >
-                  注册
-                </v-btn>
+              <v-text-field
+                  label="确认密码"
+                  :rules="confirmPasswordRules"
+                  type = "password"
+                  hide-details="auto"
+                  v-model="confirmRegisterPassword"
+              ></v-text-field>
+              <v-btn
+                  :loading="loading"
+                  class="flex-grow-1"
+                  height="48"
+                  variant="tonal"
+                  align-end
+                  @click="register"
+              >
+                注册
+              </v-btn>
 
             </v-window-item>
 
@@ -118,12 +118,11 @@
 <script>
 
 import { required } from "vuelidate/lib/validators";
-
 export default {
   data: () => ({
     users: JSON.parse(localStorage.getItem("users")) || [],
     loading: false,
-    tab: null, // 添加这行代码以初始化 tab 属性
+    tab: 'login', // 添加这行代码以初始化 tab 属性
     username: "",
     password: "",
     registerUsername: "",
@@ -140,7 +139,7 @@ export default {
       // 根据需要定义表单验证规则
       // value => !!value || 'Required.',
       // value => (value && value.length >= 3) || 'Min 3 characters',
-      null
+      // null
     ],
   }),
   computed: {
@@ -156,55 +155,81 @@ export default {
     },
   },
   methods: {
+
     load() {
       this.loading = true;
       setTimeout(() => (this.loading = false), 3000);
     },
-    login() {
-      let foundUser = this.users.find(
-          (user) => user.username === this.username && user.password === this.password
-      );
+    async login() {
+      this.$v.$touch();
 
-      if (foundUser) {
-        this.$router.push({
-          name: "todo",
-          query: { username: this.username },
-        });
-      } else {
-        alert("账号或密码输入错误");
-        this.password = "";
+      if (!this.$v.$invalid) {
+        try {
+          this.loading = true;
+          const response = await this.$fetch('/api/login', {
+            method: 'POST',
+            body: JSON.stringify({
+              username: this.username,
+              password: this.password,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+        }catch (error) {
+          alert("账号或密码输入错误");
+          this.password = "";
+        } finally {
+          this.loading = false;
+        }
       }
     },
-    register() {
-      this.$v.$touch(); // 添加这行代码以触发表单验证
 
-      if (!$v.$invalid) {
-        // 检查注册信息是否完整和正确
-        if (
-            !$v.registerUsername.$invalid &&
-            !$v.registerDisplayName.$invalid &&
-            !$v.registerPassword.$invalid &&
-            !$v.confirmRegisterPassword.$invalid &&
-            this.registerPassword === this.confirmRegisterPassword
-        ) {
-          this.tab = "login";
-        } else {
-          alert("请填写完整且正确的注册信息");
+    async register() {
+      this.$v.$touch();
+
+      if (!this.$v.$invalid) {
+        try {
+          this.loading = true;
+          const response = await this.$fetch('/api/register', {
+            method: 'POST',
+            body: JSON.stringify({
+              username: this.registerUsername,
+              displayName: this.registerDisplayName,
+              password: this.registerPassword,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+        }catch (error) {
+          if (error.response.status === 409) {
+            alert("该用户名已存在，请选择其他用户名");
+          } else if (error.response.status === 400) {
+            alert("两次输入的密码不一致，请重新输入");
+          } else {
+            alert("请填写完整且正确的注册信息");
+          }
+        } finally {
+          this.loading = false;
         }
       } else {
         for (const field in this.$v.$invalid) {
           if (this.$v[field].$dirty) {
+            console.log(`${field} 输入有误，请检查`);
             alert(`${field} 输入有误，请检查`);
             break;
           }
         }
       }
     },
+
     toRegister() {
       this.$router.push("register");
     },
   },
-};
+  }
+
 </script>
 <style>
 /* 应用整体样式 */
@@ -243,6 +268,7 @@ body {
 .v-card-text {
   padding: 0;
 }
+
 .custom-height {
   height: 52px; /* 或者你想要的任何较小的高度 */
 }
@@ -275,7 +301,9 @@ body {
 /* 可选：如果需要调整错误提示文本的样式 */
 .v-messages__message {
   font-size: 14px;
+  margin-bottom: 8px; /* 添加这行代码以避免输入框背景色溢出 */
 }
+
 .v-text-field__slot label {
   font-size: 14px;
   color: #1f1e33; /*这谁*/
