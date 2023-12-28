@@ -4,76 +4,83 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import sys.AoXiangToDoListSystem;
+import sys.Messages;
 import sys.SystemController;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
+import java.util.concurrent.Executors;
 
+/**
+ * Http请求处理器。
+ *
+ * @author 贾聪毅
+ */
 public class BackEndHttpHandler implements HttpHandler {
     @Override
-    public void handle(HttpExchange exchange) throws IOException {
+    public void handle(HttpExchange exchange) {
         Headers responseHeaders = exchange.getResponseHeaders();
         responseHeaders.set("Content-Type", "text/html;charset=utf-8"); //设置编码格式
+        ResponsePacket responsePacket = new ResponsePacket();
+        int httpCode = HttpURLConnection.HTTP_OK;
 
-        String uriPath = exchange.getRequestURI().getPath();
+        boolean validArgument = true;
+        try {
+            validateArguments(exchange);
+        } catch (IllegalArgumentException exception) {
+            validArgument = false;
+            responsePacket.setStatus(ResponseStatus.Failure);
+            responsePacket.setMessage(String.format("HTTP参数错误：%s", exception.getMessage()));
+            httpCode = HttpURLConnection.HTTP_BAD_METHOD;
+        }
+        //获取输入输出流
         InputStream requestBodyStream = exchange.getRequestBody();
         OutputStream responseBodyStream = exchange.getResponseBody();
 
-        RequestPacket requestPacket = encodeRequestPacket(uriPath,getRequestContent(exchange));
-
-        ResponsePacket responsePacket = AoXiangToDoListSystem.getInstance().getSystemController().invokeRequestHandler(requestPacket, "default");
-
-        //写响应数据。
-        exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);//发送响应头
-        responseBodyStream.write(responsePacket.toJsonBytes());
-
-        requestBodyStream.close();
-        responseBodyStream.close();
-    }
-
-    private static RequestPacket encodeRequestPacket(String uriPath, String requestContent) {
-        List<String> paths = Arrays.stream(uriPath.split("/")).filter(str -> !str.isBlank()).toList();
-        String primaryPath = paths.get(0);
-        String secondaryPath = paths.size() >= 2 ? paths.get(1) : null;
-
-        RequestPacket requestPacket = new RequestPacket();
-        if (primaryPath.equals("todoworkitem")) {
-            if (secondaryPath != null) {
-                requestPacket.setRequestType(RequestType.QueryToDoWork);
-                requestPacket.setContent(secondaryPath);
-            } else {
-                requestPacket.setRequestType(RequestType.EnumerateToDoWorkList);
-                requestPacket.setContent(null);
+        if (validArgument) {
+            RequestPacket requestPacket = null;
+            try {
+                requestPacket = RequestPacket.fromJsonString(getRequestBody(exchange));
+                responsePacket = AoXiangToDoListSystem.getInstance().getSystemController().invokeRequestHandler(requestPacket, "default");
+                if (responsePacket.getStatus() == ResponseStatus.Failure)
+                    httpCode = HttpURLConnection.HTTP_SEE_OTHER;
+            } catch (IOException e) {
+                System.err.printf("HTTP内部错误：无法读取请求内容，%s\n", e.getMessage());
+                responsePacket.setStatus(ResponseStatus.Failure);
+                responsePacket.setMessage(Messages.ZH_CN.HTTP_IO_EXCEPTION);
             }
-        }
-        return requestPacket;
-    }
 
-    private static String getRequestContent(HttpExchange exchange) {
-        var headers = exchange.getRequestHeaders();
-        var lengthString = headers.getFirst("Content-Length");
-        if(lengthString == null)
-            return null; //请求不包含正文
-        int length = Integer.parseInt(lengthString);
-        var inputStream = exchange.getRequestBody();
+        }
+
+        //写响应数据，若本段出现错误，输出错误到错误流并不再发送响应。
         try {
-            return new String(inputStream.readNBytes(length));
-        }catch (IOException exception)
-        {
-            System.err.printf("后端Http服务器处理请求内容时发生IO错误：%s\n",exception.getMessage());
-            return null;
+            exchange.sendResponseHeaders(httpCode, 0);//发送响应头
+            responseBodyStream.write(responsePacket.toJsonBytes());
+
+            requestBodyStream.close();
+            responseBodyStream.close();
+        }catch (IOException exception){
+            System.err.printf("HTTP内部错误：无法发送响应，%s\n",exception.getMessage());
         }
+
     }
 
-    private static List<String> splitUri(URI uri) {
-        return splitUri(uri.getPath());
+    private static void validateArguments(HttpExchange exchange) throws IllegalArgumentException {
+        if (!exchange.getRequestMethod().equalsIgnoreCase("POST"))
+            throw new IllegalArgumentException(Messages.ZH_CN.HTTP_WRONG_METHOD_TYPE);
     }
-    private static List<String> splitUri(String uri) {
-        return Arrays.stream(uri.split("/")).filter(str -> !str.isBlank()).toList();
+
+    private static String getRequestBody(HttpExchange exchange) throws IOException {
+        String body = "";
+        var lengthHeader = exchange.getRequestHeaders().getFirst("Content-Length");
+        if (lengthHeader == null) {
+            return body;
+        }
+        InputStream inputStream = exchange.getRequestBody();
+        var inputBytes = inputStream.readNBytes(Integer.parseInt(lengthHeader));
+        body = new String(inputBytes);
+        return body;
     }
 }

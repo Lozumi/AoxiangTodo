@@ -18,7 +18,7 @@ public class JsonUtility {
         try {
             obj = mapper.readValue(json, type);
         } catch (JsonProcessingException e) {
-            System.err.println(e.getMessage());
+            System.err.printf("从Json构造对象错误：%s\n",e.getMessage());
         }
         return obj;
     }

@@ -1,6 +1,5 @@
 package trans;
 
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
@@ -24,7 +23,7 @@ public class BackEndHttpServer {
         httpServer = HttpServer.create(new InetSocketAddress(startupInfo.port), 0);
         executorService = Executors.newFixedThreadPool(startupInfo.maxThreadCount);
         httpServer.setExecutor(executorService);
-        httpServer.createContext("/",new BackEndHttpHandler());
+        httpServer.createContext("/",new BackEndHttpHandler()); //注册待办事项类处理器。
         httpServer.start();
     }
     public BackEndHttpServer(BackEndHttpServerStartupInfo startupInfo)
