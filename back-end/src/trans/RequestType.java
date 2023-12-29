@@ -7,7 +7,6 @@ public enum RequestType {
     CreateToDoWork,
     EditToDoWork,
     DeleteToDoWork,
-    ModifyToDoWork,
     EditPomodoro,
     StartPomodoro,
     EndPomodoro,

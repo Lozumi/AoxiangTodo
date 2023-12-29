@@ -1,5 +1,7 @@
 package sys;
 
+import shared.Pomodoro;
+import shared.PomodoroRecord;
 import shared.ToDoWorkItem;
 import trans.RequestPacket;
 import trans.ResponsePacket;
@@ -10,6 +12,7 @@ import util.JsonUtility;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Optional;
 
 /**
  * 该类用于定义处理请求的默认方法。
@@ -272,6 +275,115 @@ public class RequestController {
         }
         return packet;
     }
+
+
+    /**
+     * 处理编辑待办事项请求
+     * @param request 请求
+     * @param userData 扩展
+     * @return 反馈包
+     */
+    public static ResponsePacket processEditToDoWorkRequest(RequestPacket request,RequestHandlerData userData){
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+
+        ToDoWorkItem requestItem = ToDoWorkItem.fromJsonString(request.getContent());
+        if(requestItem == null)
+        {
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为ToDoWorkItem",request.getContent()));
+            return packet;
+        }
+        if(requestItem.getTitle().isBlank())
+        {
+            packet.setMessage("非法参数格式：ToDoWorkItem的主标题不能为空。");
+            return packet;
+        }
+
+        int innerId = requestItem.getInnerId();
+        //根据innerID来查找列表中待办事项，进行修改
+        var toDoWorkItemList = getSystemToDoWorkItemCollection();
+        Optional<ToDoWorkItem> oldToDoWorkItem = toDoWorkItemList.stream()
+                .filter(obj -> (innerId==(obj.getInnerId())))
+                .findFirst();
+        if(oldToDoWorkItem.isEmpty()){
+            packet.setMessage((String.format("内部错误：系统中不存在innerId为%s的待办事项。",innerId)));
+            return packet;
+        }
+        toDoWorkItemList.remove(oldToDoWorkItem.get());
+        toDoWorkItemList.add(requestItem);
+
+        //操作成功响应
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        packet.setStatus(ResponseStatus.Success);
+        return packet;
+    }
+
+    /**
+     * 处理编辑番茄钟请求
+     * @param request 编辑番茄钟请求
+     * @param userData 额外信息
+     * @return 成功响应
+     */
+    public static ResponsePacket processEditPomodoro(RequestPacket request,RequestHandlerData userData){
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+
+        Pomodoro pomodoroNew = Pomodoro.fromJsonString(request.getContent());
+        if(pomodoroNew == null)
+        {
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为Pomodoro",request.getContent()));
+            return packet;
+        }
+        Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
+        pomodoro.setWorkTime(pomodoroNew.getWorkTime());
+        pomodoro.setRestTime(pomodoroNew.getRestTime());
+
+
+        //操作成功响应
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        packet.setStatus(ResponseStatus.Success);
+        return packet;
+    }
+
+    public static ResponsePacket processStartPomodoro(RequestPacket request,RequestHandlerData userData){
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+
+        //开始番茄钟（设置番茄钟开始时间）
+        try{
+            Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
+            PomodoroRecord pomodoroRecord = pomodoro.getPomodoroRecord();
+            pomodoroRecord.setStartTime(Instant.now());
+        }catch (Exception e){
+            packet.setMessage(e.getMessage());
+        }
+
+        //操作成功响应
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        packet.setStatus(ResponseStatus.Success);
+        return packet;
+    }
+
+    public static ResponsePacket processEndPomodoro(RequestPacket request,RequestHandlerData userData){
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+
+        //结束番茄钟（设置番茄钟结束时间）
+        try{
+            Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
+            PomodoroRecord pomodoroRecord = pomodoro.getPomodoroRecord();
+            pomodoroRecord.setEndTime(Instant.now());
+        }catch (Exception e){
+            packet.setMessage(e.getMessage());
+        }
+
+        //操作成功响应
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        packet.setStatus(ResponseStatus.Success);
+        return packet;
+    }
+
+
 
     /**
      * 通过innerId字符串获取待办事项。

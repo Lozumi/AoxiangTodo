@@ -1,10 +1,12 @@
 package sys;
 
+import shared.Pomodoro;
 import shared.PomodoroRecord;
 import user.User;
 
 public class AoXiangToDoListSystem {
     User currentUser;
+    Pomodoro pomodoro;
     static AoXiangToDoListSystem system;
     PomodoroRecordCollection pomodoroRecordsCollection = new PomodoroRecordCollection();
     ToDoWorkItemCollection toDoWorkItemCollection = new ToDoWorkItemCollection();
@@ -25,5 +27,6 @@ public class AoXiangToDoListSystem {
         return toDoWorkItemCollection;
     }
     public User getCurrentUser(){return currentUser;}
+    public Pomodoro getPomodoro(){return pomodoro;}
     public void userLogout(){this.currentUser=null;}
 }
