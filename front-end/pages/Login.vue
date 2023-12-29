@@ -241,7 +241,7 @@ body {
 /* v-card样式 */
 .v-card {
   max-width: 800px; /*长度*/
-  margin: 80px auto; /*上方距离*/
+  margin: 40px auto; /*上方距离*/
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
