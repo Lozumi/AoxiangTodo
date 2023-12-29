@@ -23,6 +23,9 @@ public class BackEndHttpHandler implements HttpHandler {
     public void handle(HttpExchange exchange) {
         Headers responseHeaders = exchange.getResponseHeaders();
         responseHeaders.set("Content-Type", "text/html;charset=utf-8"); //设置编码格式
+        responseHeaders.set("Access-Control-Allow-Origin","*");
+        responseHeaders.set("Access-Control-Allow-Credentials","true");
+        responseHeaders.set("Access-Control-Allow-Headers", "Content-Type,XFILENAME,XFILECATEGORY,XFILESIZE");
         ResponsePacket responsePacket = new ResponsePacket();
         int httpCode = HttpURLConnection.HTTP_OK;
 
@@ -33,7 +36,7 @@ public class BackEndHttpHandler implements HttpHandler {
             validArgument = false;
             responsePacket.setStatus(ResponseStatus.Failure);
             responsePacket.setMessage(String.format("HTTP参数错误：%s", exception.getMessage()));
-            httpCode = HttpURLConnection.HTTP_BAD_METHOD;
+//            httpCode = HttpURLConnection.HTTP_BAD_METHOD;
         }
         //获取输入输出流
         InputStream requestBodyStream = exchange.getRequestBody();
@@ -44,8 +47,8 @@ public class BackEndHttpHandler implements HttpHandler {
             try {
                 requestPacket = RequestPacket.fromJsonString(getRequestBody(exchange));
                 responsePacket = AoXiangToDoListSystem.getInstance().getSystemController().invokeRequestHandler(requestPacket, "default");
-                if (responsePacket.getStatus() == ResponseStatus.Failure)
-                    httpCode = HttpURLConnection.HTTP_SEE_OTHER;
+//                if (responsePacket.getStatus() == ResponseStatus.Failure)
+//                    httpCode = HttpURLConnection.HTTP_SEE_OTHER;
             } catch (IOException e) {
                 System.err.printf("HTTP内部错误：无法读取请求内容，%s\n", e.getMessage());
                 responsePacket.setStatus(ResponseStatus.Failure);
@@ -58,7 +61,7 @@ public class BackEndHttpHandler implements HttpHandler {
         try {
             exchange.sendResponseHeaders(httpCode, 0);//发送响应头
             responseBodyStream.write(responsePacket.toJsonBytes());
-
+            responseBodyStream.flush();
             requestBodyStream.close();
             responseBodyStream.close();
         }catch (IOException exception){
