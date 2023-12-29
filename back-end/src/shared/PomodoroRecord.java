@@ -37,7 +37,27 @@ public class PomodoroRecord {
         return Duration.between(startTime, endTime);
     }
 
-    public PomodoroRecord(int innerId, Instant startTime,Instant endTime,PomodoroStatus status)
+    public void setEndTime(Instant endTime) {
+        this.endTime = endTime;
+    }
+
+    public void setStartTime(Instant startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setPomodoroStatus(PomodoroStatus pomodoroStatus) {
+        this.pomodoroStatus = pomodoroStatus;
+    }
+
+    public void setCompletedCycleCount(int completedCycleCount) {
+        this.completedCycleCount = completedCycleCount;
+    }
+
+    public void setInnerId(int innerId) {
+        this.innerId = innerId;
+    }
+
+    public PomodoroRecord(int innerId, Instant startTime, Instant endTime, PomodoroStatus status)
     {
         this.innerId = innerId;
         this.startTime = startTime;

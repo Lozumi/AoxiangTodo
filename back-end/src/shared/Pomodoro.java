@@ -1,5 +1,8 @@
 package shared;
 
+import util.JsonUtility;
+
+import java.io.InputStream;
 import java.time.Instant;
 
 /**
@@ -15,17 +18,7 @@ public class Pomodoro {
      * 番茄钟信息
      */
     int workTime,restTime;
-    PomodoroStatus pomodoroStatus;
     PomodoroRecord pomodoroRecord;
-
-
-    /**
-     * 设置 状态
-     * @param pomodoroStatus 状态
-     */
-    public void setPomodoroStatus(PomodoroStatus pomodoroStatus) {
-        this.pomodoroStatus = pomodoroStatus;
-    }
 
 
     /**
@@ -35,7 +28,7 @@ public class Pomodoro {
      * @param pomodoroStatus 番茄状态
      * @return 番茄时间
      */
-    public PomodoroRecord getPomodoroRecord(int innerId,Instant startTime,Instant endTime,PomodoroStatus pomodoroStatus) {
+    public PomodoroRecord setPomodoroRecord(int innerId,Instant startTime,Instant endTime,PomodoroStatus pomodoroStatus) {
         this.pomodoroRecord = new PomodoroRecord(innerId,startTime,endTime,pomodoroStatus);
         return pomodoroRecord;
     }
@@ -70,5 +63,22 @@ public class Pomodoro {
      */
     public int getWorkTime() {
         return workTime;
+    }
+
+    public PomodoroRecord getPomodoroRecord() {
+        return pomodoroRecord;
+    }
+
+
+    public static Pomodoro fromJsonString(String json) {
+        return JsonUtility.objectFromJsonString(json, Pomodoro.class);
+    }
+
+    public static Pomodoro fromJsonBytes(byte[] bytes) {
+        return JsonUtility.objectFromJsonBytes(bytes, Pomodoro.class);
+    }
+
+    public static Pomodoro fromJsonStream(InputStream stream, int expectedLength) {
+        return JsonUtility.objectFromInputStream(stream, expectedLength, Pomodoro.class);
     }
 }
