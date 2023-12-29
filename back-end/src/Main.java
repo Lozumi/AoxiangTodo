@@ -19,7 +19,7 @@ public class Main {
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.QueryToDoWork,RequestController::processQueryToDoWorkRequest));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EnumerateToDoWorkList,RequestController::processEnumerateToDoWorkItemListRequest));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.DeleteToDoWork,RequestController::processDeleteToDoWorkRequest));
-
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EditToDoWork,RequestController::processEditToDoWork));
 //        System.out.println("test: server begins running");
 //        SocketTest test = new SocketTest(startupInfo);
 //        test.connect();
