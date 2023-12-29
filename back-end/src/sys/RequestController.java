@@ -1,10 +1,7 @@
 package sys;
 
-import shared.Pomodoro;
-import shared.PomodoroRecord;
 import shared.ToDoWorkItem;
 import trans.RequestPacket;
-import trans.RequestType;
 import trans.ResponsePacket;
 import trans.ResponseStatus;
 import user.User;
@@ -12,7 +9,6 @@ import util.JsonUtility;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Optional;
 
 /**
  * 该类用于定义处理请求的默认方法。
@@ -186,28 +182,19 @@ public class RequestController {
             packet.setMessage(String.format( "参数错误：%s",numberFormatException.getMessage()));
             return packet;
         }
-
-        var collection = getSystemToDoWorkItemCollection();
-        var optionalItem = collection.stream().filter(i ->  innerId == i.getInnerId()).findAny();
-        if(optionalItem.isEmpty())
-        {
-            packet.setMessage(String.format("内部错误：系统中不存在innerId为%s的待办事项。",innerId));
-            return packet;
-        }
         String jsonString;
         try {
-            jsonString =  optionalItem.get().toJsonString();
-        }catch (IOException ioException)
-        {
-            var errString = String.format("内部错误：找到待办事项，但发生内部JSON转换错误。%s",ioException.getMessage());
+            jsonString = item.toJsonString();
+        } catch (IOException ioException) {
+            var errString = String.format("内部错误：找到待办事项，但发生内部JSON转换错误。%s", ioException.getMessage());
             packet.setMessage(errString);
             return packet;
         }
 
-        packet.setContent(jsonString);
-        packet.setMessage(Messages.ZH_CN.SUCCESS);
-        packet.setStatus(ResponseStatus.Success);
-        return packet;
+         packet.setContent(jsonString);
+         packet.setMessage(Messages.ZH_CN.SUCCESS);
+         packet.setStatus(ResponseStatus.Success);
+         return packet;
     }
 
     public static ResponsePacket processEnumerateToDoWorkItemListRequest(RequestPacket request, RequestHandlerData userData)
@@ -352,6 +339,37 @@ public class RequestController {
 
     private static ToDoWorkItemCollection getSystemToDoWorkItemCollection()
     {
+
+    /**
+     * 通过innerId字符串获取待办事项。
+     *
+     * @param innerIdStr innerId字符串。
+     * @return 获取到的待办事项（若正常返回，保证非空）。
+     * @throws IllegalArgumentException 字符串转换失败、找不到待办事项时抛出。
+     */
+    private static ToDoWorkItem getToDoWorkItemByInnerId(String innerIdStr) throws IllegalArgumentException {
+        int innerId;
+        try {
+            innerId = Integer.parseInt(innerIdStr);
+            return getToDoWorkItemByInnerId(innerId);
+        } catch (Exception exception) {
+            throw new IllegalArgumentException(exception.getMessage());
+        }
+    }
+
+    private static void validateToDoWork(ToDoWorkItem item) throws FormatException {
+        if (item.getTitle().isBlank()) throw new FormatException("ToDoWorkItem的主标题不能为空。");
+    }
+
+    private static ToDoWorkItem getToDoWorkItemByInnerId(int innerId) throws IllegalArgumentException {
+        var collection = getSystemToDoWorkItemCollection();
+        var optionalItem = collection.stream().filter(i -> innerId == i.getInnerId()).findAny();
+        if (optionalItem.isEmpty())
+            throw new IllegalArgumentException(String.format("系统中找不到innerId为%s的待办事项。", innerId));
+        return optionalItem.get();
+    }
+
+    private static ToDoWorkItemCollection getSystemToDoWorkItemCollection() {
         return AoXiangToDoListSystem.getInstance().getToDoWorkItemCollection();
     }
     private static User getSystemCurrentUser(){return AoXiangToDoListSystem.getInstance().getCurrentUser();}

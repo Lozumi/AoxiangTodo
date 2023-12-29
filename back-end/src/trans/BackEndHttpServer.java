@@ -23,7 +23,7 @@ public class BackEndHttpServer {
         httpServer = HttpServer.create(new InetSocketAddress(startupInfo.port), 0);
         executorService = Executors.newFixedThreadPool(startupInfo.maxThreadCount);
         httpServer.setExecutor(executorService);
-        httpServer.createContext("/",new BackEndHttpHandler()); //注册待办事项类处理器。
+        httpServer.createContext("/",new BackEndHttpHandler()); //注册根处理器
         httpServer.start();
     }
     public BackEndHttpServer(BackEndHttpServerStartupInfo startupInfo)
