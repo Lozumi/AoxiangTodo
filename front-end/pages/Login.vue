@@ -19,6 +19,7 @@
 
         <v-card-text>
           <v-window v-model="tab">
+<!--            <登录窗口>-->
             <v-window-item value="login">
 
               <div>
@@ -39,7 +40,19 @@
                     hide-details="auto"
                     v-model="password"
                 ></v-text-field>
+                <v-card v-if="loginResult" class="mt-5">
+                  <v-card-title class="border-bottom mb-4">
+                    <p class="text-h5">登录返回包：</p>
+                  </v-card-title>
+                  <v-card-text>
+                    <pre>{{ loginResult }}</pre>
+                  </v-card-text>
+                </v-card>
 
+                <v-alert v-if="loginError" type="error" class="mt-5">
+                  <h2 class="text-h3">登录错误:</h2>
+                  <pre>{{ loginError }}</pre>
+                </v-alert>
                 <v-btn
                     :loading="loading"
                     class="flex-grow-1"
@@ -91,6 +104,19 @@
                   hide-details="auto"
                   v-model="confirmRegisterPassword"
               ></v-text-field>
+              <v-card v-if="registerResult" class="mt-5">
+                <v-card-title class="border-bottom mb-4">
+                  <p class="text-h5">注册返回包：</p>
+                </v-card-title>
+                <v-card-text>
+                  <pre>{{ registerResult }}</pre>
+                </v-card-text>
+              </v-card>
+
+              <v-alert v-if="registerError" type="error" class="mt-5">
+                <h2 class="text-h3">注册错误:</h2>
+                <pre>{{ registerError }}</pre>
+              </v-alert>
               <v-btn
                   :loading="loading"
                   class="flex-grow-1"
@@ -129,6 +155,10 @@ export default {
     registerDisplayName: "",
     registerPassword: "",
     confirmRegisterPassword: "",
+    loginResult: null,
+    loginError: null,
+    registerResult: null,
+    registerError: null,
     usernameRules: [required],
     passwordRules: [required],
     confirmPasswordRules: [
@@ -176,8 +206,13 @@ export default {
               'Content-Type': 'application/json',
             },
           });
+          this.loginResult = JSON.stringify(response.data, null, 2);
+          // 清除错误信息
+          this.loginError = null;
         }catch (error) {
+          this.loginError = JSON.stringify(error.response.data, null, 2);
           alert("账号或密码输入错误");
+
           this.password = "";
         } finally {
           this.loading = false;
@@ -202,6 +237,9 @@ export default {
               'Content-Type': 'application/json',
             },
           });
+          this.registerResult = JSON.stringify(response.data, null, 2);
+          // 清除错误信息
+          this.registerError = null;
         }catch (error) {
           if (error.response.status === 409) {
             alert("该用户名已存在，请选择其他用户名");
