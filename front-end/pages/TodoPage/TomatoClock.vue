@@ -4,6 +4,11 @@
       <h1>番茄专注</h1>
     </header>
     <aside>
+
+      <button :class="{ whiteButton: !handleModifyTimeClickActive, active: handleModifyTimeClickActive }"
+              @click="handleModifyTimeClick" :disabled="focusButtonActive">设立时间
+      </button>
+
       <button
           :class="{ whiteButton: !focusButtonActive, active: focusButtonActive, redButton: focusButtonActive }"
           @mouseover="hoverFocusButton = true"
@@ -11,10 +16,6 @@
           @click="handleFocus"
       >
         {{ focusButtonActive ? '放弃专注' : '开始专注' }}
-      </button>
-
-      <button :class="{ whiteButton: !handleModifyTimeClickActive, active: handleModifyTimeClickActive }"
-              @click="handleModifyTimeClick">修改时间
       </button>
 
       <button :class="{ whiteButton: !recordButtonActive, active: recordButtonActive }"
@@ -42,7 +43,11 @@
         </div>
 
         <v-dialog v-model="dialog1" max-width="290">
-          <v-card>
+          <v-card
+              elevation="12"
+              class="rounded-lg"
+              color="#ffffff"
+              hover>
             <v-card-title class="headline">
               {{ focusButtonActive ? '番茄专注' : '放弃专注' }}
             </v-card-title>
@@ -57,8 +62,12 @@
         </v-dialog>
 
         <v-dialog v-model="dialog2" max-width="290">
-          <v-card>
-            <v-card-title class="headline">修改时间</v-card-title>
+          <v-card
+              elevation="12"
+              class="rounded-lg"
+              color="#ffffff"
+              hover>
+            <v-card-title class="headline">设立时间</v-card-title>
             <v-card-text>
               <v-combobox
                   v-model="selectedTime"
@@ -75,27 +84,13 @@
           </v-card>
         </v-dialog>
 
-        <v-dialog v-model="dialog2" max-width="290">
-          <v-card>
-            <v-card-title class="headline">修改时间</v-card-title>
-            <v-card-text>
-              <v-combobox
-                  v-model="selectedTime"
-                  :items="timeOptions"
-                  label="选择时间"
-                  outlined
-              ></v-combobox>
-            </v-card-text>
-            <v-card-actions class="justify-end">
-              <v-btn color="blue darken-1" @click="dialog2 = false; dialog1 = false">
-                Close
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
         <v-dialog v-model="dialog3" max-width="290">
           <v-card
-              color="#EAECCC">
+              elevation="12"
+              class="rounded-lg"
+              color="#EAECCC"
+              hover
+          >
             <v-card-title class="headline">专注记录</v-card-title>
             <v-card-text>
               <div>
@@ -114,7 +109,8 @@
 
                 <div v-if="currentDate === 'today'">
                   <v-dialog v-model="todayDialog" width="500" max-width="90%" persistent>
-                    <v-card elevation="12" class="rounded-lg">
+                    <v-card elevation="12"
+                            class="rounded-lg">
                       <v-card-title class="d-flex align-center">
                         <span class="text-subtitle-2 mt-4 mb-2 custom-title">今天</span>
                         <v-spacer></v-spacer>
@@ -253,6 +249,21 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+
+        <v-dialog v-model="dialog4" max-width="290">
+          <v-card>
+            <v-card-title class="headline">专注成功</v-card-title>
+            <v-card-text>
+              劳逸结合才能事半功倍。
+              你的专注目标已达成，快去休息一会吧!
+            </v-card-text>
+            <v-card-actions class="justify-end">
+              <v-btn color="blue darken-1" @click=" dialog4 = false;dialog1 = false">
+                Close
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </div>
     </main>
   </div>
@@ -261,15 +272,15 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
-const countdownTime = ref('25:00');
+const countdownTime = ref('0:00');
 const focusButtonActive = ref(false);
 const recordButtonActive = ref(false);
-const handleModifyTimeClickActive = ref(false);
 const modifyTimeClicked = ref(false);
 const dialog1 = ref(false);
 const dialog2 = ref(false);
 const dialog3 = ref(false);
-const timeOptions = ['10:00', '15:00', '25:00', '40:00', '60:00'];
+const dialog4 = ref(false);
+const timeOptions = ['0:00','0:10','10:00', '15:00', '25:00', '40:00', '60:00'];
 const selectedTime = ref(timeOptions[0]);
 const hoverFocusButton = ref(false);
 const todayPanel = ref<string[]>([]);
@@ -279,7 +290,15 @@ const currentDate = ref<string | null>(null);
 const todayDialog = ref(false);
 const yesterdayDialog = ref(false);
 const beforeYesterdayDialog = ref(false);
+const handleModifyTimeClickActive = ref(true); // 初始化为可点击状态
 
+watch(focusButtonActive, (newValue) => {
+  if (newValue === true) {
+    handleModifyTimeClickActive.value = false; // 开始专注时禁用修改时间按钮
+  } else {
+    handleModifyTimeClickActive.value = true; // 退出专注时启用修改时间按钮
+  }
+});
 function showTodayPanel() {
   currentDate.value = 'today';
   todayDialog.value = true;
@@ -323,20 +342,22 @@ watch(selectedTime, (newValue) => {
   countdownTime.value = newValue;
 });
 
+
 let countdownTimer: NodeJS.Timeout | undefined;
+let remainingTotalSeconds = ref<number | null>(null);
+let countdownTimeRef = ref('25:00');
 
 const handleFocus = () => {
   focusButtonActive.value = !focusButtonActive.value;
   modifyTimeClicked.value = false; // 添加这一行，将 modifyTimeClicked 设置为 false
   if (!focusButtonActive.value) {
     dialog1.value = true;
-  }
-  if (focusButtonActive.value) {
+  } else if (remainingTotalSeconds.value === null) {
+    // 只有在没有剩余时间（即开始新专注）的情况下才从选定时间开始计时
     startCountdown();
-  } else if (countdownTimer !== undefined) {
-    clearInterval(countdownTimer);
-    countdownTimer = undefined;
-    countdownTime.value = selectedTime.value;
+  } else {
+    // 如果有剩余时间，则直接激活 focusButtonActive，不需要重新设置倒计时
+    focusButtonActive.value = true;
   }
 };
 
@@ -365,28 +386,28 @@ const continueCountdown = () => {
   focusButtonActive.value = true;
   dialog1.value = false;
 
-  if (countdownTimer === undefined) {
-    const [minutes, seconds] = countdownTime.value.split(':');
-    let totalSeconds = parseInt(minutes!) * 60 + parseInt(seconds!);
-
+  if (countdownTimer === undefined && remainingTotalSeconds.value !== null) {
     countdownTimer = setInterval(() => {
-      totalSeconds -= 1;
-      const remainingMinutes = Math.floor(totalSeconds / 60);
-      const remainingSeconds = totalSeconds % 60;
+      if (remainingTotalSeconds.value !== null) {
+        remainingTotalSeconds.value -= 1;
+        const remainingMinutes = Math.floor(remainingTotalSeconds.value / 60);
+        const remainingSeconds = remainingTotalSeconds.value % 60;
 
-      countdownTime.value = `${remainingMinutes.toString().padStart(2, '0')}:${remainingSeconds
-          .toString()
-          .padStart(2, '0')}`;
+        countdownTimeRef.value = `${remainingMinutes.toString().padStart(2, '0')}:${remainingSeconds
+            .toString()
+            .padStart(2, '0')}`;
 
-      if (totalSeconds <= 0) {
-        clearInterval(countdownTimer!);
-        countdownTimer = undefined;
-        focusButtonActive.value = false;
-        dialog1.value = true;
+        if (remainingTotalSeconds.value <= 0) {
+          clearInterval(countdownTimer!);
+          countdownTimer = undefined;
+          remainingTotalSeconds.value = null;
+          focusButtonActive.value = false;
+          dialog1.value = true;
+        }
       }
     }, 1000);
-  } else {
-    // 如果倒计时已经在进行中，只需重新激活 focusButtonActive，并且不做其他操作
+  } else if (countdownTimer !== undefined) {
+    // 如果倒计时已经在进行中，则无需重新启动定时器
     focusButtonActive.value = true;
   }
 };
@@ -409,6 +430,7 @@ const startCountdown = () => {
       countdownTimer = undefined;
       focusButtonActive.value = false;
       dialog1.value = true;
+      dialog4.value = true;
     }
   }, 1000);
 };
