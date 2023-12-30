@@ -11,7 +11,7 @@
     </v-app-bar>
 
     <!-- 侧面导航栏 -->
-    <v-navigation-drawer app :color="selectedTheme.primaryColor" :dark="selectedTheme.darkSideNav">
+    <v-navigation-drawer :width="200" app :color="selectedTheme.primaryColor" :dark="selectedTheme.darkSideNav">
       <v-list dense>
         <v-list-item title="我的" subtitle="Vuetify"></v-list-item>
         <v-list-item class="nav-item" @click="$router.push('/TodoPage/TodayTasks')">
