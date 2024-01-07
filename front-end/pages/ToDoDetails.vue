@@ -18,11 +18,9 @@
             <!--选择分类文件夹-->
             <v-list-item>
               <v-bottom-sheet v-model="sheet">
-                <template v-slot:activator = "{ props }">
+                <template v-slot:activator = "{props}">
                   <div>
-                    <v-btn v-bind = "props"
-                           elevation="0"
-                           :color="buttonColor">
+                    <v-btn v-bind = "props" elevation="0" :color="buttonColor">
                       <v-icon size="24">mdi-folder-star-outline</v-icon>
                       {{buttonText}}
                     </v-btn>
@@ -31,17 +29,15 @@
 
                 <v-list>
                   <v-list-subheader>文件夹</v-list-subheader>
-                  <v-list-item
-                      v-for="(tile, index) in tiles"
-                      :key="tile.title"
-                      @click="changeSheet(tile.title);
-                          changeContent(tile.title);
-                          openDialog(tile.title);
-                          changeColor(tile.color)"
+                  <v-list-item v-for="(tile, index) in tiles"
+                               :key="tile.title"
+                               @click="changeSheet(tile.title);
+                               changeContent(tile.title);
+                               openDialog(tile.title);
+                               changeColor(tile.color)"
                   >
                     <template v-slot:prepend>
-                      <v-avatar :color="tile.color"
-                                size = "x-small"></v-avatar>
+                      <v-avatar :color="tile.color" size = "x-small"></v-avatar>
                     </template>
                     <v-list-content>
                       <v-list-item-title>
@@ -55,11 +51,7 @@
                     <template v-slot:append>
                       <v-btn elevation="0">
                         <v-icon>mdi-trash-can-outline</v-icon>
-                        <v-dialog
-                            v-model="_dialog"
-                            activator="parent"
-                            width="auto"
-                        >
+                        <v-dialog v-model = "_dialog" activator="parent" width="auto">
                           <v-card>
                             <v-card-text>
                               确定要删除这个文件夹吗？
@@ -79,18 +71,12 @@
                         </v-dialog>
                       </v-btn>
                     </template>
-
                   </v-list-item>
                 </v-list>
 
-                <v-dialog
-                    v-model = "fileDialog"
-                    max-width="600">
+                <v-dialog v-model = "fileDialog" max-width="600">
                   <v-card>
-                    <v-text-field v-model = "inputText"
-                                  label = "文件夹名称"
-                                  color="#3A8FB7"
-                    ></v-text-field>
+                    <v-text-field v-model = "inputText" label = "文件夹名称" color = "#3A8FB7"></v-text-field>
                     <v-card-actions>
                       <v-spacer></v-spacer>
                       <v-btn color="blue-darken-1"
@@ -99,6 +85,7 @@
                       >
                         关闭
                       </v-btn>
+
                       <v-btn color="blue-darken-1"
                              variant="text"
                              @click="fileDialog = false;
@@ -113,12 +100,14 @@
               </v-bottom-sheet>
             </v-list-item>
             <v-divider></v-divider>  <!--下划线-->
+
             <!--任务名-->
             <v-list-item>
               <v-text-field
                   label="任务名"
                   color="#3A8FB7"
               ></v-text-field>
+
               <!--任务描述-->
               <v-text-field
                   v-model="inputValue"
@@ -131,8 +120,7 @@
             <!--任务时间-->
             <!--开始日期-->
             <v-list-item>
-              <v-list-item-title style="font-weight: bold;
-                                        color: #9796f0">待办开始时间</v-list-item-title>
+              <v-list-item-title style="font-weight: bold; color: #9796f0">待办开始时间</v-list-item-title>
               <v-btn-toggle
                   v-model="toggle_exclusive"
                   color="#9796f0"
@@ -163,12 +151,13 @@
                                  v-model="selectedDate"></v-date-picker>
                 </v-card>
               </v-expand-transition>
-
             </v-list-item>
+
             <!--待办结束日期-->
             <v-list-item>
               <v-list-item-title style="font-weight: bold;
                                         color: #ee9ca7">待办结束时间</v-list-item-title>
+
               <v-btn-toggle
                   v-model="toggle_exclusive_over"
                   color="#ee9ca7"
@@ -205,13 +194,12 @@
 
             <!--任务重要程度设置-->
             <v-list-item>
-              <v-card
-                  class="mx-auto"
-              >
+              <v-card class="mx-auto">
                 <v-card-title style="font-weight: bold;
                                          color: #3A8FB7">
                   任务重要程度
                 </v-card-title>
+
                 <v-container>
                   <v-row
                       align="center"
@@ -226,7 +214,7 @@
                       <v-chip
                           :disabled="loading"
                           closable
-                          @click:close="selected.splice(i, 1)"d
+                          @click:close="selected.splice(i, 1)"
                       >
                         {{ selection.text }}
                       </v-chip>
@@ -301,7 +289,6 @@
 
           </v-list>
         </v-container>
-
       </v-main>
     </v-app>
   </div>
