@@ -55,12 +55,11 @@
                 </v-alert>
                 <v-btn
                     :loading="loading"
-                    class="flex-grow-1"
+                    class="mb-5"
                     height="48"
                     variant="tonal"
                     align-end
                     @click="login"
-
                 >
                   登入
                 </v-btn>
@@ -73,7 +72,6 @@
               <div class="text-h6 mb-1">
                 REGISTER
               </div>
-
 
               <v-text-field
                   label="请设置账号"
@@ -119,7 +117,7 @@
               </v-alert>
               <v-btn
                   :loading="loading"
-                  class="flex-grow-1"
+                  class="mb-5"
                   height="48"
                   variant="tonal"
                   align-end
@@ -136,13 +134,30 @@
       </v-col>
     </v-row>
   </v-card>
-
+<!--  <v-card v-if="result" class="mt-5">-->
+<!--    &lt;!&ndash; ... &ndash;&gt;-->
+<!--  </v-card>-->
+  <v-progress-linear v-if="pending" class="mt-5"></v-progress-linear>
 </template>
 
 
 
 <script>
 
+const loginSend = async () => {
+  await refresh();
+};
+
+// const { data, pending, error, refresh } = useFetch(apiUrl, {
+//   method: 'POST',
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+//   body: JSON.stringify({
+//     content: Content,
+//     requestType: requestType,
+//   }),
+// });
 import { required } from "vuelidate/lib/validators";
 export default {
   data: () => ({
@@ -190,6 +205,7 @@ export default {
       this.loading = true;
       setTimeout(() => (this.loading = false), 3000);
     },
+
     async login() {
       this.$v.$touch();
 
@@ -212,7 +228,6 @@ export default {
         }catch (error) {
           this.loginError = JSON.stringify(error.response.data, null, 2);
           alert("账号或密码输入错误");
-
           this.password = "";
         } finally {
           this.loading = false;
@@ -267,8 +282,28 @@ export default {
     },
   },
   }
+// const result = ref(null);
+//
+// onMounted(() => {
+//   refresh();
+// });
+// watch(data, (newData) => {
+//   // 将 JSON 字符串解析为对象
+//   result.value = JSON.parse(newData);
+// });
 
 </script>
+
+
+
+
+
+
+
+
+
+
+
 <style>
 /* 应用整体样式 */
 body {
