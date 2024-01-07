@@ -82,7 +82,7 @@ public class AoXiangToDoListSystem {
     }
 
     /**
-     * todo:同步
+     * 同步
      * 1.试图从服务端拉取系统数据
      * 2.如果HTTP请求失败，中断
      * 3.如果HTTP请求成功，但拉取为空，则上传本地数据
