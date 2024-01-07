@@ -3,6 +3,7 @@ package shared;
 import util.JsonUtility;
 
 import java.io.InputStream;
+import java.time.Duration;
 import java.time.Instant;
 
 /**
@@ -20,19 +21,9 @@ public class Pomodoro {
     int workTime,restTime;
     PomodoroRecord pomodoroRecord;
 
-
-    /**
-     * 返回番茄钟信息
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @param pomodoroStatus 番茄状态
-     * @return 番茄时间
-     */
-    public PomodoroRecord setPomodoroRecord(int innerId,Instant startTime,Instant endTime,PomodoroStatus pomodoroStatus) {
-        this.pomodoroRecord = new PomodoroRecord(innerId,startTime,endTime,pomodoroStatus);
-        return pomodoroRecord;
+    public Pomodoro(){
+        this.pomodoroRecord = new PomodoroRecord();
     }
-
     /**
      * 设置休息时间
      * @param restTime 休息时间
@@ -80,5 +71,41 @@ public class Pomodoro {
 
     public static Pomodoro fromJsonStream(InputStream stream, int expectedLength) {
         return JsonUtility.objectFromInputStream(stream, expectedLength, Pomodoro.class);
+    }
+
+    /**
+     * 开始番茄钟
+     */
+    public void startPomodoro(){
+        this.pomodoroRecord.setStartTime(Instant.now());
+    }
+
+    /**
+     * 结束番茄钟，同时计算番茄记录
+     */
+    public void endPomodoro(){
+        this.pomodoroRecord.setEndTime(Instant.now());
+        calculateRecord();
+    }
+    /**
+     * 计算pomodoroRecord
+     * 完成时计算
+     *
+     */
+    public void calculateRecord(){
+        Instant startTime = this.getPomodoroRecord().startTime;
+        Instant endTime = this.getPomodoroRecord().endTime;
+        int durationTime = (int) Duration.between(startTime, endTime).toMinutes();
+        if (durationTime >= workTime){
+            pomodoroRecord.setPomodoroStatus(PomodoroStatus.Finished);
+        }else {
+            pomodoroRecord.setPomodoroStatus(PomodoroStatus.Interrupted);
+        }
+        // 计算逻辑：完成了多少个工作时间
+        int completedCycleCount = durationTime/(workTime+restTime);
+        if (durationTime%(workTime+restTime)>=workTime){
+            completedCycleCount += 1;
+        }
+        pomodoroRecord.setCompletedCycleCount(completedCycleCount);
     }
 }
