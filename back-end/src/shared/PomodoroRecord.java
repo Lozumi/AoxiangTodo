@@ -37,6 +37,10 @@ public class PomodoroRecord {
         return Duration.between(startTime, endTime);
     }
 
+    /**
+     * 结束番茄钟
+     * @param endTime 结束时间
+     */
     public void setEndTime(Instant endTime) {
         this.endTime = endTime;
     }
@@ -57,11 +61,13 @@ public class PomodoroRecord {
         this.innerId = innerId;
     }
 
-    public PomodoroRecord(int innerId, Instant startTime, Instant endTime, PomodoroStatus status)
-    {
-        this.innerId = innerId;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.pomodoroStatus = status;
-    }
+//    public PomodoroRecord(int innerId, Instant startTime, Instant endTime, PomodoroStatus status)
+//    {
+//        this.innerId = innerId;
+//        this.startTime = startTime;
+//        this.endTime = endTime;
+//        this.pomodoroStatus = status;
+//    }
+
+
 }

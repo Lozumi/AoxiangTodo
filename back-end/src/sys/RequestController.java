@@ -345,6 +345,12 @@ public class RequestController {
         return packet;
     }
 
+    /**
+     * 处理开始番茄钟请求
+     * @param request 绑定事项的InnerId
+     * @param userData
+     * @return
+     */
     public static ResponsePacket processStartPomodoro(RequestPacket request,RequestHandlerData userData){
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
@@ -353,7 +359,14 @@ public class RequestController {
         try{
             Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
             PomodoroRecord pomodoroRecord = pomodoro.getPomodoroRecord();
-            pomodoroRecord.setStartTime(Instant.now());
+            var pomodoroRecordList = getSystemPomodoroCollection();
+            pomodoroRecord.setInnerId(pomodoroRecordList.getAvailableID());
+            // 绑定事件
+            ToDoWorkItem item = getToDoWorkItemByInnerId(request.getContent());
+            item.getPomodoroRecordInnerIdList().add(pomodoroRecord.getInnerId());
+            // 开始番茄钟
+            pomodoro.startPomodoro();
+
         }catch (Exception e){
             packet.setMessage(e.getMessage());
         }
@@ -371,8 +384,8 @@ public class RequestController {
         //结束番茄钟（设置番茄钟结束时间）
         try{
             Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
-            PomodoroRecord pomodoroRecord = pomodoro.getPomodoroRecord();
-            pomodoroRecord.setEndTime(Instant.now());
+            pomodoro.endPomodoro();
+
         }catch (Exception e){
             packet.setMessage(e.getMessage());
         }
@@ -416,6 +429,10 @@ public class RequestController {
 
     private static ToDoWorkItemCollection getSystemToDoWorkItemCollection() {
         return AoXiangToDoListSystem.getInstance().getToDoWorkItemCollection();
+    }
+
+    private  static PomodoroRecordCollection getSystemPomodoroCollection(){
+        return AoXiangToDoListSystem.getInstance().getPomodoroRecordsCollection();
     }
 
     private static User getSystemCurrentUser() {
