@@ -11,7 +11,6 @@ import java.time.Instant;
 public class Pomodoro {
     /**
      * 属性
-     *
      * 开始时间
      * 结束时间
      * 状态
