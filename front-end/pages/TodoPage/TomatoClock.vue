@@ -61,7 +61,7 @@
           </v-card>
         </v-dialog>
 
-        <v-dialog v-model="dialog2" max-width="290">
+        <v-dialog v-model="dialog2" max-width="320">
           <v-card
               elevation="12"
               class="rounded-lg"
@@ -69,12 +69,28 @@
               hover>
             <v-card-title class="headline">设立时间</v-card-title>
             <v-card-text>
-              <v-combobox
-                  v-model="selectedTime"
-                  :items="timeOptions"
+              番茄专注建议：专注时间25分钟，休息5分钟。
+            </v-card-text>
+            <v-card-text>
+              <v-slider
+                  color="#4cafa0"
+                  v-model="sliderTimeValue"
+                  min="0"
+                  max="7200"
+                  step="60"
                   label="选择时间"
-                  outlined
-              ></v-combobox>
+                  thumb-color="#fff"
+                  track-color="#e0f2f1"
+                  background-color="#B2DFDB"
+                  @change="onSliderChange"
+                  class="custom-slider"
+              >
+                <template #thumb="{ value }">
+                  <div class="slider-thumb-label">{{ formatTime(value / 60) }}</div>
+                </template>
+              </v-slider>
+
+              <div class="selected-time">{{ formattedSelectedTime }}</div>
             </v-card-text>
             <v-card-actions class="justify-end">
               <v-btn color="blue darken-1" @click="dialog2 = false; dialog1 = false">
@@ -250,11 +266,11 @@
           </v-card>
         </v-dialog>
 
-        <v-dialog v-model="dialog4" max-width="290">
+        <v-dialog v-model="dialog4" max-width="390">
           <v-card>
             <v-card-title class="headline">专注成功</v-card-title>
             <v-card-text>
-              劳逸结合才能事半功倍。
+              劳逸结合才能事半功倍。<br>
               你的专注目标已达成，快去休息一会吧!
             </v-card-text>
             <v-card-actions class="justify-end">
@@ -272,6 +288,9 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
+const sliderTimeValue = ref<number>(25);
+const formattedSelectedTime = computed(() => formatTime(sliderTimeValue.value));
+
 const countdownTime = ref('0:00');
 const focusButtonActive = ref(false);
 const recordButtonActive = ref(false);
@@ -280,8 +299,7 @@ const dialog1 = ref(false);
 const dialog2 = ref(false);
 const dialog3 = ref(false);
 const dialog4 = ref(false);
-const timeOptions = ['0:00','0:10','10:00', '15:00', '25:00', '40:00', '60:00'];
-const selectedTime = ref(timeOptions[0]);
+
 const hoverFocusButton = ref(false);
 const todayPanel = ref<string[]>([]);
 const yesterdayPanel = ref<string[]>([]);
@@ -299,6 +317,21 @@ watch(focusButtonActive, (newValue) => {
     handleModifyTimeClickActive.value = true; // 退出专注时启用修改时间按钮
   }
 });
+
+watch(sliderTimeValue, (newValue) => {
+  countdownTime.value = formatTime(newValue);
+});
+
+function onSliderChange(value: number) {
+  sliderTimeValue.value = value;
+}
+
+function formatTime(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${remainingMinutes.toString().padStart(2, '0')}`;
+}
+
 function showTodayPanel() {
   currentDate.value = 'today';
   todayDialog.value = true;
@@ -338,9 +371,6 @@ function beforeYesterdayNone() {
   beforeYesterdayPanel.value = [];
 }
 
-watch(selectedTime, (newValue) => {
-  countdownTime.value = newValue;
-});
 
 
 let countdownTimer: NodeJS.Timeout | undefined;
@@ -374,7 +404,7 @@ const handleModifyTimeClick = () => {
 
 const confirmGiveUpFocus = () => {
   focusButtonActive.value = false;
-  countdownTime.value = selectedTime.value;
+  countdownTime.value = formatTime(sliderTimeValue.value);
   dialog1.value = false;
   if (countdownTimer !== undefined) {
     clearInterval(countdownTimer);
@@ -544,4 +574,24 @@ button.whiteButton{
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
 }
+
+.custom-slider {
+  margin-top: 16px;
+}
+
+.slider-thumb-label {
+  position: absolute;
+  top: -24px;
+  width: fit-content;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 50%;
+  background-color: white;
+  color: #4cafa0;
+  font-size: 14px;
+  z-index: 1;
+  pointer-events: none;
+}
+
 </style>
