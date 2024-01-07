@@ -1,7 +1,11 @@
-// import { defineNuxtConfig } from 'nuxt'
+//import { defineNuxtConfig } from 'nuxt'
 //
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
+
 export default defineNuxtConfig({
+
+        plugins: ['~/plugins/event-bus.js'],
   devtools: { enabled: true },
   build: {
     transpile:
@@ -13,6 +17,7 @@ export default defineNuxtConfig({
               '@juggle/resize-observer',
                 'date-fns-tz',
                 '@nuxtjs/tailwindcss',
+
             '@pinia/nuxt'
             ]
             : ['@juggle/resize-observer']

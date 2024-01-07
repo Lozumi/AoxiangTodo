@@ -5,7 +5,6 @@
 </template>
 
 <script>
-
 import {defineComponent} from "vue";
 import TodoPage from "~/pages/TodoPage.vue";
 

@@ -4,30 +4,38 @@
       <h1>番茄专注</h1>
     </header>
     <aside>
+
+      <button :class="{ whiteButton: !handleModifyTimeClickActive, active: handleModifyTimeClickActive }"
+              @click="handleModifyTimeClick" :disabled="focusButtonActive">设立时间
+      </button>
+
       <button
-          :class="{ whiteButton: !focusButtonActive,active: focusButtonActive, redButton: focusButtonActive  }"
+          :class="{ whiteButton: !focusButtonActive, active: focusButtonActive, redButton: focusButtonActive }"
+          @mouseover="hoverFocusButton = true"
+          @mouseleave="hoverFocusButton = false"
           @click="handleFocus"
       >
         {{ focusButtonActive ? '放弃专注' : '开始专注' }}
       </button>
-      <button :class="{  whiteButton: !recordButtonActive,active: recordButtonActive }"
-              @click="handleRecord">专注记录</button>
+
+      <button :class="{ whiteButton: !recordButtonActive, active: recordButtonActive }"
+              @click="handleRecord">专注记录
+      </button>
+
     </aside>
 
     <main>
-
       <div class="countdown-container">
-<!--        /*countdown显示专注中还可再优化*/-->
         <div class="countdown">
           <v-img
               class="align-end text-white pulse-animation"
               height="400"
               width="400"
               src="/static/tomato_2.png"
-              opacity: 0.9;
+              opacity="0.9"
               cover
           >
-            <v-card-title>专注中</v-card-title>
+            <v-card-title v-if="focusButtonActive">专注中</v-card-title>
           </v-img>
           <div class="timer">
             {{ countdownTime }}
@@ -35,19 +43,17 @@
         </div>
 
         <v-dialog v-model="dialog1" max-width="290">
-          <v-card>
+          <v-card
+              elevation="12"
+              class="rounded-lg"
+              color="#ffffff"
+              hover>
             <v-card-title class="headline">
-              {{ focusButtonActive ? '番茄专注' :'放弃专注' }}
+              {{ focusButtonActive ? '番茄专注' : '放弃专注' }}
             </v-card-title>
             <v-card-text>
-              {{focusButtonActive ? '专注时长25分钟，建议休息5分钟' :'确认退出并终止计时吗？'}}
+              {{ focusButtonActive ? '开始啦' : '再坚持一下吧' }}
             </v-card-text>
-            <v-card-actions v-if="!modifyTimeClicked && focusButtonActive">
-              <v-btn color="blue darken-1" @click="dialog1 = false">默认</v-btn>
-              <v-btn color="blue darken-1" @click="handleModifyTimeClick">
-                修改时间
-              </v-btn>
-            </v-card-actions>
             <v-card-actions v-if="!modifyTimeClicked && !focusButtonActive">
               <v-btn color="red" @click="confirmGiveUpFocus">确认放弃</v-btn>
               <v-btn color="green" @click="continueCountdown">继续计时</v-btn>
@@ -55,20 +61,38 @@
           </v-card>
         </v-dialog>
 
-        <v-dialog v-model="dialog2" max-width="290">
-          <v-card>
-            <v-card-title class="headline">
-              修改时间
-            </v-card-title>
+        <v-dialog v-model="dialog2" max-width="320">
+          <v-card
+              elevation="12"
+              class="rounded-lg"
+              color="#ffffff"
+              hover>
+            <v-card-title class="headline">设立时间</v-card-title>
             <v-card-text>
-              <v-combobox
-                  v-model="selectedTime"
-                  :items="timeOptions"
-                  label="选择时间"
-                  outlined
-              ></v-combobox>
+              番茄专注建议：专注时间25分钟，休息5分钟。
             </v-card-text>
-            <v-card-actions>
+            <v-card-text>
+              <v-slider
+                  color="#4cafa0"
+                  v-model="sliderTimeValue"
+                  min="0"
+                  max="7200"
+                  step="60"
+                  label="选择时间"
+                  thumb-color="#fff"
+                  track-color="#e0f2f1"
+                  background-color="#B2DFDB"
+                  @change="onSliderChange"
+                  class="custom-slider"
+              >
+                <template #thumb="{ value }">
+                  <div class="slider-thumb-label">{{ formatTime(value / 60) }}</div>
+                </template>
+              </v-slider>
+
+              <div class="selected-time">{{ formattedSelectedTime }}</div>
+            </v-card-text>
+            <v-card-actions class="justify-end">
               <v-btn color="blue darken-1" @click="dialog2 = false; dialog1 = false">
                 Close
               </v-btn>
@@ -77,48 +101,180 @@
         </v-dialog>
 
         <v-dialog v-model="dialog3" max-width="290">
-          <v-card>
-            <v-card-title class="headline">
-              专注记录
-            </v-card-title>
+          <v-card
+              elevation="12"
+              class="rounded-lg"
+              color="#EAECCC"
+              hover
+          >
+            <v-card-title class="headline">专注记录</v-card-title>
             <v-card-text>
               <div>
-                <div class="text-subtitle-2 mb-2">今天</div>
-                <v-expansion-panels>
-                  <v-expansion-panel
-                      v-for="i in 3"
-                      :key="i"
-                      title=" "
-                      text="  "
-                  ></v-expansion-panel>
-                </v-expansion-panels>
+                <v-sheet elevation="2" class="my-4">
+                  <v-btn outlined
+                         color="#4cafa0"
+                         block
+                         @click="showTodayPanel">今天</v-btn>
+                  <v-btn outlined color="#4cafa0"
+                         block
+                         @click="showYesterdayPanel">昨天</v-btn>
+                  <v-btn outlined color="#4cafa0"
+                         block
+                         @click="showBeforeYesterdayPanel">前天</v-btn>
+                </v-sheet>
 
-                <div class="text-subtitle-2 mt-4 mb-2">昨天</div>
-                <v-expansion-panels variant="accordion">
-                  <v-expansion-panel
-                      v-for="i in 3"
-                      :key="i"
-                      title="  "
-                      text="  ."
-                  ></v-expansion-panel>
-                </v-expansion-panels>
+                <div v-if="currentDate === 'today'">
+                  <v-dialog v-model="todayDialog" width="500" max-width="90%" persistent>
+                    <v-card elevation="12"
+                            class="rounded-lg">
+                      <v-card-title class="d-flex align-center">
+                        <span class="text-subtitle-2 mt-4 mb-2 custom-title">今天</span>
+                        <v-spacer></v-spacer>
+                        <v-icon @click.stop="todayDialog = false"
+                                transition="scale-transition">mdi-close</v-icon>
+                      </v-card-title>
+                      <v-card-text>
+                        <div>
+                          <div class="text-center d-flex pb-4">
+                            <v-btn class="rounded-lg"
+                                   color="#C3E2C2"
+                                   @click="todayAll"> All </v-btn>
+                            <v-btn class="rounded-lg"
+                                   color="#C3E2C2"
+                                   @click="todayNone"> None </v-btn>
+                          </div>
+                          <v-expansion-panels v-model="todayPanel" multiple>
+                            <v-expansion-panel
+                                title="Foo"
+                                text="od tla."
+                                value="foo"
+                            ></v-expansion-panel>
 
-                <div class="text-subtitle-2 mt-4 mb-2">前天</div>
+                            <v-expansion-panel
+                                title="Bar"
+                                text="1"
+                                value="bar"
+                            ></v-expansion-panel>
 
-                <v-expansion-panels variant="inset" class="my-4">
-                  <v-expansion-panel
-                      v-for="i in 3"
-                      :key="i"
-                      title=" "
-                      text=""
-                  ></v-expansion-panel>
-                </v-expansion-panels>
+                            <v-expansion-panel
+                                title="Baz"
+                                text="1."
+                                value="baz"
+                            ></v-expansion-panel>
+                          </v-expansion-panels>
+                        </div>
 
+                      </v-card-text>
+                    </v-card>
+                  </v-dialog>
+                </div>
+
+                <div v-if="currentDate === 'yesterday'">
+                  <v-dialog v-model="yesterdayDialog" width="500" max-width="90%" persistent>
+                    <v-card elevation="12" class="rounded-lg">
+                      <v-card-title class="d-flex align-center">
+                        <span class="text-subtitle-2 mt-4 mb-2 custom-title">昨天</span>
+                        <v-spacer></v-spacer>
+                        <v-icon @click.stop="yesterdayDialog = false">mdi-close</v-icon>
+                      </v-card-title>
+                      <v-card-text>
+                        <div>
+                          <div class="text-center d-flex pb-4">
+                            <v-btn class="rounded-lg"
+                                   color="#C3E2C2"
+                                   @click="yesterdayAll"> All </v-btn>
+                            <v-btn class="rounded-lg"
+                                   color="#C3E2C2"
+                                   @click="yesterdayNone"> None </v-btn>
+                          </div>
+
+                          <v-expansion-panels v-model="yesterdayPanel" multiple>
+                            <v-expansion-panel
+                                title="Foo"
+                                text="od tla."
+                                value="foo"
+                            ></v-expansion-panel>
+
+                            <v-expansion-panel
+                                title="Bar"
+                                text="1"
+                                value="bar"
+                            ></v-expansion-panel>
+
+                            <v-expansion-panel
+                                title="Baz"
+                                text="1."
+                                value="baz"
+                            ></v-expansion-panel>
+                          </v-expansion-panels>
+                        </div>
+                      </v-card-text>
+                    </v-card>
+                  </v-dialog>
+                </div>
+
+                <div v-if="currentDate === 'beforeYesterday'">
+                  <v-dialog v-model="beforeYesterdayDialog" width="500" max-width="90%" persistent>
+                    <v-card elevation="12" class="rounded-lg">
+                      <v-card-title class="d-flex align-center">
+                        <span class="text-subtitle-2 mt-4 mb-2 custom-title">前天</span>
+                        <v-spacer></v-spacer>
+                        <v-icon @click.stop="beforeYesterdayDialog = false">mdi-close</v-icon>
+                      </v-card-title>
+                      <v-card-text>
+                        <div>
+                          <div class="text-center d-flex pb-4">
+                            <v-btn class="rounded-lg"
+                                   color="#C3E2C2"
+                                   @click="beforeYesterdayAll"> All </v-btn>
+                            <v-btn class="rounded-lg"
+                                   color="#C3E2C2"
+                                   @click="beforeYesterdayNone"> None </v-btn>
+                          </div>
+                          <v-expansion-panels v-model="beforeYesterdayPanel" multiple>
+                            <v-expansion-panel
+                                title="Foo"
+                                text="od tla."
+                                value="foo"
+                            ></v-expansion-panel>
+
+                            <v-expansion-panel
+                                title="Bar"
+                                text="1"
+                                value="bar"
+                            ></v-expansion-panel>
+
+                            <v-expansion-panel
+                                title="Baz"
+                                text="1."
+                                value="baz"
+                            ></v-expansion-panel>
+                          </v-expansion-panels>
+                        </div>
+                      </v-card-text>
+                    </v-card>
+                  </v-dialog>
+                </div>
               </div>
             </v-card-text>
             <v-card-actions>
-              <v-btn color="blue darken-1"
-                     @click="dialog3 = false; dialog3 = false">
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" @click="dialog3 = false">
+                Close
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="dialog4" max-width="390">
+          <v-card>
+            <v-card-title class="headline">专注成功</v-card-title>
+            <v-card-text>
+              劳逸结合才能事半功倍。<br>
+              你的专注目标已达成，快去休息一会吧!
+            </v-card-text>
+            <v-card-actions class="justify-end">
+              <v-btn color="blue darken-1" @click=" dialog4 = false;dialog1 = false">
                 Close
               </v-btn>
             </v-card-actions>
@@ -132,48 +288,112 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
-const countdownTime = ref('25:00');
+const sliderTimeValue = ref<number>(25);
+const formattedSelectedTime = computed(() => formatTime(sliderTimeValue.value));
+
+const countdownTime = ref('0:00');
 const focusButtonActive = ref(false);
 const recordButtonActive = ref(false);
 const modifyTimeClicked = ref(false);
 const dialog1 = ref(false);
 const dialog2 = ref(false);
 const dialog3 = ref(false);
-const selectedTime = ref(null);
-const timeOptions = ['10：00', '15：00', '25：00','40：00', '60：00'];
+const dialog4 = ref(false);
 
-watch(selectedTime, (newValue) => {
-  if (newValue) {
-    countdownTime.value = newValue; // 更新 countdownTime 的值为选择的时间
+const hoverFocusButton = ref(false);
+const todayPanel = ref<string[]>([]);
+const yesterdayPanel = ref<string[]>([]);
+const beforeYesterdayPanel = ref<string[]>([]);
+const currentDate = ref<string | null>(null);
+const todayDialog = ref(false);
+const yesterdayDialog = ref(false);
+const beforeYesterdayDialog = ref(false);
+const handleModifyTimeClickActive = ref(true); // 初始化为可点击状态
+
+watch(focusButtonActive, (newValue) => {
+  if (newValue === true) {
+    handleModifyTimeClickActive.value = false; // 开始专注时禁用修改时间按钮
+  } else {
+    handleModifyTimeClickActive.value = true; // 退出专注时启用修改时间按钮
   }
 });
 
-let countdownTimer: NodeJS.Timeout | null = null;
+watch(sliderTimeValue, (newValue) => {
+  countdownTime.value = formatTime(newValue);
+});
 
-const handleTimeSelection = () => {
-  // 处理时间选择逻辑
-  console.log('选择的时间：', selectedTime.value);
-  // 这里可以根据选择的时间进行相应的逻辑处理
-};
+function onSliderChange(value: number) {
+  sliderTimeValue.value = value;
+}
+
+function formatTime(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${remainingMinutes.toString().padStart(2, '0')}`;
+}
+
+function showTodayPanel() {
+  currentDate.value = 'today';
+  todayDialog.value = true;
+}
+
+function showYesterdayPanel() {
+  currentDate.value = 'yesterday';
+  yesterdayDialog.value = true;
+}
+
+function showBeforeYesterdayPanel() {
+  currentDate.value = 'beforeYesterday';
+  beforeYesterdayDialog.value = true;
+}
+
+function todayAll() {
+  todayPanel.value = ['foo', 'bar', 'baz'];
+}
+
+function todayNone() {
+  todayPanel.value = [];
+}
+
+function yesterdayAll() {
+  yesterdayPanel.value = ['foo', 'bar', 'baz'];
+}
+
+function yesterdayNone() {
+  yesterdayPanel.value = [];
+}
+
+function beforeYesterdayAll() {
+  beforeYesterdayPanel.value = ['foo', 'bar', 'baz'];
+}
+
+function beforeYesterdayNone() {
+  beforeYesterdayPanel.value = [];
+}
+
+
+
+let countdownTimer: NodeJS.Timeout | undefined;
+let remainingTotalSeconds = ref<number | null>(null);
+let countdownTimeRef = ref('25:00');
 
 const handleFocus = () => {
   focusButtonActive.value = !focusButtonActive.value;
-  dialog1.value = focusButtonActive.value;
+  modifyTimeClicked.value = false; // 添加这一行，将 modifyTimeClicked 设置为 false
   if (!focusButtonActive.value) {
     dialog1.value = true;
-  }
-  if (focusButtonActive.value) {
+  } else if (remainingTotalSeconds.value === null) {
+    // 只有在没有剩余时间（即开始新专注）的情况下才从选定时间开始计时
     startCountdown();
-  } else if (countdownTimer !== null) {
-    clearInterval(countdownTimer);
-    countdownTimer = null;
+  } else {
+    // 如果有剩余时间，则直接激活 focusButtonActive，不需要重新设置倒计时
+    focusButtonActive.value = true;
   }
 };
 
 const handleRecord = () => {
   recordButtonActive.value = !recordButtonActive.value;
   dialog3.value = true; // 弹出卡片
-  // 处理专注记录逻辑
 };
 
 const handleModifyTimeClick = () => {
@@ -184,19 +404,41 @@ const handleModifyTimeClick = () => {
 
 const confirmGiveUpFocus = () => {
   focusButtonActive.value = false;
-  countdownTime.value = '25:00';
+  countdownTime.value = formatTime(sliderTimeValue.value);
   dialog1.value = false;
-  if (countdownTimer !== null) {
+  if (countdownTimer !== undefined) {
     clearInterval(countdownTimer);
-    countdownTimer = null;
+    countdownTimer = undefined;
   }
 };
 
 const continueCountdown = () => {
   focusButtonActive.value = true;
   dialog1.value = false;
-  if (countdownTimer === null) {
-    startCountdown();
+
+  if (countdownTimer === undefined && remainingTotalSeconds.value !== null) {
+    countdownTimer = setInterval(() => {
+      if (remainingTotalSeconds.value !== null) {
+        remainingTotalSeconds.value -= 1;
+        const remainingMinutes = Math.floor(remainingTotalSeconds.value / 60);
+        const remainingSeconds = remainingTotalSeconds.value % 60;
+
+        countdownTimeRef.value = `${remainingMinutes.toString().padStart(2, '0')}:${remainingSeconds
+            .toString()
+            .padStart(2, '0')}`;
+
+        if (remainingTotalSeconds.value <= 0) {
+          clearInterval(countdownTimer!);
+          countdownTimer = undefined;
+          remainingTotalSeconds.value = null;
+          focusButtonActive.value = false;
+          dialog1.value = true;
+        }
+      }
+    }, 1000);
+  } else if (countdownTimer !== undefined) {
+    // 如果倒计时已经在进行中，则无需重新启动定时器
+    focusButtonActive.value = true;
   }
 };
 
@@ -214,18 +456,20 @@ const startCountdown = () => {
         .padStart(2, '0')}`;
 
     if (totalSeconds <= 0) {
-      clearInterval(countdownTimer);
-      countdownTimer = null;
+      clearInterval(countdownTimer!);
+      countdownTimer = undefined;
       focusButtonActive.value = false;
       dialog1.value = true;
+      dialog4.value = true;
     }
   }, 1000);
 };
 </script>
+
 <style scoped>
 header {
   text-align: center;
-  background-color: #1f1e33; /* 修改背景颜色 */
+  background-color: #4CAF50; /* 修改背景颜色 */
   color: white; /* 修改文字颜色 */
   height: 10vh;
   padding: 20px;
@@ -269,9 +513,15 @@ button.whiteButton{
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 90vh;
+  height: 70vh;
   z-index: 0;
 
+}
+
+.custom-title {
+  font-size: 3rem; /* 调整字体大小 */
+  font-family: 'Arial', sans-serif; /* 更换字体，这里以 Arial 为例，你可以替换为你喜欢的字体 */
+  font-weight: bold; /* 添加加粗效果（可选） */
 }
 
 .countdown-container::before{
@@ -291,6 +541,10 @@ button.whiteButton{
 
 .countdown {
   position: relative;
+}
+
+.v-expansion-panels  {
+  background-color: #4cafa0;
 }
 
 .timer {
@@ -320,4 +574,24 @@ button.whiteButton{
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
 }
+
+.custom-slider {
+  margin-top: 16px;
+}
+
+.slider-thumb-label {
+  position: absolute;
+  top: -24px;
+  width: fit-content;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 50%;
+  background-color: white;
+  color: #4cafa0;
+  font-size: 14px;
+  z-index: 1;
+  pointer-events: none;
+}
+
 </style>

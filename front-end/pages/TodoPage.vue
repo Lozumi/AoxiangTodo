@@ -11,7 +11,7 @@
     </v-app-bar>
 
     <!-- 侧面导航栏 -->
-    <v-navigation-drawer app :color="selectedTheme.primaryColor" :dark="selectedTheme.darkSideNav">
+    <v-navigation-drawer :width="200" app :color="selectedTheme.primaryColor" :dark="selectedTheme.darkSideNav">
       <v-list dense>
         <v-list-item title="我的" subtitle="Vuetify"></v-list-item>
         <v-list-item class="nav-item" @click="$router.push('/TodoPage/TodayTasks')">
@@ -24,6 +24,10 @@
         <v-divider class="white--text"></v-divider>
         <v-list-item class="nav-item" @click="$router.push('/TodoPage/TomatoClock')">
           <v-list-item-title class="white--text">番茄时钟</v-list-item-title>
+        </v-list-item>
+        <v-divider class="white--text"></v-divider>
+        <v-list-item class="nav-item" @click="$router.push('/TodoPage/PostTest')">
+          <v-list-item-title class="white--text">网络测试</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>

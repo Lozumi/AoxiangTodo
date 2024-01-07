@@ -1,82 +1,96 @@
 <template>
-  <v-card
-      class="list-card"
-      max-width="700"
-  >
+  <v-container class="pa-4 text-center">
+    <v-row
+        class="fill-height"
+        align="center"
+        justify="center"
+    >
+      <template v-for="(item, i) in items" :key="i">
+        <v-col
+            cols="12"
+            md="4"
+        >
+          <v-hover v-slot="{ isHovering, props }">
+            <v-card
+                :elevation="isHovering ? 12 : 2"
+                :class="{ 'on-hover': isHovering }"
+                v-bind="props"
+            >
+              <v-img
+                  :src="item.img"
+                  height="225px"
+                  cover
+              >
+                <v-card-title class="text-h6 text-white d-flex flex-column">
+                  <p class="mt-4">
+                    {{ item.title }}
+                  </p>
 
-
-    <v-list lines="two">
-      <v-list-subheader>
-          Things To Do
-      </v-list-subheader>
-
-    </v-list>
-
-    <v-divider></v-divider>
-
-    <v-list lines="two" select-strategy="classic" class="list1">
-      <v-list-subheader>General</v-list-subheader>
-
-      <v-list-item value="notifications">
-        <template v-slot:prepend="{ isActive }">
-
-          <v-list-item-action start>
-            <v-checkbox-btn :model-value="isActive"></v-checkbox-btn>
-          </v-list-item-action>
-        </template>
-
-        <v-list-item-title>Notifications</v-list-item-title>
-
-        <v-list-item-subtitle>
-          Notify me about updates to apps or games that I downloaded
-        </v-list-item-subtitle>
-      </v-list-item>
-
-      <v-list-item value="sound" class="custom-list1">
-        <template v-slot:prepend="{ isActive }">
-          <v-list-item-action start>
-            <v-checkbox-btn :model-value="isActive"></v-checkbox-btn>
-          </v-list-item-action>
-        </template>
-
-        <v-list-item-title>
-          Sound
-        </v-list-item-title>
-
-        <v-list-item-subtitle>
-          Auto-update apps at any time. Data charges may apply
-        </v-list-item-subtitle>
-      </v-list-item>
-
-      <v-list-item value="widgets">
-        <template v-slot:prepend="{ isActive }">
-          <v-list-item-action start>
-            <v-checkbox-btn :model-value="isActive"></v-checkbox-btn>
-          </v-list-item-action>
-        </template>
-
-        <v-list-item-title>Auto-add widgets</v-list-item-title>
-
-        <v-list-item-subtitle>
-          Automatically add home screen widgets when downloads complete
-        </v-list-item-subtitle>
-      </v-list-item>
-    </v-list>
-  </v-card>
+                  <div>
+                    <p class="ma-0 text-body-1 font-weight-bold">
+                      {{ item.text }}
+                    </p>
+                    <p class="text-caption font-weight-medium">
+                      {{ item.subtext }}
+                    </p>
+                  </div>
+                </v-card-title>
+                <div class="align-self-center">
+                  <v-btn
+                      v-for="(icon, index) in icons"
+                      :key="index"
+                      variant="text"
+                      :class="{ 'show-btns': isHovering }"
+                      :color="transparent"
+                      :icon="icon"
+                  ></v-btn>
+                </div>
+              </v-img>
+            </v-card>
+          </v-hover>
+        </v-col>
+      </template>
+    </v-row>
+  </v-container>
 </template>
-
-<style>
-.list1{
-  border:1px solid #303030;
-
+<script>
+export default {
+  data: () => ({
+    icons: ['mdi-rewind', 'mdi-play', 'mdi-fast-forward'],
+    items: [
+      {
+        title: 'New Releases',
+        text: `It's New Release Friday`,
+        subtext: 'Newly released songs.',
+        img: 'https://cdn.vuetifyjs.com/docs/images/cards/hands.jpg',
+      },
+      {
+        title: 'Rock',
+        text: 'Greatest Rock Hits',
+        subtext: 'Lose yourself in rock tunes.',
+        img: 'https://cdn.vuetifyjs.com/docs/images/cards/singer.jpg',
+      },
+      {
+        title: 'Mellow Moods',
+        text: 'Ambient Bass',
+        subtext: 'Chill beats to mellow you out.',
+        img: 'https://cdn.vuetifyjs.com/docs/images/cards/concert.jpg',
+      },
+    ],
+    transparent: 'rgba(255, 255, 255, 0)',
+  }),
 }
-</style>
-
-<style scoped>
-.list-card {
-  margin-left:300px;
-}
-</style>
-
-<script setup lang="ts">
 </script>
+<style scoped>
+.v-card {
+  transition: opacity .4s ease-in-out;
+}
+
+.v-card:not(.on-hover) {
+  opacity: 0.6;
+}
+
+.show-btns {
+  color: rgba(255, 255, 255, 1) !important;
+}
+</style>
