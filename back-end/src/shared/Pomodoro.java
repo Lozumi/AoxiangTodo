@@ -1,5 +1,6 @@
 package shared;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import util.JsonUtility;
 
 import java.io.InputStream;
@@ -18,6 +19,7 @@ public class Pomodoro {
      * 番茄钟信息
      */
     int workTime,restTime;
+    @JsonIgnore
     PomodoroRecord pomodoroRecord;
 
     public Pomodoro(){
@@ -55,6 +57,7 @@ public class Pomodoro {
         return workTime;
     }
 
+    @JsonIgnore
     public PomodoroRecord getPomodoroRecord() {
         return pomodoroRecord;
     }

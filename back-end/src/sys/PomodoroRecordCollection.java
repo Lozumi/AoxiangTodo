@@ -1,5 +1,6 @@
 package sys;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import shared.Pomodoro;
 import shared.PomodoroRecord;
 import shared.ToDoWorkItem;
@@ -7,7 +8,7 @@ import shared.ToDoWorkItem;
 import java.util.*;
 
 public class PomodoroRecordCollection implements List<PomodoroRecord> {
-    ArrayList<PomodoroRecord> pomodoroRecords;
+    ArrayList<PomodoroRecord> pomodoroRecords = new ArrayList<>();
 
     /**
      * @return
@@ -219,6 +220,7 @@ public class PomodoroRecordCollection implements List<PomodoroRecord> {
         return pomodoroRecords.toArray();
     }
 
+    @JsonIgnore
     public int getAvailableID(){
         if(isEmpty()){
             return 0;

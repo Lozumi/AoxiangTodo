@@ -47,6 +47,8 @@ public class Main {
         RequestPacket enumerateRequestPacket = new RequestPacket();
         enumerateRequestPacket.setRequestType(RequestType.EnumerateToDoWorkList);
         System.out.printf("查询待办事项结果：%s\n", httpTest.tryRequest(enumerateRequestPacket).getContent());
+
+        AoXiangToDoListSystem.getInstance().localSaveSystemData("D:/test/1.json");
     }
 
     static ResponsePacket enumerateToDoWorkItems(SocketTest test) {

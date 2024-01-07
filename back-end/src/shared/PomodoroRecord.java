@@ -1,5 +1,7 @@
 package shared;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.Duration;
 import java.time.Instant;
 
@@ -33,6 +35,7 @@ public class PomodoroRecord {
         return pomodoroStatus;
     }
 
+    @JsonIgnore
     public Duration getDuration() {
         return Duration.between(startTime, endTime);
     }
@@ -60,14 +63,5 @@ public class PomodoroRecord {
     public void setInnerId(int innerId) {
         this.innerId = innerId;
     }
-
-//    public PomodoroRecord(int innerId, Instant startTime, Instant endTime, PomodoroStatus status)
-//    {
-//        this.innerId = innerId;
-//        this.startTime = startTime;
-//        this.endTime = endTime;
-//        this.pomodoroStatus = status;
-//    }
-
 
 }
