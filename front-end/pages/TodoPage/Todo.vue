@@ -16,6 +16,7 @@
           ></v-text-field>
           <v-divider></v-divider>
 
+<!--          加不加if真是个问题   <div v-if="items && items.length>0">-->
           <v-list lines="two"
                   select-strategy="classic"
                   class="list1"
@@ -86,6 +87,7 @@
             </v-list-item>
 
           </v-list>
+<!--          </div>-->
         </v-card>
       </div>
 
@@ -105,57 +107,6 @@
   </div>
 </template>
 
-<script >
-export default {
-  data: () => ({
-    items: [],
-    newItemText:'',
-    dialogVisible: false,
-    isCardVisible: false,
-    cardDetailsSrc:'',
-    iframeSrc:'',
-
-
-  }),
-
-  // created(){
-  //   this.addNewItem({title:'待办示例',subtitle:'此处显示该待办的备注~'});
-  //   this.addNewItem({title:'尝试创建一个待办',subtitle:'开始你的待办旅途吧！'});
-  // },
-
-  methods: {
-
-    onItemOrBtnClick(item, event) {
-      event.stopPropagation();
-      //接受两个参数：item 表示被点击的项（即 v-list-item 中的数据项），event 表示触发点击事件的事件对象。
-      //使用 event.stopPropagation() 阻止事件冒泡，确保只有当前的 v-list-item 收到点击事件，而不会传播到其他元素。
-      console.log('Item clicked:', item);
-      // 处理 item 的点击逻辑，例如更新数据等操作
-    },
-
-
-    // addNewItem({ title='None',subtitle='None' } = {}) {
-    //   this.items.push({
-    //     title,
-    //     subtitle,
-    //     isChecked: false,
-    //   });
-    // },
-
-    subSelectedItem() {
-      event.stopPropagation();
-      const selectedItem = this.items.find(item => item.isChecked);
-      if (selectedItem) {
-        const index = this.items.indexOf(selectedItem);
-        this.items.splice(index, 1);
-      }
-    },
-
-
-
-  },
-}
-</script>
 
 
 <script setup>
@@ -163,16 +114,21 @@ import { useRouter } from 'vue-router';
 import { ref,onMounted } from 'vue';
 import {useFetch} from "nuxt/app";
 
-const router = useRouter();
-const newItemText = ref('');
-
-const apiUrl = 'http://localhost:20220/todoworkitem';
-
-const isCardVisible = ref(false);
 let currentItemId = ref(null);
 let iframeSrc = ref('');
 
 
+const router = useRouter();
+const newItemText = ref('');
+// 增加一个标志位，表示用户是否首次登录
+const isFirstLogin = ref(true);
+
+const apiUrl = 'http://localhost:20220/todoworkitem';
+// 假设这是获取用户待办事项的API
+const userTodosUrl = `http://localhost:20220/user-todos`;
+
+
+const isCardVisible = ref(false);
 const items = ref([]);
 const predefinedItems = [
   {
@@ -186,6 +142,19 @@ const predefinedItems = [
     isChecked: false,
   },
 ];
+
+// 检查用户是否首次登录（实际项目中这部分逻辑应从服务器获取）
+// 在这里假设通过某种方式检查并设置 isFirstLogin 的值
+// const checkFirstLogin = async () => {
+//   // 这里是模拟代码，实际应用中需要替换为从服务器获取数据的逻辑
+//   const response = await fetch('/api/check-first-login');
+//   const data = await response.json();
+//   isFirstLogin.value = data.isFirstLogin;
+// };
+
+// onMounted(async () => {
+//   await checkFirstLogin();
+// });
 
 
 const addNewItemToServer = async (item) => {
@@ -224,7 +193,8 @@ const addNewItemToServer = async (item) => {
       // 请求成功后执行的操作，例如将新添加的待办项添加到本地数组状态或 UI 更新
 
       const response = addItemFetcher.data.value; // 获取后端返回的数据
-      const newItemWithId = { ...newItem, id: response.id }; // 合并新的id
+      //嘶嘶这个新建项是不是这么添加到本地数组啊。。。
+      const newItemWithId = { title:item.title,subtitle:item.subtitle, id: response.id ,isChecked:false}; // 合并新的id
       items.value.push(newItemWithId); // 将带有id的新项目添加到本地数组状态
     }
 
@@ -234,11 +204,29 @@ const addNewItemToServer = async (item) => {
 };
 
 onMounted(async () => {
-  for (const item of predefinedItems) {
-    await addNewItemToServer(item);
+  if (isFirstLogin.value) {
+    for (const item of predefinedItems) {
+      await addNewItemToServer(item);
+    }
+    // 登录后将首次登录标志位设为 false
+    isFirstLogin.value = false;
+  } else {
+    // 若非首次登录，从服务器获取用户的待办事项列表
+    const getUserTodosFetcher = useFetch(userTodosUrl, { method: 'GET' });
+
+    try {
+      await getUserTodosFetcher.refresh();
+      if (!getUserTodosFetcher.pending.value && !getUserTodosFetcher.error.value) {
+        // 获取后端返回的数据
+        const response = getUserTodosFetcher.data.value;
+        // 将数据添加到本地items数组，并初始化isChecked为false
+        items.value = response.map(todo => ({ ...todo, isChecked: false }));
+      }
+    } catch (error) {
+      console.error('Error fetching user todos:', error);
+    }
   }
 });
-
 
 const addNewItemFromInput = async () => {
   if (newItemText.value.trim() !== '') {
@@ -253,6 +241,7 @@ const addNewItemFromInput = async () => {
   }
 };
 
+//到底要怎么样才能在卡片展开式按照itemid拉取相应item的内容啊
 async function toggleCardDetails(item) {
   if (!this.isCardVisible) {
     this.isCardVisible = true;
@@ -261,9 +250,28 @@ async function toggleCardDetails(item) {
   }
 }
 
+function  onItemOrBtnClick(item, event) {
+  event.stopPropagation();
+  //接受两个参数：item 表示被点击的项（即 v-list-item 中的数据项），event 表示触发点击事件的事件对象。
+  //使用 event.stopPropagation() 阻止事件冒泡，确保只有当前的 v-list-item 收到点击事件，而不会传播到其他元素。
+  console.log('Item clicked:', item);
+  // 处理 item 的点击逻辑，例如更新数据等操作
+}
+
+function subSelectedItem() {
+  event.stopPropagation();
+  const selectedItem = this.items.find(item => item.isChecked);
+  if (selectedItem) {
+    const index = this.items.indexOf(selectedItem);
+    this.items.splice(index, 1);
+  }
+}
+
 async function toTomatoClock(item)
 {
   await router.push('/TodoPage/Tomato');
+  //进入番茄钟页面并传递该item的唯一id给它......
+  //计时完成后根据该itemid将数据绑定到item上
 }
 
 
