@@ -231,6 +231,35 @@
             </v-list-item>
             <v-divider></v-divider>  <!--下划线-->
 
+            <!--任务重要程度设置-->
+            <v-list-item>
+              <v-card class="mx-auto">
+                <v-card-title style="font-weight: bold;
+                                         color: #3A8FB7">
+                  任务紧急程度
+                </v-card-title>
+
+                <v-expansion-panels>
+                  <v-expansion-panel
+                      :title="expansionTitle_1"
+                      :color="expansionColor_1"
+                  >
+                    <v-expansion-panel-text>
+                      <v-list>
+                        <v-list-item v-for="item in items_1"
+                                     :key="item.text"
+                                     @click="changeTitle_1(item.text); changeExColor_1(item.color)"
+                                     :style="{'background-color': item.color}">
+                          <v-list-item-title>{{item.text}}</v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </v-expansion-panel-text>
+                  </v-expansion-panel>
+                </v-expansion-panels>
+
+              </v-card>
+            </v-list-item>
+
             <!--上传图片-->
             <v-list-item>
               <v-file-input
@@ -306,6 +335,8 @@ export default {
       selectedDateOver: null,
       expansionTitle:'未设置',
       expansionColor:'gray',
+      expansionTitle_1:'未设置',
+      expansionColor_1:'gray',
 
       tiles: [
         { color: '#3A8FB7', title: '自定义'},
@@ -342,6 +373,29 @@ export default {
       loading: false,
       search: '',
       selected: [],
+
+      items_1: [
+        {
+          text: '不紧急',
+          color: '#C3E2C2',
+          index: '1',
+        },
+        {
+          text: '较不紧急',
+          color: '#EAECCC',
+          index: '2',
+        },
+        {
+          text: '比较紧急',
+          color: '#DBCC95',
+          index: '3',
+        },
+        {
+          text: '很紧急',
+          color: '#CD8D7A',
+          index: '4',
+        },
+      ]
     }
   },
 
@@ -479,8 +533,16 @@ export default {
       this.expansionTitle = parameter;
     },
 
+    changeTitle_1(parameter){
+      this.expansionTitle_1 = parameter;
+    },
+
     changeExColor(parameter){
       this.expansionColor = parameter;
+    },
+
+    changeExColor_1(parameter){
+      this.expansionColor_1 = parameter;
     }
   }
 }
