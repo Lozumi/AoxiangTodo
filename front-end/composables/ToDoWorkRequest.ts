@@ -34,7 +34,7 @@ const createTodoWork = (workLayer:number,workInnerId:number,workImportancePriori
 export default new class ToDoWorkRequest {
   create(todoItem: any) {
     const requestBody = {
-      content: JSON.stringify(todoItem),
+      content: todoItem,
       requestType: 'CreateToDoWork',
     };
     return sendRequest(requestBody);

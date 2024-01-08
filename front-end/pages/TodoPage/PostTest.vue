@@ -41,7 +41,7 @@ const sendPostRequest = async () => {
   await refresh();
 };
 
-  const todoItem = {
+  const todoItem = JSON.stringify({
     '@class': 'shared.ToDoWorkItem',
     layer: 1,
     innerId: 0,
@@ -56,7 +56,7 @@ const sendPostRequest = async () => {
     status: 'Activated',
     subToDoWorkItemInnerIdList: [],
     pomodoroRecordInnerIdList: [],
-  };
+  });
 
   const {data, error, pending, refresh} = await ToDoWorkRequest.create(todoItem);
 
