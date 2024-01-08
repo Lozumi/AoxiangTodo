@@ -1,6 +1,6 @@
 // nuxt项目目录/composables/ToDoWorkRequest.ts
 
-let baseUrl = 'http://10.60.50.102:20220'
+let baseUrl = 'http://localhost:20220'
 
 const sendRequest = (body: any) => {
   return useFetch(baseUrl, {
@@ -34,7 +34,7 @@ const createTodoWork = (workLayer:number,workInnerId:number,workImportancePriori
 export default new class ToDoWorkRequest {
   create(todoItem: any) {
     const requestBody = {
-      content: todoItem,
+      content: JSON.stringify(todoItem),
       requestType: 'CreateToDoWork',
     };
     return sendRequest(requestBody);
