@@ -20,7 +20,9 @@
               <v-bottom-sheet v-model="sheet">
                 <template v-slot:activator = "{props}">
                   <div>
-                    <v-btn v-bind = "props" elevation="0" :color="buttonColor">
+                    <v-btn v-bind = "props"
+                           elevation="0"
+                           :color="buttonColor">
                       <v-icon size="24">mdi-folder-star-outline</v-icon>
                       {{buttonText}}
                     </v-btn>
@@ -37,7 +39,8 @@
                                changeColor(tile.color)"
                   >
                     <template v-slot:prepend>
-                      <v-avatar :color="tile.color" size = "x-small"></v-avatar>
+                      <v-avatar :color="tile.color"
+                                size = "x-small"></v-avatar>
                     </template>
                     <v-list-content>
                       <v-list-item-title>
@@ -51,7 +54,9 @@
                     <template v-slot:append>
                       <v-btn elevation="0">
                         <v-icon>mdi-trash-can-outline</v-icon>
-                        <v-dialog v-model = "_dialog" activator="parent" width="auto">
+                        <v-dialog v-model = "_dialog"
+                                  activator="parent"
+                                  width="auto">
                           <v-card>
                             <v-card-text>
                               确定要删除这个文件夹吗？
@@ -74,9 +79,12 @@
                   </v-list-item>
                 </v-list>
 
-                <v-dialog v-model = "fileDialog" max-width="600">
+                <v-dialog v-model = "fileDialog"
+                          max-width="600">
                   <v-card>
-                    <v-text-field v-model = "inputText" label = "文件夹名称" color = "#3A8FB7"></v-text-field>
+                    <v-text-field v-model = "inputText"
+                                  label = "文件夹名称"
+                                  color = "#3A8FB7"></v-text-field>
                     <v-card-actions>
                       <v-spacer></v-spacer>
                       <v-btn color="blue-darken-1"
@@ -120,7 +128,8 @@
             <!--任务时间-->
             <!--开始日期-->
             <v-list-item>
-              <v-list-item-title style="font-weight: bold; color: #9796f0">待办开始时间</v-list-item-title>
+              <v-list-item-title style="font-weight: bold;
+              color: #9796f0">待办开始时间</v-list-item-title>
               <v-btn-toggle
                   v-model="toggle_exclusive"
                   color="#9796f0"
@@ -200,51 +209,56 @@
                   任务重要程度
                 </v-card-title>
 
-                <v-container>
-                  <v-row
-                      align="center"
-                      justify="start"
+                <v-expansion-panels>
+                  <v-expansion-panel
+                      :title="expansionTitle"
+                      :color="expansionColor"
                   >
-                    <v-col
-                        v-for="(selection, i) in selections"
-                        :key="selection.text"
-                        cols="auto"
-                        class="py-1 pe-0"
-                    >
-                      <v-chip
-                          :disabled="loading"
-                          closable
-                          @click:close="selected.splice(i, 1)"
-                      >
-                        {{ selection.text }}
-                      </v-chip>
-                    </v-col>
-                  </v-row>
-                </v-container>
+                    <v-expansion-panel-text>
+                      <v-list>
+                        <v-list-item v-for="item in items"
+                                     :key="item.text"
+                                     @click="changeTitle(item.text); changeExColor(item.color)"
+                                     :style="{'background-color': item.color}">
+                          <v-list-item-title>{{item.text}}</v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </v-expansion-panel-text>
+                  </v-expansion-panel>
+                </v-expansion-panels>
 
-                <v-divider v-if="!allSelected"></v-divider>
-
-                <v-list>
-                  <template v-for="item in categories">
-                    <v-list-item
-                        v-if="!selected.includes(item)"
-                        :key="item.text"
-                        :disabled="loading"
-                        @click="selected.push(item)"
-                    >
-                      <template>
-                        <v-icon
-                            :disabled="loading"
-                        ></v-icon>
-                      </template>
-
-                      <v-list-item-title v-text="item.text"></v-list-item-title>
-                    </v-list-item>
-                  </template>
-                </v-list>
               </v-card>
             </v-list-item>
             <v-divider></v-divider>  <!--下划线-->
+
+            <!--任务重要程度设置-->
+            <v-list-item>
+              <v-card class="mx-auto">
+                <v-card-title style="font-weight: bold;
+                                         color: #3A8FB7">
+                  任务紧急程度
+                </v-card-title>
+
+                <v-expansion-panels>
+                  <v-expansion-panel
+                      :title="expansionTitle_1"
+                      :color="expansionColor_1"
+                  >
+                    <v-expansion-panel-text>
+                      <v-list>
+                        <v-list-item v-for="item in items_1"
+                                     :key="item.text"
+                                     @click="changeTitle_1(item.text); changeExColor_1(item.color)"
+                                     :style="{'background-color': item.color}">
+                          <v-list-item-title>{{item.text}}</v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </v-expansion-panel-text>
+                  </v-expansion-panel>
+                </v-expansion-panels>
+
+              </v-card>
+            </v-list-item>
 
             <!--上传图片-->
             <v-list-item>
@@ -319,6 +333,10 @@ export default {
       inputText: '',
       selectedDate: null,
       selectedDateOver: null,
+      expansionTitle:'未设置',
+      expansionColor:'gray',
+      expansionTitle_1:'未设置',
+      expansionColor_1:'gray',
 
       tiles: [
         { color: '#3A8FB7', title: '自定义'},
@@ -332,29 +350,52 @@ export default {
 
       items: [
         {
-          text: '不重要不紧急',
-          color: 'blue',
+          text: '不重要',
+          color: '#C3E2C2',
           index: '1',
         },
         {
-          text: '重要但不紧急',
-          color: 'blue',
+          text: '较不重要',
+          color: '#EAECCC',
           index: '2',
         },
         {
-          text: '不重要但紧急',
-          color: 'blue',
+          text: '比较重要',
+          color: '#DBCC95',
           index: '3',
         },
         {
-          text: '重要且紧急',
-          color: 'blue',
+          text: '很重要',
+          color: '#CD8D7A',
           index: '4',
         },
       ],
       loading: false,
       search: '',
       selected: [],
+
+      items_1: [
+        {
+          text: '不紧急',
+          color: '#C3E2C2',
+          index: '1',
+        },
+        {
+          text: '较不紧急',
+          color: '#EAECCC',
+          index: '2',
+        },
+        {
+          text: '比较紧急',
+          color: '#DBCC95',
+          index: '3',
+        },
+        {
+          text: '很紧急',
+          color: '#CD8D7A',
+          index: '4',
+        },
+      ]
     }
   },
 
@@ -436,7 +477,7 @@ export default {
     },
 
     changeContent(parameter) {
-      if(parameter == '不选择文件夹'){
+      if(parameter === '不选择文件夹'){
         this.buttonText = '未分类';
       }
       else{
@@ -445,7 +486,7 @@ export default {
     },
 
     changeColor(parameter) {
-      if(parameter == '不选择文件夹'){
+      if(parameter === '不选择文件夹'){
         this.buttonColor = 'primary';
       }
       else{
@@ -463,7 +504,7 @@ export default {
     },
 
     changeSheet(parameter) {
-      if(parameter == '自定义'){
+      if(parameter === '自定义'){
         this.sheet = true;
       }
       else{
@@ -486,6 +527,22 @@ export default {
 
     removeFolder(parameter) {
       this.tiles.splice(parameter,1);
+    },
+
+    changeTitle(parameter){
+      this.expansionTitle = parameter;
+    },
+
+    changeTitle_1(parameter){
+      this.expansionTitle_1 = parameter;
+    },
+
+    changeExColor(parameter){
+      this.expansionColor = parameter;
+    },
+
+    changeExColor_1(parameter){
+      this.expansionColor_1 = parameter;
     }
   }
 }

@@ -61,14 +61,14 @@
           </v-card>
         </v-dialog>
 
-        <v-dialog v-model="dialog2" max-width="320">
+        <v-dialog v-model="dialog2" max-width="490">
           <v-card
               elevation="12"
               class="rounded-lg"
               color="#ffffff"
               hover>
-            <v-card-title class="headline">设立时间</v-card-title>
-            <v-card-text>
+            <v-card-title class=" custom-card-text headline">设立时间</v-card-title>
+            <v-card-text class="custom-card2-text">
               番茄专注建议：专注时间25分钟，休息5分钟。
             </v-card-text>
             <v-card-text>
@@ -76,9 +76,9 @@
                   color="#4cafa0"
                   v-model="sliderTimeValue"
                   min="0"
-                  max="7200"
+                  max="3600"
                   step="60"
-                  label="选择时间"
+                  label="专注时间"
                   thumb-color="#fff"
                   track-color="#e0f2f1"
                   background-color="#B2DFDB"
@@ -89,9 +89,34 @@
                   <div class="slider-thumb-label">{{ formatTime(value / 60) }}</div>
                 </template>
               </v-slider>
-
-              <div class="selected-time">{{ formattedSelectedTime }}</div>
+              <!-- 显示已选择的专注时间 -->
+              <div class="selected-time text-center">专注时间: {{ formattedSelectedTime }}</div>
             </v-card-text>
+
+            <v-card-text>
+              <!-- 添加新的休息时间滑块 -->
+              <v-slider
+                  color="#4cafa0"
+                  v-model="restTimeValue"
+                  min="0"
+                  max="1200"
+                  step="60"
+                  label="休息时间"
+                  thumb-color="#fff"
+                  track-color="#e0f2f1"
+                  background-color="#B2DFDB"
+                  @change="onRestTimeChange"
+                  class="custom-slider"
+              >
+                <template #thumb="{ value }">
+                  <div class="slider-thumb-label">{{ formatTime(value / 60) }}</div>
+                </template>
+              </v-slider>
+
+              <!-- 显示已选择的休息时间 -->
+              <div class="selected-time mt-2 text-center">休息时间: {{ formattedRestTime }}</div>
+            </v-card-text>
+
             <v-card-actions class="justify-end">
               <v-btn color="blue darken-1" @click="dialog2 = false; dialog1 = false">
                 Close
@@ -257,6 +282,7 @@
                 </div>
               </div>
             </v-card-text>
+
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="blue darken-1" @click="dialog3 = false">
@@ -270,8 +296,8 @@
           <v-card>
             <v-card-title class="headline">专注成功</v-card-title>
             <v-card-text>
-              劳逸结合才能事半功倍。<br>
-              你的专注目标已达成，快去休息一会吧!
+              优秀的人总是自律。<br>
+              你的目标已达成，进入下一段旅程吧!
             </v-card-text>
             <v-card-actions class="justify-end">
               <v-btn color="blue darken-1" @click=" dialog4 = false;dialog1 = false">
@@ -288,9 +314,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
-const sliderTimeValue = ref<number>(25);
+const sliderTimeValue = ref<number>(25*60);
 const formattedSelectedTime = computed(() => formatTime(sliderTimeValue.value));
-
 const countdownTime = ref('0:00');
 const focusButtonActive = ref(false);
 const recordButtonActive = ref(false);
@@ -299,7 +324,6 @@ const dialog1 = ref(false);
 const dialog2 = ref(false);
 const dialog3 = ref(false);
 const dialog4 = ref(false);
-
 const hoverFocusButton = ref(false);
 const todayPanel = ref<string[]>([]);
 const yesterdayPanel = ref<string[]>([]);
@@ -309,6 +333,13 @@ const todayDialog = ref(false);
 const yesterdayDialog = ref(false);
 const beforeYesterdayDialog = ref(false);
 const handleModifyTimeClickActive = ref(true); // 初始化为可点击状态
+const restTimeValue = ref<number>(5 * 60); // 默认休息时间为 5 分钟
+const formattedRestTime = computed(() => formatTime(restTimeValue.value));
+
+function onRestTimeChange(value: number) {
+  restTimeValue.value = value;
+}
+
 
 watch(focusButtonActive, (newValue) => {
   if (newValue === true) {
@@ -371,22 +402,19 @@ function beforeYesterdayNone() {
   beforeYesterdayPanel.value = [];
 }
 
-
-
 let countdownTimer: NodeJS.Timeout | undefined;
 let remainingTotalSeconds = ref<number | null>(null);
 let countdownTimeRef = ref('25:00');
 
 const handleFocus = () => {
   focusButtonActive.value = !focusButtonActive.value;
-  modifyTimeClicked.value = false; // 添加这一行，将 modifyTimeClicked 设置为 false
+  modifyTimeClicked.value = false;
+
   if (!focusButtonActive.value) {
     dialog1.value = true;
   } else if (remainingTotalSeconds.value === null) {
-    // 只有在没有剩余时间（即开始新专注）的情况下才从选定时间开始计时
     startCountdown();
   } else {
-    // 如果有剩余时间，则直接激活 focusButtonActive，不需要重新设置倒计时
     focusButtonActive.value = true;
   }
 };
@@ -451,9 +479,29 @@ const startCountdown = () => {
     const remainingMinutes = Math.floor(totalSeconds / 60);
     const remainingSeconds = totalSeconds % 60;
 
-    countdownTime.value = `${remainingMinutes.toString().padStart(2, '0')}:${remainingSeconds
-        .toString()
-        .padStart(2, '0')}`;
+    countdownTime.value = `${remainingMinutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+
+    if (totalSeconds <= 0) {
+      clearInterval(countdownTimer!);
+      countdownTimer = undefined;
+
+      // 倒计时结束后，开始休息时间倒计时
+      countdownTime.value = formattedRestTime.value;
+      startRestCountdown();
+    }
+  }, 1000);
+};
+
+const startRestCountdown = () => {
+  const [minutes, seconds] = countdownTime.value.split(':');
+  let totalSeconds = parseInt(minutes!) * 60 + parseInt(seconds!);
+
+  countdownTimer = setInterval(() => {
+    totalSeconds -= 1;
+    const remainingMinutes = Math.floor(totalSeconds / 60);
+    const remainingSeconds = totalSeconds % 60;
+
+    countdownTime.value = `${remainingMinutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 
     if (totalSeconds <= 0) {
       clearInterval(countdownTimer!);
@@ -464,6 +512,7 @@ const startCountdown = () => {
     }
   }, 1000);
 };
+
 </script>
 
 <style scoped>
@@ -594,4 +643,13 @@ button.whiteButton{
   pointer-events: none;
 }
 
+.custom-card-text {
+  color: black; /* 文字颜色 */
+  background-color: #C3E2C2; /* 背景颜色 */
+}
+
+.custom-card2-text {
+  color: black; /* 文字颜色 */
+  background-color: #EAECCC; /* 背景颜色 */
+}
 </style>
