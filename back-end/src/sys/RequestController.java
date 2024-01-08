@@ -5,6 +5,7 @@ import shared.PomodoroInfo;
 import shared.PomodoroRecord;
 import shared.ToDoWorkItem;
 import trans.RequestPacket;
+import trans.RequestType;
 import trans.ResponsePacket;
 import trans.ResponseStatus;
 import user.FormatException;
@@ -399,6 +400,7 @@ public class RequestController {
             item.getPomodoroRecordInnerIdList().add(pomodoroRecord.getInnerId());
         } catch (Exception e) {
             packet.setMessage(e.getMessage());
+            return packet;
         }
 
         //操作成功响应
@@ -426,6 +428,32 @@ public class RequestController {
 
         } catch (Exception e) {
             packet.setMessage(e.getMessage());
+            return packet;
+        }
+
+        //操作成功响应
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        packet.setStatus(ResponseStatus.Success);
+        return packet;
+    }
+
+    /**
+     * 返回目前用户信息
+     * @param request
+     * @param userData
+     * @return
+     */
+    public static ResponsePacket processGetCurrentUser(RequestPacket request,RequestHandlerData userData){
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+
+        try {
+            User currentUser = getSystemCurrentUser();
+            String userName = currentUser.getUserName();
+            packet.setContent(userName);
+        } catch (Exception e) {
+            packet.setMessage(e.getMessage());
+            return packet;
         }
 
         //操作成功响应

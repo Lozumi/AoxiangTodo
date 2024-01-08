@@ -15,5 +15,6 @@ public enum RequestType {
     UserLogout,
     Synchronize,
     ConfigureBackEnd,
-    ToDoWorkItemNotification
+    ToDoWorkItemNotification,
+    GetCurrentUser
 }
