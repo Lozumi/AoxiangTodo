@@ -79,14 +79,12 @@ public class RegisterServlet extends HttpServlet {
                 out.println(failure);
                 return;
             }
-            System.out.println("here1");
 
             statement.executeUpdate("""
                     INSERT INTO users (account, user_name, password)
                     VALUES ("%s", "%s", "%s");
                     """.formatted(parameters.get("account"), parameters.get("user-name"), parameters.get("password")));
             c.commit();
-            System.out.println("here2");
             resultSet.close();
             statement.close();
         } catch (Exception e) {
