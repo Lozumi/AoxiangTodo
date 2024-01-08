@@ -11,11 +11,6 @@ public final class DBSingletonInstance implements AutoCloseable {
         try {
             Class.forName("org.sqlite.JDBC");
             connectionToDB = DriverManager.getConnection("jdbc:sqlite:/var/lib/sqlite3/list.db");
-            while (!connectionToDB.isValid(3)) {
-                Runtime.getRuntime().exec("mkdir -p /var/lib/sqlite3");
-                Runtime.getRuntime().exec("touch /var/lib/sqlite3/list.db");
-                connectionToDB = DriverManager.getConnection("jdbc:sqlite:/var/lib/sqlite3/list.db");
-            }
             connectionToDB.setAutoCommit(false);
             Statement statement = connectionToDB.createStatement();
             statement.executeUpdate("""
