@@ -57,13 +57,15 @@ public class RegisterServlet extends HttpServlet {
                 System.out.println("Parsed: %s\t%s".formatted(paramRec, valueRec));
             } else {
                 System.out.println("Error: wrong parameter name");
-                out.println(failure);
+                out.print(failure);
+                out.flush();
                 return;
             }
         }
         if (paramCount != expectedParamCount) {
             System.out.println("Error: wrong parameter count");
-            out.println(failure);
+            out.print(failure);
+            out.flush();
             return;
         }
 
@@ -76,7 +78,8 @@ public class RegisterServlet extends HttpServlet {
                 resultSet.close();
                 statement.close();
                 System.out.println("Error: user already exists");
-                out.println(failure);
+                out.print(failure);
+                out.flush();
                 return;
             }
 
@@ -89,12 +92,14 @@ public class RegisterServlet extends HttpServlet {
             statement.close();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            out.println(failure);
+            out.print(failure);
+            out.flush();
             return;
         }
 
         System.out.println("User registered successfully");
-        out.println(success);
+        out.print(success);
+        out.flush();
     }
 
     @Override
