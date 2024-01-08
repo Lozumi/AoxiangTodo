@@ -5,6 +5,7 @@
         <v-img src="/static/ckw.jpg" height="100%" max-width="100%"/>
       </v-col>
       <v-col cols="6">
+
         <v-tabs
             v-model="state.tab"
             color="primary"
@@ -26,7 +27,7 @@
                 <v-text-field
                     label="请输入账号"
                     hide-details="auto"
-                    v-model="state.loginData.username"
+                    v-model="state.loginData.account"
                 ></v-text-field>
 
                 <v-text-field
@@ -43,12 +44,15 @@
                   </v-card-text>
                 </v-card>
 
-                <v-alert v-if="loginError" type="error" class="mt-5">
-                  <h2 class="text-h3">登录错误:</h2>
-                  <pre>{{ loginError }}</pre>
+                <v-alert
+                    v-if="loginError"
+                    type="warning"
+                    class="mt-5"
+                    text="登录错误，请检查账号密码是否输入正确">
+
                 </v-alert>
 
-<!--                -->
+                <!--                -->
                 <v-btn
                     :loading="state.loading"
                     class="mb-5"
@@ -72,20 +76,20 @@
               <v-text-field
                   label="请设置账号"
                   hide-details="auto"
-                  v-model="state.registerData.registerUsername"
+                  v-model="state.registerData.account"
               ></v-text-field>
 
               <v-text-field
                   label="设置用户名"
                   hide-details="auto"
-                  v-model="state.registerData.registerDisplayName"
+                  v-model="state.registerData.userName"
               ></v-text-field>
 
               <v-text-field
                   label="设置密码"
                   type="password"
                   hide-details="auto"
-                  v-model="state.registerData.registerPassword"
+                  v-model="state.registerData.password"
               ></v-text-field>
 
               <v-text-field
@@ -93,17 +97,17 @@
                   :rules="confirmPasswordRules"
                   type="password"
                   hide-details="auto"
-                  v-model="state.registerData.confirmRegisterPassword"
+                  v-model="state.registerData.confirmPassword"
               ></v-text-field>
-              <v-alert v-if="state.registerData.registerPassword !== state.registerData.confirmRegisterPassword"
-                       type="error"
-                       class="mt-5">
-                <h2 class="text-h3">确认密码错误:</h2>
-                <p>两次输入的密码不一致，请重新输入。</p>
+              <v-alert
+                  v-if="state.registerData.password !== '' && state.registerData.confirmPassword !== '' && state.registerData.password !== state.registerData.confirmPassword"
+                  type="error"
+                  class="mt-5"
+                  text="确认密码错误,请检查两次输入的密码是否一致">
               </v-alert>
               <!--              !isRegisterFormValid ||-->
               <v-btn
-                  :disabled=" state.registerData.registerPassword !== state.registerData.confirmRegisterPassword"
+                  :disabled="state.registerData.password !== state.registerData.confirmPassword"
                   :loading="state.loading"
                   class="mb-5"
                   height="48"
@@ -121,64 +125,67 @@
                   <pre>{{ registerResult }}</pre>
                 </v-card-text>
               </v-card>
-              <v-alert v-if="registerError" type="error" class="mt-5">
+              <v-alert
+                  v-if="registerError"
+                  type="error"
+                  class="mt-5">
                 <h2 class="text-h3">注册错误:</h2>
                 <pre>{{ registerError }}</pre>
               </v-alert>
 
-
             </v-window-item>
-
           </v-window>
         </v-card-text>
-
       </v-col>
     </v-row>
   </v-card>
-
-  <v-progress-linear v-if="isLoginPending || isRegisterPending" class="mt-5"></v-progress-linear>
+  <v-progress-linear
+      v-if="isLoginPending || isRegisterPending"
+      class="mt-5">
+  </v-progress-linear>
 
 </template>
-
-
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
 <script setup>
-
 const loginSend = async () => {
   await refresh();
 };
 
-
 const confirmPasswordRules = {
-  sameAs: (value) => value === state.registerData.registerPassword,
+  sameAs: (value) => value === state.registerData.password,
 };
+
 const state = reactive({
-  loading: false,
-  tab: 'login',
-  loginData: {
-    username: '',
-    password: '',
-  },
-  registerData: {
-    registerUsername: '',
-    registerDisplayName: '',
-    registerPassword: '',
-    confirmRegisterPassword: '',
-  },
-  loginResult: null,
-  loginError: null,
-  registerResult: null,
-  registerError: null,
-});
+      loading: false,
+      tab: 'login',
+      loginData: {
+        account: '',
+        password: '',
+      },
+      registerData: {
+        account: '',
+        userName: '',
+        password: '',
+        // confirmPassword: '',
+      },
+      loginResult: null,
+      loginError: null,
+      registerResult: null,
+      registerError: null,
+    }
+);
+//**********************验证函数***************************
+const base = 'http://10.60.50.102:20220/'
+const apiUrlLogin = 'UserLogin';
 
-
-// 登录验证函数
-
-// 注册验证函数
-
-const apiUrlLogin = '/api/login';
-const apiUrlRegister = '/api/register';
+const apiUrlRegister = 'UserRegister';
 
 const loginResult = ref(null);
+
 const registerResult = ref(null);
 
 const {
@@ -187,13 +194,16 @@ const {
   refresh: refreshLogin,
   data: loginResponse
 } = useFetch(apiUrlLogin, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: () => JSON.stringify(state.loginData),
-  immediate: false
-});
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: state.loginData,
+      baseURL: base,
+      immediate: false,
+      watch: false,
+    }
+);
 
 const {
   pending: isRegisterPending,
@@ -201,38 +211,35 @@ const {
   refresh: refreshRegister,
   data: registerResponse
 } = useFetch(apiUrlRegister, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: () => JSON.stringify({
-    username: state.registerData.registerUsername,
-    displayName: state.registerData.registerDisplayName,
-    password: state.registerData.registerPassword,
-  }),
-  immediate: false
-});
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: state.registerData,
+      baseURL: base,
+      immediate: false,
+      watch: false,
+    }
+);
 
 async function handleLogin() {
-  if (state.loginData.username && state.loginData.password) {
+  if (state.loginData.account && state.loginData.password) {
     await refreshLogin();
     if (isLoginPending.value === false && loginError.value === null) {
       // 更新登录结果到组件内部状态
       state.loginResult = loginResponse.value;
       loginError.value = null;
 
-      // 跳转页面或其他逻辑
     }
   }
 }
 
-
 async function handleRegister() {
   if (
-      state.registerData.registerUsername &&
-      state.registerData.registerDisplayName &&
-      state.registerData.registerPassword &&
-      state.registerData.registerPassword === state.registerData.confirmRegisterPassword
+      state.registerData.account &&
+      state.registerData.userName &&
+      state.registerData.password &&
+      state.registerData.password === state.registerData.confirmPassword
   ) {
     await refreshRegister();
     if (isRegisterPending.value === false && registerError.value === null) {
@@ -248,6 +255,7 @@ async function handleRegister() {
 
 
 <style>
+
 /* 应用整体样式 */
 body {
   background-color: #f5f5f5;
@@ -286,7 +294,7 @@ body {
 }
 
 .custom-height {
-  height: 52px; /* 或者你想要的任何较小的高度 */
+  height: 52px; /* 高度 */
 }
 
 /* v-window样式 */
@@ -311,13 +319,13 @@ body {
 
 /* 确保输入框之间的固定间距 */
 .v-text-field:not(:last-child) {
-  margin-bottom: 18px; /* 或者您想要的固定间距值 */
+  margin-bottom: 18px; /* 固定间距值 */
 }
 
 /* 可选：如果需要调整错误提示文本的样式 */
 .v-messages__message {
   font-size: 14px;
-  margin-bottom: 8px; /* 添加这行代码以避免输入框背景色溢出 */
+  margin-bottom: 8px; /* 避免输入框背景色溢出 */
 }
 
 .v-text-field__slot label {
