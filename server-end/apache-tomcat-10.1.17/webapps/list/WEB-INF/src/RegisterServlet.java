@@ -54,7 +54,7 @@ public class RegisterServlet extends HttpServlet {
             if (parameters.containsKey(paramRec)) {
                 parameters.remove(paramRec);
                 parameters.put(paramRec, valueRec);
-                System.out.println("Parsed: %s\t%s".formatted(paramRec, valueRec));
+                System.out.println("Parsed: %s - %s".formatted(paramRec, valueRec));
             } else {
                 System.out.println("Error: wrong parameter name");
                 out.print(failure);
