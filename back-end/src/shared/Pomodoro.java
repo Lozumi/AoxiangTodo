@@ -6,9 +6,11 @@ import util.JsonUtility;
 import java.io.InputStream;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
- * 番茄中钟类
+ * 番茄钟类
  */
 public class Pomodoro {
     /**
@@ -21,9 +23,11 @@ public class Pomodoro {
     int workTime,restTime;
     @JsonIgnore
     PomodoroRecord pomodoroRecord;
+    Timer pomodoroTimer;
 
     public Pomodoro(){
         this.pomodoroRecord = new PomodoroRecord();
+        this.pomodoroTimer = new Timer("pomodoro",false);
     }
     /**
      * 设置休息时间
@@ -80,14 +84,18 @@ public class Pomodoro {
      */
     public void startPomodoro(){
         this.pomodoroRecord.setStartTime(Instant.now());
+        //开始主动计时
+        startTimer();
     }
 
     /**
      * 结束番茄钟，同时计算番茄记录
      */
-    public void endPomodoro(){
+    public PomodoroRecord endPomodoro(){
+        endTimer();
         this.pomodoroRecord.setEndTime(Instant.now());
         calculateRecord();
+        return pomodoroRecord;
     }
     /**
      * 计算pomodoroRecord
@@ -97,17 +105,38 @@ public class Pomodoro {
     public void calculateRecord(){
         Instant startTime = this.getPomodoroRecord().startTime;
         Instant endTime = this.getPomodoroRecord().endTime;
+        // 计算状态
         int durationTime = (int) Duration.between(startTime, endTime).toMinutes();
         if (durationTime >= workTime){
             pomodoroRecord.setPomodoroStatus(PomodoroStatus.Finished);
         }else {
             pomodoroRecord.setPomodoroStatus(PomodoroStatus.Interrupted);
         }
-        // 计算逻辑：完成了多少个工作时间
-        int completedCycleCount = durationTime/(workTime+restTime);
-        if (durationTime%(workTime+restTime)>=workTime){
-            completedCycleCount += 1;
-        }
-        pomodoroRecord.setCompletedCycleCount(completedCycleCount);
+//        // 循环计算逻辑：完成了多少个工作时间
+//        int completedCycleCount = durationTime/(workTime+restTime);
+//        if (durationTime%(workTime+restTime)>=workTime){
+//            completedCycleCount += 1;
+//        }
+//        pomodoroRecord.setCompletedCycleCount(completedCycleCount);
+    }
+
+    // 计时模块
+    private void startTimer(){
+        int delay = (workTime+restTime)*60000;
+        // 开始计时
+        pomodoroTimer.schedule(new TimerTask(){
+            @Override
+            public void run(){
+                // 正常结束番茄钟
+                endPomodoro();
+            }
+        },delay);
+    }
+
+    /**
+     * 打断番茄钟计时
+     */
+    private void endTimer(){
+        pomodoroTimer.cancel();
     }
 }

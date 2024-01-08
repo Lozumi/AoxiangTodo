@@ -11,6 +11,7 @@ import user.User;
 import util.JsonUtility;
 
 import java.io.IOException;
+import java.security.spec.ECField;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -364,6 +365,7 @@ public class RequestController {
             // 绑定事件
             ToDoWorkItem item = getToDoWorkItemByInnerId(request.getContent());
             item.getPomodoroRecordInnerIdList().add(pomodoroRecord.getInnerId());
+
             // 开始番茄钟
             pomodoro.startPomodoro();
 
@@ -377,6 +379,12 @@ public class RequestController {
         return packet;
     }
 
+    /**
+     * 处理主动结束番茄钟请求，添加PomodoroRecord至事件
+     * @param request 请求
+     * @param userData 附加
+     * @return
+     */
     public static ResponsePacket processEndPomodoro(RequestPacket request,RequestHandlerData userData){
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
@@ -384,7 +392,9 @@ public class RequestController {
         //结束番茄钟（设置番茄钟结束时间）
         try{
             Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
-            pomodoro.endPomodoro();
+            var pomodoroList = getSystemPomodoroCollection();
+            // 打断后台计时
+            pomodoroList.add(pomodoro.endPomodoro());
 
         }catch (Exception e){
             packet.setMessage(e.getMessage());

@@ -98,7 +98,7 @@ public class statistics {
     public Duration yesterdayPomodoroTime(){
         Duration ans = Duration.ZERO;
         for (PomodoroRecord pomodoroRecord:this.yesterdayPomodoros){
-            ans = ans.plus(pomodoroRecord.getDuration().multipliedBy(pomodoroRecord.getCompletedCycleCount()));
+            ans = ans.plus(pomodoroRecord.getDuration());
         }
         return ans;
     }

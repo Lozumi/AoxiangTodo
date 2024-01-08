@@ -11,7 +11,7 @@ import java.time.Instant;
  */
 public class PomodoroRecord {
     int innerId;
-    int completedCycleCount;
+//    int completedCycleCount;
     Instant startTime,endTime;
     PomodoroStatus pomodoroStatus;
 
@@ -19,9 +19,9 @@ public class PomodoroRecord {
         return innerId;
     }
 
-    public int getCompletedCycleCount() {
-        return completedCycleCount;
-    }
+//    public int getCompletedCycleCount() {
+//        return completedCycleCount;
+//    }
 
     public Instant getStartTime() {
         return startTime;
@@ -56,12 +56,17 @@ public class PomodoroRecord {
         this.pomodoroStatus = pomodoroStatus;
     }
 
-    public void setCompletedCycleCount(int completedCycleCount) {
-        this.completedCycleCount = completedCycleCount;
-    }
+//    public void setCompletedCycleCount(int completedCycleCount) {
+//        this.completedCycleCount = completedCycleCount;
+//    }
 
     public void setInnerId(int innerId) {
         this.innerId = innerId;
     }
 
+
+    @Override
+    public String toString(){
+        return innerId+"_"+startTime.toString()+"_"+endTime.toString()+"_"+pomodoroStatus;
+    }
 }
