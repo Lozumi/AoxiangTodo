@@ -1,6 +1,7 @@
 package sys;
 
 import shared.Pomodoro;
+import shared.PomodoroInfo;
 import shared.PomodoroRecord;
 import shared.ToDoWorkItem;
 import trans.RequestPacket;
@@ -20,6 +21,34 @@ import java.util.Optional;
  * @author 贾聪毅
  */
 public class RequestController {
+
+    /**
+     * 处理编辑番茄钟事项请求。
+     *
+     * @param request  请求报文。
+     * @param userData 未使用。
+     * @return 向前端发送的请求。
+     */
+    public static ResponsePacket processEditPomodoro(RequestPacket request, RequestHandlerData userData) {
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+
+        PomodoroInfo pomodoroInfo = JsonUtility.objectFromJsonString(request.getContent(), PomodoroInfo.class);
+        if(pomodoroInfo == null)
+        {
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为PomodoroInfo", request.getContent()));
+            return packet;
+        }
+        if (pomodoroInfo.getWorkTime() < 10 || pomodoroInfo.getWorkTime() > 90) {
+            packet.setMessage(String.format("参数错误：番茄钟工作时间应当大于10分钟且小于90分钟，当前尝试将工作时间设为 %s 分钟", pomodoroInfo.getWorkTime()));
+            return packet;
+        }
+
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        packet.setStatus(ResponseStatus.Success);
+        return packet;
+    }
+
     /**
      * 处理注册请求，向服务器发送请求
      *
@@ -243,7 +272,8 @@ public class RequestController {
 
     /**
      * 处理编辑待办事项请求。
-     * @param request 请求对象。
+     *
+     * @param request  请求对象。
      * @param userData 用户数据。
      * @return 响应数据包。
      */
@@ -279,22 +309,21 @@ public class RequestController {
 
     /**
      * 处理编辑待办事项请求
-     * @param request 请求
+     *
+     * @param request  请求
      * @param userData 扩展
      * @return 反馈包
      */
-    public static ResponsePacket processEditToDoWorkRequest(RequestPacket request,RequestHandlerData userData){
+    public static ResponsePacket processEditToDoWorkRequest(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
 
         ToDoWorkItem requestItem = ToDoWorkItem.fromJsonString(request.getContent());
-        if(requestItem == null)
-        {
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为ToDoWorkItem",request.getContent()));
+        if (requestItem == null) {
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为ToDoWorkItem", request.getContent()));
             return packet;
         }
-        if(requestItem.getTitle().isBlank())
-        {
+        if (requestItem.getTitle().isBlank()) {
             packet.setMessage("非法参数格式：ToDoWorkItem的主标题不能为空。");
             return packet;
         }
@@ -303,10 +332,10 @@ public class RequestController {
         //根据innerID来查找列表中待办事项，进行修改
         var toDoWorkItemList = getSystemToDoWorkItemCollection();
         Optional<ToDoWorkItem> oldToDoWorkItem = toDoWorkItemList.stream()
-                .filter(obj -> (innerId==(obj.getInnerId())))
+                .filter(obj -> (innerId == (obj.getInnerId())))
                 .findFirst();
-        if(oldToDoWorkItem.isEmpty()){
-            packet.setMessage((String.format("内部错误：系统中不存在innerId为%s的待办事项。",innerId)));
+        if (oldToDoWorkItem.isEmpty()) {
+            packet.setMessage((String.format("内部错误：系统中不存在innerId为%s的待办事项。", innerId)));
             return packet;
         }
         toDoWorkItemList.remove(oldToDoWorkItem.get());
@@ -318,45 +347,46 @@ public class RequestController {
         return packet;
     }
 
-    /**
-     * 处理编辑番茄钟请求
-     * @param request 编辑番茄钟请求
-     * @param userData 额外信息
-     * @return 成功响应
-     */
-    public static ResponsePacket processEditPomodoro(RequestPacket request,RequestHandlerData userData){
-        ResponsePacket packet = new ResponsePacket();
-        packet.setStatus(ResponseStatus.Failure);
-
-        Pomodoro pomodoroNew = Pomodoro.fromJsonString(request.getContent());
-        if(pomodoroNew == null)
-        {
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为Pomodoro",request.getContent()));
-            return packet;
-        }
-        Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
-        pomodoro.setWorkTime(pomodoroNew.getWorkTime());
-        pomodoro.setRestTime(pomodoroNew.getRestTime());
-
-
-        //操作成功响应
-        packet.setMessage(Messages.ZH_CN.SUCCESS);
-        packet.setStatus(ResponseStatus.Success);
-        return packet;
-    }
+//    /**
+//     * 处理编辑番茄钟请求
+//     * @param request 编辑番茄钟请求
+//     * @param userData 额外信息
+//     * @return 成功响应
+//     */
+//    public static ResponsePacket processEditPomodoro(RequestPacket request,RequestHandlerData userData){
+//        ResponsePacket packet = new ResponsePacket();
+//        packet.setStatus(ResponseStatus.Failure);
+//
+//        Pomodoro pomodoroNew = Pomodoro.fromJsonString(request.getContent());
+//        if(pomodoroNew == null)
+//        {
+//            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为Pomodoro",request.getContent()));
+//            return packet;
+//        }
+//        Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
+//        pomodoro.setWorkTime(pomodoroNew.getWorkTime());
+//        pomodoro.setRestTime(pomodoroNew.getRestTime());
+//
+//
+//        //操作成功响应
+//        packet.setMessage(Messages.ZH_CN.SUCCESS);
+//        packet.setStatus(ResponseStatus.Success);
+//        return packet;
+//    }
 
     /**
      * 处理开始番茄钟请求
-     * @param request 绑定事项的InnerId
+     *
+     * @param request  绑定事项的InnerId
      * @param userData
      * @return
      */
-    public static ResponsePacket processStartPomodoro(RequestPacket request,RequestHandlerData userData){
+    public static ResponsePacket processStartPomodoro(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
 
         //开始番茄钟（设置番茄钟开始时间）
-        try{
+        try {
             Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
             PomodoroRecord pomodoroRecord = pomodoro.getPomodoroRecord();
             var pomodoroRecordList = getSystemPomodoroCollection();
@@ -367,7 +397,7 @@ public class RequestController {
             // 开始番茄钟
             pomodoro.startPomodoro();
 
-        }catch (Exception e){
+        } catch (Exception e) {
             packet.setMessage(e.getMessage());
         }
 
@@ -377,16 +407,16 @@ public class RequestController {
         return packet;
     }
 
-    public static ResponsePacket processEndPomodoro(RequestPacket request,RequestHandlerData userData){
+    public static ResponsePacket processEndPomodoro(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
 
         //结束番茄钟（设置番茄钟结束时间）
-        try{
+        try {
             Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
             pomodoro.endPomodoro();
 
-        }catch (Exception e){
+        } catch (Exception e) {
             packet.setMessage(e.getMessage());
         }
 
@@ -395,7 +425,6 @@ public class RequestController {
         packet.setStatus(ResponseStatus.Success);
         return packet;
     }
-
 
 
     /**
@@ -431,7 +460,7 @@ public class RequestController {
         return AoXiangToDoListSystem.getInstance().getToDoWorkItemCollection();
     }
 
-    private  static PomodoroRecordCollection getSystemPomodoroCollection(){
+    private static PomodoroRecordCollection getSystemPomodoroCollection() {
         return AoXiangToDoListSystem.getInstance().getPomodoroRecordsCollection();
     }
 

@@ -25,6 +25,10 @@ public class Main {
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EnumerateToDoWorkList, RequestController::processEnumerateToDoWorkItemListRequest));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.DeleteToDoWork, RequestController::processDeleteToDoWorkRequest));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EditToDoWork, RequestController::processEditToDoWork));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EditPomodoro,RequestController::processEditPomodoro));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.StartPomodoro,RequestController::processStartPomodoro));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EndPomodoro,RequestController::processEndPomodoro));
+        //controller.registerRequestHandler(new RequestHandlerInfo(RequestType.UserRegister))
 
         HttpTest httpTest = new HttpTest("localhost:20220");
 

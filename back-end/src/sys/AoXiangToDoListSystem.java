@@ -18,6 +18,9 @@ public class AoXiangToDoListSystem {
         return system;
     }
 
+    /**
+     * 初始化系统实例，自动从文件中读取数据。
+     */
     private AoXiangToDoListSystem() {
         this.reloadFromFile(systemDataJsonPath);
     }
@@ -136,7 +139,6 @@ public class AoXiangToDoListSystem {
                 } catch (Exception exception) {
                     throw new Exception("找到云端合法数据，但保存并读取数据时发生异常。");
                 }
-
             }
         }
     }
