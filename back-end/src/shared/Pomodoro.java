@@ -26,7 +26,6 @@ public class Pomodoro {
     Timer pomodoroTimer;
 
     public Pomodoro(){
-        this.pomodoroRecord = new PomodoroRecord();
         this.pomodoroTimer = new Timer("pomodoro",false);
     }
     /**
@@ -83,6 +82,7 @@ public class Pomodoro {
      * 开始番茄钟
      */
     public void startPomodoro(){
+        this.pomodoroRecord = new PomodoroRecord();
         this.pomodoroRecord.setStartTime(Instant.now());
         //开始主动计时
         startTimer();
