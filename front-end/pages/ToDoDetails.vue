@@ -209,48 +209,24 @@
                   任务重要程度
                 </v-card-title>
 
-                <v-container>
-                  <v-row
-                      align="center"
-                      justify="start"
+                <v-expansion-panels>
+                  <v-expansion-panel
+                      :title="expansionTitle"
+                      :color="expansionColor"
                   >
-                    <v-col
-                        v-for="(selection, i) in selections"
-                        :key="selection.text"
-                        cols="auto"
-                        class="py-1 pe-0"
-                    >
-                      <v-chip
-                          :disabled="loading"
-                          closable
-                          @click:close="selected.splice(i, 1)"
-                      >
-                        {{ selection.text }}
-                      </v-chip>
-                    </v-col>
-                  </v-row>
-                </v-container>
+                    <v-expansion-panel-text>
+                      <v-list>
+                        <v-list-item v-for="item in items"
+                                     :key="item.text"
+                                     @click="changeTitle(item.text); changeExColor(item.color)"
+                                     :style="{'background-color': item.color}">
+                          <v-list-item-title>{{item.text}}</v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </v-expansion-panel-text>
+                  </v-expansion-panel>
+                </v-expansion-panels>
 
-                <v-divider v-if="!allSelected"></v-divider>
-
-                <v-list>
-                  <template v-for="item in categories">
-                    <v-list-item
-                        v-if="!selected.includes(item)"
-                        :key="item.text"
-                        :disabled="loading"
-                        @click="selected.push(item)"
-                    >
-                      <template>
-                        <v-icon
-                            :disabled="loading"
-                        ></v-icon>
-                      </template>
-
-                      <v-list-item-title v-text="item.text"></v-list-item-title>
-                    </v-list-item>
-                  </template>
-                </v-list>
               </v-card>
             </v-list-item>
             <v-divider></v-divider>  <!--下划线-->
@@ -328,6 +304,8 @@ export default {
       inputText: '',
       selectedDate: null,
       selectedDateOver: null,
+      expansionTitle:'未设置',
+      expansionColor:'gray',
 
       tiles: [
         { color: '#3A8FB7', title: '自定义'},
@@ -341,23 +319,23 @@ export default {
 
       items: [
         {
-          text: '不重要不紧急',
-          color: 'blue',
+          text: '不重要',
+          color: '#C3E2C2',
           index: '1',
         },
         {
-          text: '重要但不紧急',
-          color: 'blue',
+          text: '较不重要',
+          color: '#EAECCC',
           index: '2',
         },
         {
-          text: '不重要但紧急',
-          color: 'blue',
+          text: '比较重要',
+          color: '#DBCC95',
           index: '3',
         },
         {
-          text: '重要且紧急',
-          color: 'blue',
+          text: '很重要',
+          color: '#CD8D7A',
           index: '4',
         },
       ],
@@ -445,7 +423,7 @@ export default {
     },
 
     changeContent(parameter) {
-      if(parameter == '不选择文件夹'){
+      if(parameter === '不选择文件夹'){
         this.buttonText = '未分类';
       }
       else{
@@ -454,7 +432,7 @@ export default {
     },
 
     changeColor(parameter) {
-      if(parameter == '不选择文件夹'){
+      if(parameter === '不选择文件夹'){
         this.buttonColor = 'primary';
       }
       else{
@@ -472,7 +450,7 @@ export default {
     },
 
     changeSheet(parameter) {
-      if(parameter == '自定义'){
+      if(parameter === '自定义'){
         this.sheet = true;
       }
       else{
@@ -495,6 +473,14 @@ export default {
 
     removeFolder(parameter) {
       this.tiles.splice(parameter,1);
+    },
+
+    changeTitle(parameter){
+      this.expansionTitle = parameter;
+    },
+
+    changeExColor(parameter){
+      this.expansionColor = parameter;
     }
   }
 }
