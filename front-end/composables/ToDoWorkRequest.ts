@@ -32,15 +32,15 @@ const createTodoWork = (workLayer:number,workInnerId:number,workImportancePriori
 }
 
 export default new class ToDoWorkRequest {
-  createToDoWork(todoItem: any) {
+  create(todoItem: any) {
     const requestBody = {
-      content: JSON.stringify(todoItem),
-      requestType: 'CreateTodoWork',
+      content: todoItem,
+      requestType: 'CreateToDoWork',
     };
     return sendRequest(requestBody);
   }
 
-  queryToDoWork(innerId: any) {
+  query(innerId: any) {
     const requestBody = {
       content:JSON.stringify({
         '@class': 'shared.ToDoWorkItem',
@@ -51,7 +51,7 @@ export default new class ToDoWorkRequest {
     return sendRequest(requestBody);
   }
 
-  deleteToDoWork(innerId: number) {
+  delete(innerId: number) {
     const requestBody = {
       content:JSON.stringify({
         '@class': 'shared.ToDoWorkItem',
@@ -62,15 +62,15 @@ export default new class ToDoWorkRequest {
     return sendRequest(requestBody);
   }
 
-  editToDoWork(updatedTodoItem: any) {
+  edit(updatedTodoItem: any) {
     const requestBody = {
-      content: JSON.stringify(updatedTodoItem),
+      content: updatedTodoItem,
       requestType: 'EditToDoWork',
     };
     return sendRequest(requestBody);
   }
 
-  enumerateToDoWork() {
+  enumerate() {
     const requestBody = {
       requestType: 'EnumerateToDoWork',
     };
