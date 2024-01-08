@@ -13,7 +13,7 @@ const sendRequest = (body: any) => {
 };
 
 export default new class PomodoroRequest {
-    startPomodoro(innerId:number) {
+    start(innerId:number) {
         const requestBody = {
             content: JSON.stringify({
                 innerId: innerId,
@@ -23,7 +23,7 @@ export default new class PomodoroRequest {
         return sendRequest(requestBody);
     }
 
-    endPomodoro() {
+    end() {
         const requestBody = {
             content:'',
             requestType: 'EndPomodoro',
@@ -31,7 +31,7 @@ export default new class PomodoroRequest {
         return sendRequest(requestBody);
     }
 
-    editPomodoro(workTime:string,restTime:string) {
+    edit(workTime:string,restTime:string) {
         const requestBody = {
             content:JSON.stringify({
                 workTime: workTime,
