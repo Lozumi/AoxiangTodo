@@ -20,7 +20,7 @@ public class Pomodoro {
      * 状态
      * 番茄钟信息
      */
-    int workTime,restTime;
+    int workTime = 25,restTime = 5;
     @JsonIgnore
     PomodoroRecord pomodoroRecord;
     Timer pomodoroTimer;
