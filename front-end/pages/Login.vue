@@ -1,27 +1,23 @@
 <template>
-
   <v-card>
     <v-row no-gutters>
       <v-col cols="6" class="d-flex">
-        <v-img src="/static/ckw.jpg"  height="100%" max-width="100%" />
+        <v-img src="/static/ckw.jpg" height="100%" max-width="100%"/>
       </v-col>
       <v-col cols="6">
-
-
         <v-tabs
-            v-model="tab"
+            v-model="state.tab"
             color="primary"
             align-tabs="end"
         >
-          <v-tab value="login"> 登录</v-tab>
+          <v-tab value="login">登录</v-tab>
           <v-tab value="register">注册</v-tab>
         </v-tabs>
 
         <v-card-text>
-          <v-window v-model="tab">
-<!--            <登录窗口>-->
+          <v-window v-model="state.tab">
+            <!--            <登录窗口>-->
             <v-window-item value="login">
-
               <div>
 
                 <div class="text-h6 mb-1">
@@ -29,16 +25,14 @@
                 </div>
                 <v-text-field
                     label="请输入账号"
-                    :rules="usernameRules"
                     hide-details="auto"
-                    v-model="username"
+                    v-model="state.loginData.username"
                 ></v-text-field>
 
                 <v-text-field
                     label="请输入密码"
-                    :rules="passwordRules"
                     hide-details="auto"
-                    v-model="password"
+                    v-model="state.loginData.password"
                 ></v-text-field>
                 <v-card v-if="loginResult" class="mt-5">
                   <v-card-title class="border-bottom mb-4">
@@ -53,13 +47,15 @@
                   <h2 class="text-h3">登录错误:</h2>
                   <pre>{{ loginError }}</pre>
                 </v-alert>
+
+<!--                -->
                 <v-btn
-                    :loading="loading"
+                    :loading="state.loading"
                     class="mb-5"
                     height="48"
                     variant="tonal"
                     align-end
-                    @click="login"
+                    @click="handleLogin"
                 >
                   登入
                 </v-btn>
@@ -75,33 +71,48 @@
 
               <v-text-field
                   label="请设置账号"
-                  :rules="usernameRules"
                   hide-details="auto"
-                  v-model="registerUsername"
+                  v-model="state.registerData.registerUsername"
               ></v-text-field>
 
               <v-text-field
                   label="设置用户名"
-                  :rules="usernameRules"
                   hide-details="auto"
-                  v-model="registerDisplayName"
+                  v-model="state.registerData.registerDisplayName"
               ></v-text-field>
 
               <v-text-field
                   label="设置密码"
-                  :rules="passwordRules"
-                  type = "password"
+                  type="password"
                   hide-details="auto"
-                  v-model="registerPassword"
+                  v-model="state.registerData.registerPassword"
               ></v-text-field>
 
               <v-text-field
                   label="确认密码"
                   :rules="confirmPasswordRules"
-                  type = "password"
+                  type="password"
                   hide-details="auto"
-                  v-model="confirmRegisterPassword"
+                  v-model="state.registerData.confirmRegisterPassword"
               ></v-text-field>
+              <v-alert v-if="state.registerData.registerPassword !== state.registerData.confirmRegisterPassword"
+                       type="error"
+                       class="mt-5">
+                <h2 class="text-h3">确认密码错误:</h2>
+                <p>两次输入的密码不一致，请重新输入。</p>
+              </v-alert>
+              <!--              !isRegisterFormValid ||-->
+              <v-btn
+                  :disabled=" state.registerData.registerPassword !== state.registerData.confirmRegisterPassword"
+                  :loading="state.loading"
+                  class="mb-5"
+                  height="48"
+                  variant="tonal"
+                  align-end
+                  @click="handleRegister"
+              >
+                注册
+              </v-btn>
               <v-card v-if="registerResult" class="mt-5">
                 <v-card-title class="border-bottom mb-4">
                   <p class="text-h5">注册返回包：</p>
@@ -110,21 +121,11 @@
                   <pre>{{ registerResult }}</pre>
                 </v-card-text>
               </v-card>
-
               <v-alert v-if="registerError" type="error" class="mt-5">
                 <h2 class="text-h3">注册错误:</h2>
                 <pre>{{ registerError }}</pre>
               </v-alert>
-              <v-btn
-                  :loading="loading"
-                  class="mb-5"
-                  height="48"
-                  variant="tonal"
-                  align-end
-                  @click="register"
-              >
-                注册
-              </v-btn>
+
 
             </v-window-item>
 
@@ -134,174 +135,116 @@
       </v-col>
     </v-row>
   </v-card>
-<!--  <v-card v-if="result" class="mt-5">-->
-<!--    &lt;!&ndash; ... &ndash;&gt;-->
-<!--  </v-card>-->
-  <v-progress-linear v-if="pending" class="mt-5"></v-progress-linear>
+
+  <v-progress-linear v-if="isLoginPending || isRegisterPending" class="mt-5"></v-progress-linear>
+
 </template>
 
 
-
-<script>
+<script setup>
 
 const loginSend = async () => {
   await refresh();
 };
 
-// const { data, pending, error, refresh } = useFetch(apiUrl, {
-//   method: 'POST',
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-//   body: JSON.stringify({
-//     content: Content,
-//     requestType: requestType,
-//   }),
-// });
-import { required } from "vuelidate/lib/validators";
-export default {
-  data: () => ({
-    users: JSON.parse(localStorage.getItem("users")) || [],
-    loading: false,
-    tab: 'login', // 添加这行代码以初始化 tab 属性
-    username: "",
-    password: "",
-    registerUsername: "",
-    registerDisplayName: "",
-    registerPassword: "",
-    confirmRegisterPassword: "",
-    loginResult: null,
-    loginError: null,
-    registerResult: null,
-    registerError: null,
-    usernameRules: [required],
-    passwordRules: [required],
-    confirmPasswordRules: [
-      required,
-      (value) => value === this.registerPassword || "密码不一致",
-    ],
-    rules: [
-      // 根据需要定义表单验证规则
-      // value => !!value || 'Required.',
-      // value => (value && value.length >= 3) || 'Min 3 characters',
-      // null
-    ],
+
+const confirmPasswordRules = {
+  sameAs: (value) => value === state.registerData.registerPassword,
+};
+const state = reactive({
+  loading: false,
+  tab: 'login',
+  loginData: {
+    username: '',
+    password: '',
+  },
+  registerData: {
+    registerUsername: '',
+    registerDisplayName: '',
+    registerPassword: '',
+    confirmRegisterPassword: '',
+  },
+  loginResult: null,
+  loginError: null,
+  registerResult: null,
+  registerError: null,
+});
+
+
+// 登录验证函数
+
+// 注册验证函数
+
+const apiUrlLogin = '/api/login';
+const apiUrlRegister = '/api/register';
+
+const loginResult = ref(null);
+const registerResult = ref(null);
+
+const {
+  pending: isLoginPending,
+  error: loginError,
+  refresh: refreshLogin,
+  data: loginResponse
+} = useFetch(apiUrlLogin, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: () => JSON.stringify(state.loginData),
+  immediate: false
+});
+
+const {
+  pending: isRegisterPending,
+  error: registerError,
+  refresh: refreshRegister,
+  data: registerResponse
+} = useFetch(apiUrlRegister, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: () => JSON.stringify({
+    username: state.registerData.registerUsername,
+    displayName: state.registerData.registerDisplayName,
+    password: state.registerData.registerPassword,
   }),
-  computed: {
-    $v() {
-      return useVuelidate(this, {
-        username: this.usernameRules,
-        password: this.passwordRules,
-        registerUsername: this.usernameRules,
-        registerDisplayName: this.usernameRules,
-        registerPassword: this.passwordRules,
-        confirmRegisterPassword: this.confirmPasswordRules,
-      });
-    },
-  },
-  methods: {
+  immediate: false
+});
 
-    load() {
-      this.loading = true;
-      setTimeout(() => (this.loading = false), 3000);
-    },
+async function handleLogin() {
+  if (state.loginData.username && state.loginData.password) {
+    await refreshLogin();
+    if (isLoginPending.value === false && loginError.value === null) {
+      // 更新登录结果到组件内部状态
+      state.loginResult = loginResponse.value;
+      loginError.value = null;
 
-    async login() {
-      this.$v.$touch();
-
-      if (!this.$v.$invalid) {
-        try {
-          this.loading = true;
-          const response = await this.$fetch('/api/login', {
-            method: 'POST',
-            body: JSON.stringify({
-              username: this.username,
-              password: this.password,
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          this.loginResult = JSON.stringify(response.data, null, 2);
-          // 清除错误信息
-          this.loginError = null;
-        }catch (error) {
-          this.loginError = JSON.stringify(error.response.data, null, 2);
-          alert("账号或密码输入错误");
-          this.password = "";
-        } finally {
-          this.loading = false;
-        }
-      }
-    },
-
-    async register() {
-      this.$v.$touch();
-
-      if (!this.$v.$invalid) {
-        try {
-          this.loading = true;
-          const response = await this.$fetch('/api/register', {
-            method: 'POST',
-            body: JSON.stringify({
-              username: this.registerUsername,
-              displayName: this.registerDisplayName,
-              password: this.registerPassword,
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          this.registerResult = JSON.stringify(response.data, null, 2);
-          // 清除错误信息
-          this.registerError = null;
-        }catch (error) {
-          if (error.response.status === 409) {
-            alert("该用户名已存在，请选择其他用户名");
-          } else if (error.response.status === 400) {
-            alert("两次输入的密码不一致，请重新输入");
-          } else {
-            alert("请填写完整且正确的注册信息");
-          }
-        } finally {
-          this.loading = false;
-        }
-      } else {
-        for (const field in this.$v.$invalid) {
-          if (this.$v[field].$dirty) {
-            console.log(`${field} 输入有误，请检查`);
-            alert(`${field} 输入有误，请检查`);
-            break;
-          }
-        }
-      }
-    },
-
-    toRegister() {
-      this.$router.push("register");
-    },
-  },
+      // 跳转页面或其他逻辑
+    }
   }
-// const result = ref(null);
-//
-// onMounted(() => {
-//   refresh();
-// });
-// watch(data, (newData) => {
-//   // 将 JSON 字符串解析为对象
-//   result.value = JSON.parse(newData);
-// });
+}
 
+
+async function handleRegister() {
+  if (
+      state.registerData.registerUsername &&
+      state.registerData.registerDisplayName &&
+      state.registerData.registerPassword &&
+      state.registerData.registerPassword === state.registerData.confirmRegisterPassword
+  ) {
+    await refreshRegister();
+    if (isRegisterPending.value === false && registerError.value === null) {
+      // 更新注册结果到组件内部状态
+      state.registerResult = registerResponse.value;
+      registerError.value = null;
+
+      // 跳转至登录页面或其他逻辑
+    }
+  }
+}
 </script>
-
-
-
-
-
-
-
-
-
 
 
 <style>
