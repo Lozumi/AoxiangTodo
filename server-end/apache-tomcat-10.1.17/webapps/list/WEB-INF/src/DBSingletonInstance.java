@@ -23,9 +23,9 @@ public final class DBSingletonInstance implements AutoCloseable {
                     );""");
             statement.executeUpdate("""
                     CREATE TABLE IF NOT EXISTS tokens (
-                    token       TEXT PRIMARY KEY NOT NULL,
-                    account     TEXT             NOT NULL,
-                    expire_time TEXT             NOT NULL
+                    token       TEXT   PRIMARY KEY NOT NULL,
+                    account     TEXT               NOT NULL,
+                    expire_time BIGINT             NOT NULL
                     );""");
             connectionToDB.commit();
             statement.close();
