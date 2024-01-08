@@ -389,16 +389,14 @@ public class RequestController {
         //开始番茄钟（设置番茄钟开始时间）
         try {
             Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
+            // 开始番茄钟
+            pomodoro.startPomodoro();
             PomodoroRecord pomodoroRecord = pomodoro.getPomodoroRecord();
             var pomodoroRecordList = getSystemPomodoroCollection();
             pomodoroRecord.setInnerId(pomodoroRecordList.getAvailableID());
             // 绑定事件
             ToDoWorkItem item = getToDoWorkItemByInnerId(request.getContent());
             item.getPomodoroRecordInnerIdList().add(pomodoroRecord.getInnerId());
-
-            // 开始番茄钟
-            pomodoro.startPomodoro();
-
         } catch (Exception e) {
             packet.setMessage(e.getMessage());
         }
