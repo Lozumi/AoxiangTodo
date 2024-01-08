@@ -16,7 +16,7 @@
           ></v-text-field>
           <v-divider></v-divider>
 
-<!--          加不加if真是个问题   <div v-if="items && items.length>0">-->
+          <!--          加不加if真是个问题   <div v-if="items && items.length>0">-->
           <v-list lines="two"
                   select-strategy="classic"
                   class="list1"
@@ -26,11 +26,11 @@
                 class="TodoTitle">最近待办</v-list-subheader>
 
             <v-divider></v-divider>
-
+            <!--              要把index改成innerId-->
             <!-- 新增项 -->
             <v-list-item
-                v-for="(item, index) in items"
-                :key="index"
+                v-for="item in items"
+                :key="item.innerId"
                 value="newItem"
                 class="hover"
                 @click="onItemOrBtnClick(item)"
@@ -52,10 +52,10 @@
                     size="x-small"
                     style="font-size: 18px; color:sandybrown"
                     position="relative"
-                    @click="toTomatoClock(item)">
+                    @click="toTomatoClock()">
                 </v-btn>
                 <v-btn
-                    :ref="'btnInfo' + index"
+                    :ref="'btnInfo' + item.innerId"
                     color="grey-lighten-1"
                     icon="mdi-information"
                     variant="text"
@@ -69,7 +69,6 @@
                     position="relative"
                     @click="subSelectedItem()">
                 </v-btn>
-                <!--                    @click="onBtnClick(item,$event)"-->
               </template>
 
               <v-list-item-title :class="{ 'strike-through': item.isChecked }">
@@ -80,14 +79,8 @@
                 {{item.subtitle}}
               </v-list-item-subtitle>
 
-              <!-- 为每个item添加一个详情标识符，用于后续加载对应内容 -->
-              <!-- 为什么不是index呢？因为我不知道怎么确保 item 对象中包含一个唯一的 id 属性            -->
-              <v-list-item-meta :id="'details_' + item.id"></v-list-item-meta>
-
             </v-list-item>
-
           </v-list>
-<!--          </div>-->
         </v-card>
       </div>
 
@@ -97,8 +90,7 @@
             <iframe
                 v-if="isCardVisible && currentItemId"
                 :src="iframeSrc"
-                width="100%"
-                height="400px"
+                class="right-card"
             ></iframe>
           </v-card-text>
         </v-card>
@@ -120,43 +112,17 @@ let iframeSrc = ref('');
 
 const router = useRouter();
 const newItemText = ref('');
-// 增加一个标志位，表示用户是否首次登录
-const isFirstLogin = ref(true);
 
-const apiUrl = 'http://localhost:20220/todoworkitem';
-// 假设这是获取用户待办事项的API
-const userTodosUrl = `http://localhost:20220/user-todos`;
+
+const apiUrl = 'http://localhost:20220';
 
 
 const isCardVisible = ref(false);
 const items = ref([]);
-const predefinedItems = [
-  {
-    title: '预设待办事项1',
-    subtitle: '这是一个预先定义好的子标题',
-    isChecked:false,
-  },
-  {
-    title: '预设待办事项2',
-    subtitle: '这是另一个预先定义好的子标题',
-    isChecked: false,
-  },
-];
 
-// 检查用户是否首次登录（实际项目中这部分逻辑应从服务器获取）
-// 在这里假设通过某种方式检查并设置 isFirstLogin 的值
-// const checkFirstLogin = async () => {
-//   // 这里是模拟代码，实际应用中需要替换为从服务器获取数据的逻辑
-//   const response = await fetch('/api/check-first-login');
-//   const data = await response.json();
-//   isFirstLogin.value = data.isFirstLogin;
-// };
-
-// onMounted(async () => {
-//   await checkFirstLogin();
-// });
-
-
+/**
+ * 将新建的待办事项发送到服务器
+ */
 const addNewItemToServer = async (item) => {
   const requestType = 'CreateToDoWork';
   const Content  = JSON.stringify({
@@ -176,6 +142,10 @@ const addNewItemToServer = async (item) => {
     pomodoroRecordInnerIdList: [],
   });
 
+  /**
+   * 内含的钩子函数——添加待办事项的Fetcher
+   * @type {AsyncData<PickFrom<FetchResult<"http://localhost:20220", string>, KeysOf<FetchResult<"http://localhost:20220", string>>> | null, FetchError | null>}
+   */
   const addItemFetcher = useFetch(apiUrl, {
     method: 'POST',
     headers: {
@@ -194,7 +164,7 @@ const addNewItemToServer = async (item) => {
 
       const response = addItemFetcher.data.value; // 获取后端返回的数据
       //嘶嘶这个新建项是不是这么添加到本地数组啊。。。
-      const newItemWithId = { title:item.title,subtitle:item.subtitle, id: response.id ,isChecked:false}; // 合并新的id
+      const newItemWithId = { title:response.title,subtitle:response.subtitle, innerId: response.innerId ,isChecked:false}; // 合并新的id
       items.value.push(newItemWithId); // 将带有id的新项目添加到本地数组状态
     }
 
@@ -203,31 +173,97 @@ const addNewItemToServer = async (item) => {
   }
 };
 
-onMounted(async () => {
-  if (isFirstLogin.value) {
-    for (const item of predefinedItems) {
-      await addNewItemToServer(item);
-    }
-    // 登录后将首次登录标志位设为 false
-    isFirstLogin.value = false;
-  } else {
-    // 若非首次登录，从服务器获取用户的待办事项列表
-    const getUserTodosFetcher = useFetch(userTodosUrl, { method: 'GET' });
+//这里将HTTP方法从POST更改为DELETE，以便符合RESTful API的设计原则
+const deleteItemInServer = async (item) => {
+  const requestType = 'DeleteToDoWork';
+  const deleteData = JSON.stringify({
+    '@class': 'shared.ToDoWorkItem',
+    innerId: item.innerId,
+    requestType: requestType,
+  });
 
-    try {
-      await getUserTodosFetcher.refresh();
-      if (!getUserTodosFetcher.pending.value && !getUserTodosFetcher.error.value) {
-        // 获取后端返回的数据
-        const response = getUserTodosFetcher.data.value;
-        // 将数据添加到本地items数组，并初始化isChecked为false
-        items.value = response.map(todo => ({ ...todo, isChecked: false }));
+  const deleteItemFetcher = useFetch(apiUrl, {
+    //或者直接在body中传入innerId，取决于你的API设计
+    method: 'DELETE', // 通常对于删除操作使用HTTP DELETE方法
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: deleteData,
+  });
+
+  try {
+    await deleteItemFetcher.refresh();
+    if (!deleteItemFetcher.pending.value && !deleteItemFetcher.error.value) {
+      // 请求成功后从本地数组中移除该待办事项
+      const index = items.value.indexOf(item);
+      if (index !== -1) {
+        items.value.splice(index, 1);
       }
-    } catch (error) {
-      console.error('Error fetching user todos:', error);
     }
+  } catch (error) {
+    console.error('Error deleting item:', error);
+  }
+};
+
+
+
+// 假设这是获取用户待办事项的API
+const userTodosUrl = `http://localhost:20220`;
+/**
+ * 钩子函数——获取已创建的待办事项列表
+ * @returns {Promise<void>}
+ */
+async function getItemFetcher ()  {
+  const requestType = 'EnumerateToDoWorkList';
+  const response = await fetch(userTodosUrl, {
+    method: 'GET',
+    headers: {
+      //??Type
+      'Content-Type': 'application/json',
+    },
+
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch todos with status ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  items.value = data.map((item) => ({
+    layer: item.layer,
+    innerId: item.innerId,
+    importancePriority: item.importancePriority,
+    emergencyPriority: item.emergencyPriority,
+    title: item.title,
+    subtitle: item.subtitle,
+    description: item.description,
+    createTime: new Date(item.createTime),
+    startTime: item.startTime ? new Date(item.startTime) : '',
+    deadLine: item.deadLine ? new Date(item.deadLine) : '',
+    status: item.status,
+    subToDoWorkItemInnerIdList: item.subToDoWorkItemInnerIdList || [],
+    pomodoroRecordInnerIdList: item.pomodoroRecordInnerIdList || [],
+    isChecked: false, // 初始化isChecked为false
+  }));
+}
+
+/**
+ * 从后端拉取已经创建的待办事项列表
+ */
+onMounted(async () => {
+  try {
+    await getItemFetcher();
+
+  } catch (error) {
+    console.error('Error fetching user todos:', error);
   }
 });
 
+/**
+ * 获取输入框中文字创建待办事项
+ * @returns {Promise<void>}
+ */
 const addNewItemFromInput = async () => {
   if (newItemText.value.trim() !== '') {
     const newItem = {
@@ -241,41 +277,58 @@ const addNewItemFromInput = async () => {
   }
 };
 
-//到底要怎么样才能在卡片展开式按照itemid拉取相应item的内容啊
-async function toggleCardDetails(item) {
-  if (!this.isCardVisible) {
-    this.isCardVisible = true;
-    currentItemId.value = item.id; // 设置当前点击项的id???
-    this.iframeSrc = `http://localhost:3000/TodoPage/TodoDetails?itemId=${item.id}`;
-  }
-}
-
-function  onItemOrBtnClick(item, event) {
-  event.stopPropagation();
-  //接受两个参数：item 表示被点击的项（即 v-list-item 中的数据项），event 表示触发点击事件的事件对象。
-  //使用 event.stopPropagation() 阻止事件冒泡，确保只有当前的 v-list-item 收到点击事件，而不会传播到其他元素。
-  console.log('Item clicked:', item);
-  // 处理 item 的点击逻辑，例如更新数据等操作
-}
-
+/**
+ * 删除处于勾选项目的item
+ */
 function subSelectedItem() {
   event.stopPropagation();
   const selectedItem = this.items.find(item => item.isChecked);
   if (selectedItem) {
-    const index = this.items.indexOf(selectedItem);
-    this.items.splice(index, 1);
+    deleteItemInServer(selectedItem); // 调用删除服务器端数据的方法
   }
 }
 
-async function toTomatoClock(item)
-{
-  await router.push('/TodoPage/Tomato');
+/**
+ * 到底要怎么样才能在卡片展开式按照itemid拉取相应item的内容啊
+ * @param item
+ * @returns {Promise<void>}
+ */
+async function toggleCardDetails(item) {
+  if (!this.isCardVisible) {
+    this.isCardVisible = true;
+    this.iframeSrc = '/TodoDetails';
+    currentItemId.value = item.innerId; // 设置当前点击项的id???
+
+  }
+}
+
+/**
+ * 点击整个item的鸡肋函数
+ * @param item
+ * @param event
+ */
+function onItemOrBtnClick(item, event) {
+  event.stopPropagation();
+  //接受两个参数：item 表示被点击的项（即 v-list-item 中的数据项），event 表示触发点击事件的事件对象。
+  //使用 event.stopPropagation() 阻止事件冒泡，确保只有当前的 v-list-item 收到点击事件，而不会传播到其他元素。
+  console.log('Item clicked:', item);
+}
+
+/**
+ * 跳转到特定item的番茄中进行计时??还是没想法
+ * @returns {Promise<void>}
+ */
+async function toTomatoClock(item) {
+  await router.push({ name: 'Tomato', params: { itemid: item.innerId } });
   //进入番茄钟页面并传递该item的唯一id给它......
   //计时完成后根据该itemid将数据绑定到item上
 }
-
-
-
+//  router.js (或相应的路由配置文件)
+// {
+//   path: '/TodoPage/Tomato/:itemid',
+//       component: TomatoPage,
+//     name: 'Tomato'
+// }
 </script>
 
 <style>
@@ -288,16 +341,19 @@ body {
 }
 
 .column {
-  float: left;
-  padding: 10px;
+  float:left;
+  padding: 40px;
 }
 
 .column.left {
-  width:70%;
+  width:55%;
+  height: 100%;
+  margin-left:-40px;
 }
 
 .row {
   display: flex;
+  border-inline-style: none;
   //justify-content: space-between; /* 使子元素在主轴方向两端对齐 */
 }
 
@@ -332,11 +388,17 @@ body {
   background-color: rgba(255, 250, 205, 1);
   cursor: pointer;
 }
+
 .strike-through {
   text-decoration: line-through;
 }
 
 .hidden{
   display:none;
+}
+
+.right-card{
+  width:500px;
+  height:500px;
 }
 </style>

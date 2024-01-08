@@ -20,7 +20,9 @@
               <v-bottom-sheet v-model="sheet">
                 <template v-slot:activator = "{props}">
                   <div>
-                    <v-btn v-bind = "props" elevation="0" :color="buttonColor">
+                    <v-btn v-bind = "props"
+                           elevation="0"
+                           :color="buttonColor">
                       <v-icon size="24">mdi-folder-star-outline</v-icon>
                       {{buttonText}}
                     </v-btn>
@@ -37,7 +39,8 @@
                                changeColor(tile.color)"
                   >
                     <template v-slot:prepend>
-                      <v-avatar :color="tile.color" size = "x-small"></v-avatar>
+                      <v-avatar :color="tile.color"
+                                size = "x-small"></v-avatar>
                     </template>
                     <v-list-content>
                       <v-list-item-title>
@@ -51,7 +54,9 @@
                     <template v-slot:append>
                       <v-btn elevation="0">
                         <v-icon>mdi-trash-can-outline</v-icon>
-                        <v-dialog v-model = "_dialog" activator="parent" width="auto">
+                        <v-dialog v-model = "_dialog"
+                                  activator="parent"
+                                  width="auto">
                           <v-card>
                             <v-card-text>
                               确定要删除这个文件夹吗？
@@ -74,9 +79,12 @@
                   </v-list-item>
                 </v-list>
 
-                <v-dialog v-model = "fileDialog" max-width="600">
+                <v-dialog v-model = "fileDialog"
+                          max-width="600">
                   <v-card>
-                    <v-text-field v-model = "inputText" label = "文件夹名称" color = "#3A8FB7"></v-text-field>
+                    <v-text-field v-model = "inputText"
+                                  label = "文件夹名称"
+                                  color = "#3A8FB7"></v-text-field>
                     <v-card-actions>
                       <v-spacer></v-spacer>
                       <v-btn color="blue-darken-1"
@@ -120,7 +128,8 @@
             <!--任务时间-->
             <!--开始日期-->
             <v-list-item>
-              <v-list-item-title style="font-weight: bold; color: #9796f0">待办开始时间</v-list-item-title>
+              <v-list-item-title style="font-weight: bold;
+              color: #9796f0">待办开始时间</v-list-item-title>
               <v-btn-toggle
                   v-model="toggle_exclusive"
                   color="#9796f0"
