@@ -37,10 +37,12 @@ public class PullServlet extends HttpServlet {
         System.out.println("PullServlet::doGet");
         System.out.println("Received: " + request.getRequestURL());
 
+        // setup response
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
 
+        // parse params
         Enumeration<String> parameterNames = request.getParameterNames();
         int paramCount = 0;
         while (parameterNames.hasMoreElements()) {
@@ -65,6 +67,7 @@ public class PullServlet extends HttpServlet {
             return;
         }
 
+        // connect & find token
         Connection c = dbSingletonInstance.getConnectionToDB();
         try {
             Statement statement = c.createStatement();
@@ -79,6 +82,7 @@ public class PullServlet extends HttpServlet {
                 return;
             }
 
+            // verify token
             String account = tokenResultSet.getString("account");
             String token = tokenResultSet.getString("token");
             long expire = tokenResultSet.getLong("expire_time");
@@ -91,11 +95,13 @@ public class PullServlet extends HttpServlet {
                 return;
             }
 
+            // renew token
             TokenPair newToken = new TokenPair(token, expire).renew();
             statement.executeUpdate(String.format("UPDATE tokens SET expire_time=%d WHERE token=\"%s\";",
                     newToken.getExpire(), newToken.getToken()));
             c.commit();
 
+            // get list and ret
             ResultSet listResultSet = statement.executeQuery(
                     "SELECT * FROM users WHERE account=\"%s\"".formatted(account));
             String todoList = listResultSet.getString("todo_list");

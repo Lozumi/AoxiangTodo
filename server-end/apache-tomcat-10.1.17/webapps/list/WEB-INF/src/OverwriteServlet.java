@@ -50,10 +50,12 @@ public class OverwriteServlet extends HttpServlet {
         System.out.println("OverwriteServlet::doPost");
         System.out.println("Received: " + request.getRequestURL());
 
+        // setup response
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
 
+        // parse params
         Enumeration<String> parameterNames = request.getParameterNames();
         int paramCount = 0;
         while (parameterNames.hasMoreElements()) {
@@ -78,6 +80,7 @@ public class OverwriteServlet extends HttpServlet {
             return;
         }
 
+        // get connection and find token
         Connection c = dbSingletonInstance.getConnectionToDB();
         try {
             Statement statement = c.createStatement();
@@ -92,6 +95,7 @@ public class OverwriteServlet extends HttpServlet {
                 return;
             }
 
+            // verify token
             String account = tokenResultSet.getString("account");
             String token = tokenResultSet.getString("token");
             long expire = tokenResultSet.getLong("expire_time");
@@ -104,11 +108,13 @@ public class OverwriteServlet extends HttpServlet {
                 return;
             }
 
+            // renew token
             TokenPair newToken = new TokenPair(token, expire).renew();
             statement.executeUpdate(String.format("UPDATE tokens SET expire_time=%d WHERE token=\"%s\";",
                     newToken.getExpire(), newToken.getToken()));
             c.commit();
 
+            // build list string
             StringBuilder sb = new StringBuilder();
             String line = null;
             while ((line = request.getReader().readLine()) != null) {
@@ -118,6 +124,7 @@ public class OverwriteServlet extends HttpServlet {
                     sb.toString(), account));
             c.commit();
 
+            // ret status
             System.out.println("Todo list updated successfully");
             out.print(success);
             out.flush();
