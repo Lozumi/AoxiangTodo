@@ -18,7 +18,7 @@ export default new class AccountRequest {
     login(account: string,password: string) {
         const requestBody = {
             content:JSON.stringify({
-                '@class': 'shared.ToDoWorkItem',
+                '@class': 'shared.UserInfo',
                 userName : '',
                 account: account,
                 password: password
@@ -31,7 +31,7 @@ export default new class AccountRequest {
     register(userName: string,account: string,password: string) {
         const requestBody = {
             content:JSON.stringify({
-                '@class': 'shared.ToDoWorkItem',
+                '@class': 'shared.UserInfo',
                 userName : userName,
                 account: account,
                 password: password
