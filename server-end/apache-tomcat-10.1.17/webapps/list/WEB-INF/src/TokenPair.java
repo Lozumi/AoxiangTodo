@@ -22,6 +22,11 @@ public final class TokenPair {
         }
     }
 
+    TokenPair(String token, long expire) {
+        this.token = token;
+        this.expire = expire;
+    }
+
     public String getToken() {
         return token;
     }
