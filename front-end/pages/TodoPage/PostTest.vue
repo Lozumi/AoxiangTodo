@@ -59,7 +59,7 @@ const sendPostRequest = async () => {
   //   pomodoroRecordInnerIdList: [],
   // });
 
-  const {data, error, pending, refresh} = await AccountRequest.register('234','456','789');
+  const {data, error, pending, refresh} = await AccountRequest.register('testUserName7','testUserAccount13','!Password1223');
 
   if (error) {
     console.error('Error:', error);
