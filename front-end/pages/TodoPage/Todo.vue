@@ -43,7 +43,6 @@
                       v-model="item.isChecked">
                   </v-checkbox-btn>
                 </v-list-item-action>
-                <!--      item.isChecked       找到复选框被选中的item并赋值，方便后续指针删除该item-->
               </template>
 
               <template v-slot:append>
