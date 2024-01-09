@@ -1,4 +1,5 @@
 import shared.ToDoWorkItem;
+import shared.UserInfo;
 import shared.WorkItemStatus;
 import sys.AoXiangToDoListSystem;
 import sys.RequestController;
@@ -6,6 +7,7 @@ import sys.RequestHandlerInfo;
 import trans.*;
 import unittest.HttpTest;
 import unittest.SocketTest;
+import util.Encrypt;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -25,9 +27,12 @@ public class Main {
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EnumerateToDoWorkList, RequestController::processEnumerateToDoWorkItemListRequest));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.DeleteToDoWork, RequestController::processDeleteToDoWorkRequest));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EditToDoWork, RequestController::processEditToDoWork));
-        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EditPomodoro,RequestController::processEditPomodoro));
-        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.StartPomodoro,RequestController::processStartPomodoro));
-        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EndPomodoro,RequestController::processEndPomodoro));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EditPomodoro, RequestController::processEditPomodoro));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.StartPomodoro, RequestController::processStartPomodoro));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EndPomodoro, RequestController::processEndPomodoro));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.UserRegister, RequestController::processUserRegister));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.UserLogin, RequestController::processUserLogin));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.UserLogout, RequestController::processUserLogout));
         //controller.registerRequestHandler(new RequestHandlerInfo(RequestType.UserRegister))
 
         HttpTest httpTest = new HttpTest("localhost:20220");
@@ -44,15 +49,33 @@ public class Main {
         String itemJson = item.toJsonString();
         addItemRequestPacket.setContent(itemJson);
         addItemRequestPacket.setRequestType(RequestType.CreateToDoWork);
+        String st = addItemRequestPacket.toJsonString();
         System.err.println(item.toJsonString());
         System.out.printf("添加待办事项结果：%s\n", httpTest.tryRequest(addItemRequestPacket).toJsonString());
-       // System.out.printf("添加待办事项结果：%s\n", httpTest.tryRequest(addItemRequestPacket).toJsonString());
-
-        RequestPacket enumerateRequestPacket = new RequestPacket();
-        enumerateRequestPacket.setRequestType(RequestType.EnumerateToDoWorkList);
-        System.out.printf("查询待办事项结果：%s\n", httpTest.tryRequest(enumerateRequestPacket).getContent());
-
+        // System.out.printf("添加待办事项结果：%s\n", httpTest.tryRequest(addItemRequestPacket).toJsonString());
+//
+//        RequestPacket enumerateRequestPacket = new RequestPacket();
+//        enumerateRequestPacket.setRequestType(RequestType.EnumerateToDoWorkList);
+//        System.out.printf("查询待办事项结果：%s\n", httpTest.tryRequest(enumerateRequestPacket).getContent());
+//
+//        RequestPacket packet = new RequestPacket();
+//        packet.setRequestType(RequestType.UserLogin);
+//        UserInfo info = new UserInfo();
+//        info.setPassword("uzi94yyds!");
+//        info.setAccount("uzi");
+//        packet.setContent(info.toJsonString());
+//        var loginRequest = httpTest.tryRequest(packet);
+        httpTest.tryRequestQueryToDoWorkItem(0);
+        httpTest.tryRequestStartPomodoro(0);
         AoXiangToDoListSystem.getInstance().localSaveSystemData("D:/test/1.json");
+        new Thread(() -> {
+            try {
+                Thread.sleep(61000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            httpServer.stop();
+        }).start();
     }
 
     static ResponsePacket enumerateToDoWorkItems(SocketTest test) {

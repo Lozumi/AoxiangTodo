@@ -1,5 +1,8 @@
 package trans;
 
+import com.fasterxml.jackson.databind.annotation.EnumNaming;
+
+
 public enum RequestType {
     None,
     EnumerateToDoWorkList,

@@ -33,15 +33,15 @@ public class ResponsePacket extends TransmissionPacket {
         this.content = content;
     }
 
-    public static ResponsePacket fromJsonString(String json) {
+    public static ResponsePacket fromJsonString(String json) throws Exception{
         return JsonUtility.objectFromJsonString(json, ResponsePacket.class);
     }
 
-    public static ResponsePacket fromJsonBytes(byte[] bytes) {
+    public static ResponsePacket fromJsonBytes(byte[] bytes) throws Exception{
         return JsonUtility.objectFromJsonBytes(bytes, ResponsePacket.class);
     }
 
-    public static ResponsePacket fromJsonStream(InputStream stream, int expectedLength) {
+    public static ResponsePacket fromJsonStream(InputStream stream, int expectedLength) throws Exception{
         return JsonUtility.objectFromInputStream(stream, expectedLength, ResponsePacket.class);
     }
 }

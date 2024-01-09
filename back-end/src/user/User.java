@@ -1,6 +1,7 @@
 package user;
 
 import shared.JsonConvertable;
+import util.Encrypt;
 import util.JsonUtility;
 
 import java.io.InputStream;
@@ -21,8 +22,6 @@ public class User implements JsonConvertable {
      * 用户状态
      */
     String userName, account, password, token;
-    UserStatus userStatus;
-
 
     /**
      * 设置用户账号
@@ -50,16 +49,6 @@ public class User implements JsonConvertable {
     public void setUserName(String userName) {
         this.userName = userName;
     }
-
-    /**
-     * 设置用户状态
-     *
-     * @param userStatus 用户状态
-     */
-    public void setUserStatus(UserStatus userStatus) {
-        this.userStatus = userStatus;
-    }
-
     /**
      * 返回用户账号
      *
@@ -76,15 +65,6 @@ public class User implements JsonConvertable {
      */
     public String getUserName() {
         return userName;
-    }
-
-    /**
-     * 返回账号状态
-     *
-     * @return 帐号状态
-     */
-    public UserStatus getUserStatus() {
-        return userStatus;
     }
 
     /**
@@ -110,22 +90,17 @@ public class User implements JsonConvertable {
      *
      * @return 加密过的密码（作为唯一识别，系统中不出现密码的明文对比）
      */
-    public String getEncryptedPassword(String input) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(this.password.getBytes());
-        byte[] byteData = md.digest();
+    public String getEncryptedPassword() throws NoSuchAlgorithmException {
+        return Encrypt.md5Hash(password);
+    }
 
-        // 将字节数组转换为十六进制字符串
-        StringBuilder hexString = new StringBuilder();
-        for (byte b : byteData) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) {
-                hexString.append('0');
-            }
-            hexString.append(hex);
-        }
 
-        return hexString.toString();
+    public boolean isValidPassword() {
+        return isValidPassword(this.password);
+    }
+
+    public boolean isValidAccount() {
+        return isValidAccount(this.account);
     }
 
     /**
@@ -134,7 +109,9 @@ public class User implements JsonConvertable {
      *
      * @return 格式是否正确
      */
-    public boolean isValidPassword() {
+    public static boolean isValidPassword(String password) {
+        if (password == null)
+            return false;
         // 密码长度限制：8到32个字符
         int minLength = 8;
         int maxLength = 32;
@@ -144,12 +121,14 @@ public class User implements JsonConvertable {
                 + minLength + "," + maxLength + "}$";
 
         Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(this.password);
+        Matcher matcher = pattern.matcher(password);
 
         return matcher.matches();
     }
 
-    public boolean isValidAccount(){
+    public static boolean isValidAccount(String account) {
+        if (account == null)
+            return false;
         // 账号长度限制：8-32个字符
         int minLength = 8;
         int maxLength = 32;
@@ -159,7 +138,7 @@ public class User implements JsonConvertable {
                 + minLength + "," + maxLength + "}$";
 
         Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(this.account);
+        Matcher matcher = pattern.matcher(account);
 
         return matcher.matches();
     }
@@ -171,7 +150,7 @@ public class User implements JsonConvertable {
      * @param json json字符串。
      * @return 新构造的User对象，失败返回null。
      */
-    public static User fromJsonString(String json) {
+    public static User fromJsonString(String json) throws Exception{
         return JsonUtility.objectFromJsonString(json, User.class);
     }
 
@@ -181,7 +160,7 @@ public class User implements JsonConvertable {
      * @param bytes json字节数组。
      * @return 新构造的User对象，失败返回null。
      */
-    public static User fromJsonBytes(byte[] bytes) {
+    public static User fromJsonBytes(byte[] bytes) throws Exception {
         return fromJsonString(new String(bytes));
     }
 
@@ -189,12 +168,12 @@ public class User implements JsonConvertable {
     /**
      * 从Json字节流中读取指定数量的字节，然后从字节数组构造一个User对象。
      *
-     * @param stream  Json字节输入流。
+     * @param stream         Json字节输入流。
      * @param expectedLength 预期的字节长度。如果该值小于等于0，则读取流的所有字节。
      * @return 新构造的User对象。失败返回null，并尝试回溯流数据到未调用此方法前的状态。
      */
-    public static User fromJsonStream(InputStream stream, int expectedLength) {
-        return JsonUtility.objectFromInputStream(stream,expectedLength, User.class);
+    public static User fromJsonStream(InputStream stream, int expectedLength) throws Exception {
+        return JsonUtility.objectFromInputStream(stream, expectedLength, User.class);
     }
 
 }

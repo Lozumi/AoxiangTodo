@@ -29,15 +29,15 @@ public class RequestPacket extends TransmissionPacket {
     }
 
 
-    public static RequestPacket fromJsonString(String json) {
+    public static RequestPacket fromJsonString(String json) throws Exception{
         return JsonUtility.objectFromJsonString(json, RequestPacket.class);
     }
 
-    public static RequestPacket fromJsonBytes(byte[] bytes) {
+    public static RequestPacket fromJsonBytes(byte[] bytes) throws Exception{
         return JsonUtility.objectFromJsonBytes(bytes, RequestPacket.class);
     }
 
-    public static RequestPacket fromJsonStream(InputStream stream, int expectedLength) {
+    public static RequestPacket fromJsonStream(InputStream stream, int expectedLength) throws Exception{
         return JsonUtility.objectFromInputStream(stream, expectedLength, RequestPacket.class);
     }
 }

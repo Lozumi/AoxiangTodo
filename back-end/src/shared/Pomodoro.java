@@ -1,6 +1,8 @@
 package shared;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import sys.Messages;
+import util.DateHelper;
 import util.JsonUtility;
 
 import java.io.InputStream;
@@ -20,16 +22,32 @@ public class Pomodoro {
      * 状态
      * 番茄钟信息
      */
-    int workTime = 25,restTime = 5;
+    int workTime = 25, restTime = 5;
     @JsonIgnore
     PomodoroRecord pomodoroRecord;
+    @JsonIgnore
     Timer pomodoroTimer;
 
-    public Pomodoro(){
-        this.pomodoroTimer = new Timer("pomodoro",false);
+    /**
+     * 获取一个值，指示了当前番茄钟是否正在工作。
+     *
+     * @return true表示正在工作，false表示未工作。
+     */
+    @JsonIgnore
+    public boolean isWorking() {
+        return working;
     }
+
+    @JsonIgnore
+    boolean working;
+
+    public Pomodoro() {
+        this.pomodoroTimer = new Timer("pomodoro", false);
+    }
+
     /**
      * 设置休息时间
+     *
      * @param restTime 休息时间
      */
     public void setRestTime(int restTime) {
@@ -38,6 +56,7 @@ public class Pomodoro {
 
     /**
      * 设置工作时间
+     *
      * @param workTime 工作时间
      */
     public void setWorkTime(int workTime) {
@@ -46,6 +65,7 @@ public class Pomodoro {
 
     /**
      * 返回休息时间
+     *
      * @return 休息时间
      */
     public int getRestTime() {
@@ -54,6 +74,7 @@ public class Pomodoro {
 
     /**
      * 返回工作时间
+     *
      * @return 工作时间
      */
     public int getWorkTime() {
@@ -66,22 +87,24 @@ public class Pomodoro {
     }
 
 
-    public static Pomodoro fromJsonString(String json) {
+    public static Pomodoro fromJsonString(String json) throws Exception {
         return JsonUtility.objectFromJsonString(json, Pomodoro.class);
     }
 
-    public static Pomodoro fromJsonBytes(byte[] bytes) {
+    public static Pomodoro fromJsonBytes(byte[] bytes) throws Exception {
         return JsonUtility.objectFromJsonBytes(bytes, Pomodoro.class);
     }
 
-    public static Pomodoro fromJsonStream(InputStream stream, int expectedLength) {
+    public static Pomodoro fromJsonStream(InputStream stream, int expectedLength) throws Exception {
         return JsonUtility.objectFromInputStream(stream, expectedLength, Pomodoro.class);
     }
 
     /**
-     * 开始番茄钟
+     * 开始番茄钟。如果番茄钟正在工作，则抛出异常。
      */
-    public void startPomodoro(){
+    public synchronized void startPomodoro() {
+        if (working)
+            throw new IllegalStateException(Messages.ZH_CN.POMODORO_ALREADY_WORKING);
         this.pomodoroRecord = new PomodoroRecord();
         this.pomodoroRecord.setStartTime(Instant.now());
         //开始主动计时
@@ -89,29 +112,33 @@ public class Pomodoro {
     }
 
     /**
-     * 结束番茄钟，同时计算番茄记录
+     * 结束番茄钟，同时计算番茄记录。如果番茄钟尚未开始工作，则抛出异常。
      */
-    public PomodoroRecord endPomodoro(){
+    public synchronized PomodoroRecord endPomodoro() {
+        if (!working)
+            throw new IllegalStateException(Messages.ZH_CN.POMODORO_NOT_WORKING);
         endTimer();
+        working = false;
         this.pomodoroRecord.setEndTime(Instant.now());
         calculateRecord();
         return pomodoroRecord;
     }
+
     /**
      * 计算pomodoroRecord
      * 完成时计算
-     *
      */
-    public void calculateRecord(){
+    public void calculateRecord() {
         Instant startTime = this.getPomodoroRecord().startTime;
         Instant endTime = this.getPomodoroRecord().endTime;
         // 计算状态
         int durationTime = (int) Duration.between(startTime, endTime).toMinutes();
-        if (durationTime >= workTime){
+        if (durationTime >= workTime) {
             pomodoroRecord.setPomodoroStatus(PomodoroStatus.Finished);
-        }else {
+        } else {
             pomodoroRecord.setPomodoroStatus(PomodoroStatus.Interrupted);
         }
+        System.out.printf("计算番茄钟记录完成，duration = %s\n",pomodoroRecord.getDuration());
 //        // 循环计算逻辑：完成了多少个工作时间
 //        int completedCycleCount = durationTime/(workTime+restTime);
 //        if (durationTime%(workTime+restTime)>=workTime){
@@ -121,22 +148,25 @@ public class Pomodoro {
     }
 
     // 计时模块
-    private void startTimer(){
-        int delay = (workTime+restTime)*60000;
+    private void startTimer() {
+        int delay = (workTime + restTime) * 60000;
         // 开始计时
-        pomodoroTimer.schedule(new TimerTask(){
+        pomodoroTimer.schedule(new TimerTask() {
             @Override
-            public void run(){
+            public void run() {
                 // 正常结束番茄钟
                 endPomodoro();
             }
-        },delay);
+        }, delay);
+        working = true;
+        System.out.printf("[startTimer]番茄钟已经启动 Instant.now = \"%s\"\n", DateHelper.instantToStandardTime(Instant.now()));
     }
 
     /**
      * 打断番茄钟计时
      */
-    private void endTimer(){
+    private void endTimer() {
         pomodoroTimer.cancel();
+        System.out.printf("[endTimer]番茄钟已经终止 Instant.now = \"%s\"\n", DateHelper.instantToStandardTime(Instant.now()));
     }
 }

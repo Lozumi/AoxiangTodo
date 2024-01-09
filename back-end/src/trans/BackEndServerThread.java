@@ -53,9 +53,9 @@ public class BackEndServerThread implements Runnable {
                 int responseLength = responseBytes.length;
                 outputStream.writeInt(responseLength);
                 outputStream.write(responseBytes);
-            }catch (IOException ex)
+            }catch (Exception ex)
             {
-                System.err.printf("与客户端通讯时发生IO异常：%s\n",ex.getMessage());
+                System.err.printf("[BackEndServerThread.run]与客户端通讯时发生IO异常：%s\n",ex.getMessage());
                 break;
             }
         }

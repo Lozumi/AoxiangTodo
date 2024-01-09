@@ -40,7 +40,7 @@ public class SocketTest {
             int responseLength = inputStream.readInt();
             ResponsePacket responsePacket = ResponsePacket.fromJsonStream(inputStream,responseLength);
             return responsePacket;
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             System.err.printf("SocketTest测试类发送异常：%s\n", exception.getMessage());
             return null;
         }

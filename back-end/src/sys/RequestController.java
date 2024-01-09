@@ -1,15 +1,14 @@
 package sys;
 
-import shared.Pomodoro;
-import shared.PomodoroInfo;
-import shared.PomodoroRecord;
-import shared.ToDoWorkItem;
+import shared.*;
+import trans.CloudServer;
 import trans.RequestPacket;
 import trans.RequestType;
 import trans.ResponsePacket;
 import trans.ResponseStatus;
 import user.FormatException;
 import user.User;
+import util.Encrypt;
 import util.JsonUtility;
 
 import java.io.IOException;
@@ -34,13 +33,14 @@ public class RequestController {
     public static ResponsePacket processEditPomodoro(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
-
-        PomodoroInfo pomodoroInfo = JsonUtility.objectFromJsonString(request.getContent(), PomodoroInfo.class);
-        if(pomodoroInfo == null)
-        {
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为PomodoroInfo", request.getContent()));
+        PomodoroInfo pomodoroInfo;
+        try {
+            pomodoroInfo = JsonUtility.objectFromJsonString(request.getContent(), PomodoroInfo.class);
+        } catch (Exception exception) {
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为PomodoroInfo\n%s", request.getContent(), exception.getMessage()));
             return packet;
         }
+
         if (pomodoroInfo.getWorkTime() < 10 || pomodoroInfo.getWorkTime() > 90) {
             packet.setMessage(String.format("参数错误：番茄钟工作时间应当大于10分钟且小于90分钟，当前尝试将工作时间设为 %s 分钟", pomodoroInfo.getWorkTime()));
             return packet;
@@ -61,27 +61,35 @@ public class RequestController {
     public static ResponsePacket processUserRegister(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
-
-        User user = User.fromJsonString(request.getContent());
-        if (user == null) {
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为User", request.getContent()));
+        UserInfo userInfo;
+        try {
+        userInfo = JsonUtility.objectFromJsonString(request.getContent(), UserInfo.class);
+        }catch (Exception exception){
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为UserInfo对象\n%s", request.getContent(),exception.getMessage()));
             return packet;
         }
-        if (!user.isValidAccount()) {
-            packet.setMessage("参数错误：账户格式错误！应为可显示的ASCII字符，且长度在8-32个字符之间");
+
+        if (!User.isValidAccount(userInfo.getAccount())) {
+            packet.setMessage(Messages.ZH_CN.USER_WRONG_ACCOUNT_FORMAT);
+            return packet;
         }
-        if (!user.isValidPassword()) {
-            packet.setMessage("参数错误：密码格式错误！应为可见的ASCII字符，长度在8-32个字符之间，必须同时包含字母、数字、符号三个种类的字符应为可显示的ASCII字符");
+        if (!User.isValidPassword(userInfo.getPassword())) {
+            packet.setMessage(Messages.ZH_CN.USER_WRONG_PASSWORD_FORMAT);
+            return packet;
         }
-        String jsonString;
+
         try {
-            jsonString = user.toJsonString();
-        } catch (IOException ioException) {
-            var errString = String.format("内部错误：内部发生转换错误。");
+            boolean success = CloudServer.sendRegisterRequest(userInfo.getUserName(), userInfo.getAccount(), Encrypt.md5Hash(userInfo.getPassword()));
+            if (!success) {
+                packet.setMessage("注册失败。用户可能已存在。");
+                return packet;
+            }
+        } catch (Exception exception) {
+            var errString = String.format("发送注册请求时错误：%s", exception);
             packet.setMessage(errString);
             return packet;
         }
-        packet.setContent(jsonString);
+        packet.setContent("");
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         packet.setStatus(ResponseStatus.Success);
         return packet;
@@ -97,27 +105,44 @@ public class RequestController {
     public static ResponsePacket processUserLogin(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
+        UserInfo userInfo;
 
-        User user = User.fromJsonString(request.getContent());
-        if (user == null) {
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为User", request.getContent()));
+        try {
+            userInfo = JsonUtility.objectFromJsonString(request.getContent(), UserInfo.class);
+        } catch (Exception e) {
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为UserInfo\n%s", request.getContent(),e.getMessage()));
             return packet;
         }
+
+        User user = new User();
+        user.setPassword(userInfo.getPassword());
+        user.setAccount(userInfo.getAccount());
+
         if (!user.isValidAccount()) {
-            packet.setMessage("参数错误：账户格式错误！应为可显示的ASCII字符，且长度在8-32个字符之间");
+            packet.setMessage(Messages.ZH_CN.USER_WRONG_ACCOUNT_FORMAT);
+            return packet;
         }
         if (!user.isValidPassword()) {
-            packet.setMessage("参数错误：密码格式错误！应为可见的ASCII字符，长度在8-32个字符之间，必须同时包含字母、数字、符号三个种类的字符应为可显示的ASCII字符");
-        }
-        String jsonString;
-        try {
-            jsonString = user.toJsonString();
-        } catch (IOException ioException) {
-            var errString = "内部错误：内部发生转换错误。";
-            packet.setMessage(errString);
+            packet.setMessage(Messages.ZH_CN.USER_WRONG_PASSWORD_FORMAT);
             return packet;
         }
-        packet.setContent(jsonString);
+        ;
+        try {
+            String token = CloudServer.sendLoginRequest(user.getAccount(), user.getEncryptedPassword());
+            if (token.isEmpty()) //判断token是否获取成功
+            {
+                throw new Exception("登录失败，请检查账号与密码是否正确。");
+            } else { //获取到token，登录成功
+                user.setToken(token);
+                AoXiangToDoListSystem.getInstance().systemData.setCurrentUser(user);
+
+                //todo:在登录用户后，自动进行一次数据同步。
+            }
+        } catch (Exception exception) {
+            packet.setMessage(String.format("%s", exception.getMessage()));
+            return packet;
+        }
+        packet.setContent("");
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         packet.setStatus(ResponseStatus.Success);
         return packet;
@@ -148,10 +173,11 @@ public class RequestController {
     public static ResponsePacket processUserModifyInformation(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
-
-        User newUser = User.fromJsonString(request.getContent());
-        if (newUser == null) {
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为User", request.getContent()));
+        User newUser;
+        try {
+             newUser = User.fromJsonString(request.getContent());
+        }catch (Exception exception){
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为User\n%s", request.getContent(),exception.getMessage()));
             return packet;
         }
 
@@ -181,9 +207,11 @@ public class RequestController {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
 
-        ToDoWorkItem requestItem = ToDoWorkItem.fromJsonString(request.getContent());
-        if (requestItem == null) {
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为ToDoWorkItem", request.getContent()));
+        ToDoWorkItem requestItem;
+        try {
+            requestItem = ToDoWorkItem.fromJsonString(request.getContent());
+        } catch (Exception e) {
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为ToDoWorkItem\n%s", request.getContent(),e.getMessage()));
             return packet;
         }
         try {
@@ -234,10 +262,17 @@ public class RequestController {
 
     public static ResponsePacket processEnumerateToDoWorkItemListRequest(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
 
         var collection = getSystemToDoWorkItemCollection();
         var itemsArray = collection.toArray();
-        String json = JsonUtility.objectToJsonString(itemsArray);
+        String json;
+        try {
+            json = JsonUtility.objectToJsonString(itemsArray);
+        } catch (Exception e) {
+            packet.setMessage("[RequestController.processEnumerateToDoWorkItemListRequest] 在转换待办事项列表为JSON字符串时发生错误：" + e.getMessage());
+            return packet;
+        }
         packet.setContent(json);
         packet.setStatus(ResponseStatus.Success);
         packet.setMessage(Messages.ZH_CN.SUCCESS);
@@ -320,11 +355,14 @@ public class RequestController {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
 
-        ToDoWorkItem requestItem = ToDoWorkItem.fromJsonString(request.getContent());
-        if (requestItem == null) {
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为ToDoWorkItem", request.getContent()));
+        ToDoWorkItem requestItem;
+        try {
+            requestItem = ToDoWorkItem.fromJsonString(request.getContent());
+        } catch (Exception e) {
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为ToDoWorkItem\n%s", request.getContent(),e.getMessage()));
             return packet;
         }
+
         if (requestItem.getTitle().isBlank()) {
             packet.setMessage("非法参数格式：ToDoWorkItem的主标题不能为空。");
             return packet;
@@ -380,8 +418,8 @@ public class RequestController {
      * 处理开始番茄钟请求
      *
      * @param request  绑定事项的InnerId
-     * @param userData
-     * @return
+     * @param userData 未使用。
+     * @return 响应包。
      */
     public static ResponsePacket processStartPomodoro(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
@@ -389,14 +427,20 @@ public class RequestController {
 
         //开始番茄钟（设置番茄钟开始时间）
         try {
+            //如果没有提供innerId，直接返回。
+            if(request.getContent() == null || request.getContent().isBlank())
+                throw new Exception(Messages.ZH_CN.POMODORO_INNER_ID_MISSING);
+
+            ToDoWorkItem item = getToDoWorkItemByInnerId(request.getContent());
             Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
             // 开始番茄钟
             pomodoro.startPomodoro();
             PomodoroRecord pomodoroRecord = pomodoro.getPomodoroRecord();
             var pomodoroRecordList = getSystemPomodoroCollection();
-            pomodoroRecord.setInnerId(pomodoroRecordList.getAvailableID());
+            int availableId = pomodoroRecordList.getAvailableID();
+            pomodoroRecord.setInnerId(availableId);
             // 绑定事件
-            ToDoWorkItem item = getToDoWorkItemByInnerId(request.getContent());
+            pomodoroRecordList.add(pomodoroRecord);
             item.getPomodoroRecordInnerIdList().add(pomodoroRecord.getInnerId());
         } catch (Exception e) {
             packet.setMessage(e.getMessage());
@@ -411,11 +455,12 @@ public class RequestController {
 
     /**
      * 处理主动结束番茄钟请求，添加PomodoroRecord至事件
-     * @param request 请求
+     *
+     * @param request  请求
      * @param userData 附加
      * @return
      */
-    public static ResponsePacket processEndPomodoro(RequestPacket request,RequestHandlerData userData){
+    public static ResponsePacket processEndPomodoro(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
 
@@ -439,11 +484,12 @@ public class RequestController {
 
     /**
      * 返回目前用户信息
+     *
      * @param request
      * @param userData
      * @return
      */
-    public static ResponsePacket processGetCurrentUser(RequestPacket request,RequestHandlerData userData){
+    public static ResponsePacket processGetCurrentUser(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
 

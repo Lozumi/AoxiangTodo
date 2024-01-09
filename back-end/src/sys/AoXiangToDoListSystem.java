@@ -3,7 +3,6 @@ package sys;
 import shared.Pomodoro;
 import trans.CloudServer;
 import user.User;
-import user.UserStatus;
 import util.FileHelper;
 import util.JsonUtility;
 
@@ -78,8 +77,9 @@ public class AoXiangToDoListSystem {
         try {
             var jsonStr = FileHelper.readStringFromFile(filePath);
             systemData = JsonUtility.objectFromJsonString(jsonStr, SystemData.class);
+            if(systemData == null) throw new Exception(String.format("文件%s中存储的不是有效的系统数据JSON字符串",filePath));
         } catch (Exception ex) {
-            System.err.printf("从\"%s\"重新加载系统数据时发生错误：%s，创建默认实例", filePath, ex.getMessage());
+            System.err.printf("从\"%s\"重新加载系统数据时发生错误：%s，创建默认实例\n", filePath, ex.getMessage());
             systemData = new SystemData();
         }
     }
@@ -95,12 +95,8 @@ public class AoXiangToDoListSystem {
      */
     public void synchronizeSystemData() throws Exception {
         User currentUser = systemData.getCurrentUser();
-        if (currentUser == null)
+        if (currentUser == null || currentUser.getToken() == null)
             throw new Exception("用户未登录。");
-        if (currentUser.getUserStatus() == UserStatus.Offline) {
-            //此处补充登录逻辑，登录成功继续，登陆失败抛出异常
-            throw new Exception("同步失败：用户登录异常。");
-        }
         String cloudSystemDataJsonStr;
         try {
             cloudSystemDataJsonStr = CloudServer.sendPullRequest(currentUser.getToken()); //尝试拉取字符串，如果这一步失败，说明无法连接到服务器，抛出异常中断操作。
@@ -123,7 +119,7 @@ public class AoXiangToDoListSystem {
                     try {
                         saveAndPush();
                     } catch (Exception exception) {
-                        throw new Exception("本地数据比服务端数据新，尝试推送本地数据时发生异常：" + exception.getMessage());
+                        throw new Exception("本地数据比服务端数据更新，尝试推送本地数据时发生异常：" + exception.getMessage());
                     }
                 } else {
                     //云端的数据比本地更新，使用云端数据。

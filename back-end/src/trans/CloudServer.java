@@ -10,10 +10,12 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 public class CloudServer {
-    public static final String serverIpAddress = "127.0.0.1:8080";
+    public static final String serverIpAddress = "8.210.61.64:8080";
     static String successString = "Success";
     static String failureString = "Failure";
 
@@ -66,32 +68,35 @@ public class CloudServer {
     }
 
     static String requestGET(String urlStr) throws IOException {
-        return request(urlStr, "GET", "");
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(urlStr))
+                .header("Content-Type", "text/plain")
+                .GET()
+                .build();
+        try {
+            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            return response.body();
+        } catch (InterruptedException e) {
+            System.err.printf("向%s发送GET请求时发生错误：%s",urlStr,e.getMessage());
+            return "Failure";
+        }
     }
 
-    static String request(String urlStr, String method, String requestContent) throws IOException {
-        URL url = new URL(urlStr);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod(method);
-        if (!method.equals("GET")) {
-            OutputStream outputStream = con.getOutputStream();
-            outputStream.write(requestContent.getBytes());
-            outputStream.close();
-        }
-        int status = con.getResponseCode();
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuilder content = new StringBuilder();
-        while ((inputLine = in.readLine()) != null) {
-            content.append(inputLine);
-        }
-        in.close();
-        con.disconnect();
-        return content.toString();
-    }
 
     static String requestPOST(String urlStr, String content) throws IOException {
-        return request(urlStr, "POST", content);
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:20220"))
+                .header("Content-Type", "text/plain")
+                .POST(HttpRequest.BodyPublishers.ofString(content))
+                .build();
+        try {
+            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            return response.body();
+        } catch (InterruptedException e) {
+            System.err.printf("向%s发送POST请求时发生错误：%s",urlStr,e.getMessage());
+            return "Failure";
+        }
     }
 }

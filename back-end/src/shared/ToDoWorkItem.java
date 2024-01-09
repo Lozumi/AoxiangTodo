@@ -25,6 +25,7 @@ public class ToDoWorkItem implements JsonConvertable {
 
     /**
      * 获取层级（1为顶层，递增）。
+     *
      * @return 层级。
      */
     public int getLayer() {
@@ -33,6 +34,7 @@ public class ToDoWorkItem implements JsonConvertable {
 
     /**
      * 设置层级。
+     *
      * @param layer 层级。
      */
     public void setLayer(int layer) {
@@ -239,7 +241,7 @@ public class ToDoWorkItem implements JsonConvertable {
      * @param json json字符串。
      * @return 新构造的ToDoWorkItem对象，失败返回null。
      */
-    public static ToDoWorkItem fromJsonString(String json) {
+    public static ToDoWorkItem fromJsonString(String json) throws Exception {
         return JsonUtility.objectFromJsonString(json, ToDoWorkItem.class);
     }
 
@@ -249,7 +251,7 @@ public class ToDoWorkItem implements JsonConvertable {
      * @param bytes json字节数组。
      * @return 新构造的ToDoWorkItem对象，失败返回null。
      */
-    public static ToDoWorkItem fromJsonBytes(byte[] bytes) {
+    public static ToDoWorkItem fromJsonBytes(byte[] bytes) throws Exception {
         return fromJsonString(new String(bytes));
     }
 
@@ -257,17 +259,18 @@ public class ToDoWorkItem implements JsonConvertable {
     /**
      * 从Json字节流中读取指定数量的字节，然后从字节数组构造一个ToDoWorkItem对象。
      *
-     * @param stream  Json字节输入流。
+     * @param stream         Json字节输入流。
      * @param expectedLength 预期的字节长度。如果该值小于等于0，则读取流的所有字节。
      * @return 新构造的ToDoWorkItem对象。失败返回null，并尝试回溯流数据到未调用此方法前的状态。
      */
-    public static ToDoWorkItem fromJsonStream(InputStream stream, int expectedLength) {
-        return JsonUtility.objectFromInputStream(stream,expectedLength, ToDoWorkItem.class);
+    public static ToDoWorkItem fromJsonStream(InputStream stream, int expectedLength) throws Exception{
+        return JsonUtility.objectFromInputStream(stream, expectedLength, ToDoWorkItem.class);
     }
+
     @Override
-    public boolean equals(Object o){
-        if(o instanceof ToDoWorkItem item){
-            return this.innerId==item.getInnerId();
+    public boolean equals(Object o) {
+        if (o instanceof ToDoWorkItem item) {
+            return this.innerId == item.getInnerId();
         }
 
         return false;

@@ -46,13 +46,15 @@ public class BackEndHttpHandler implements HttpHandler {
             RequestPacket requestPacket = null;
             try {
                 requestPacket = RequestPacket.fromJsonString(getRequestBody(exchange));
-                responsePacket = AoXiangToDoListSystem.getInstance().getSystemController().invokeRequestHandler(requestPacket, "default");
+                var controller = AoXiangToDoListSystem.getInstance().getSystemController();
+                responsePacket = controller.invokeRequestHandler(requestPacket, "default");
 //                if (responsePacket.getStatus() == ResponseStatus.Failure)
 //                    httpCode = HttpURLConnection.HTTP_SEE_OTHER;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 System.err.printf("HTTP内部错误：无法读取请求内容，%s\n", e.getMessage());
                 responsePacket.setStatus(ResponseStatus.Failure);
                 responsePacket.setMessage(Messages.ZH_CN.HTTP_IO_EXCEPTION);
+                return;
             }
 
         }
