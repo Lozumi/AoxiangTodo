@@ -33,7 +33,7 @@
                 :key="item.innerId"
                 value="newItem"
                 class="hover"
-                @click="onItemOrBtnClick(item,event)"
+                @click="onItemOrBtnClick(item)"
             >
               <template v-slot:prepend>
 
@@ -51,7 +51,7 @@
                     size="x-small"
                     style="font-size: 19px; color:olivedrab"
                     position="relative"
-                    @click="toTomatoClock(item)">
+                    @click="toTomatoClock(item.innerId.valueOf())">
                 </v-btn>
                 <v-btn
                     :ref="'btnInfo' + index"
@@ -87,7 +87,7 @@
       <div class="column right"
            :class="{ 'hidden': !isCardVisible  }">
 
-      <!-- ... 卡片内容 -->
+        <!-- ... 卡片内容 -->
         <v-card>
           <v-card-text>
             <iframe
@@ -100,7 +100,7 @@
           <template v-if="isCardVisible ">
             <v-btn
                 class="close-details-btn"
-                @click.stop="toggleCardDetails(items.find(i => i.innerId === currentItemId.value))"
+                @click.stop="toggleCardDetails(items.find(i => i.innerId === currentItemId))"
             >关闭详情</v-btn>
           </template>
         </v-card>
@@ -126,12 +126,12 @@ const items = ref([] as{
   title: string;
   subtitle: string | null; // 添加subtitle属性，并设置默认值为null
   isChecked: boolean;
-  innerId: number | null;
+  innerId: number;
 }[]);
 const newItemText = ref('');
 
 
-function formatISOString(date) {
+function formatISOString(date: Date) {
   // 获取年、月、日、小时、分钟、秒
   const year = date.getFullYear();
   const month = ("0" + (date.getMonth() + 1)).slice(-2);
@@ -146,7 +146,7 @@ function formatISOString(date) {
 
 onMounted(async () => {
   // 如果有初始数据加载需求，请在此处使用useFetch或其他方式获取待办事项列表
-     await getItemList();
+  await getItemList();
 });
 
 
@@ -171,14 +171,17 @@ async function addNewItemFromInput() {
     });
 
     const {data, error} = await ToDoWorkRequest.create(newTodo);
-    const createdTodoId = data.value;
+    const result=JSON.parse(data.value);
+    const createdTodoId = result.content;
+    console.log(data);
+    console.log(createdTodoId);
     try {
       if (newItemText.value !== '') {
         items.value.push({
-          title: newItemText.value,
-          subtitle: 'None',
+          innerId: createdTodoId,
           isChecked: false,
-          innerId: createdTodoId
+          subtitle: 'None',
+          title: newItemText.value
         });
         newItemText.value = '';
       } else {
@@ -191,8 +194,7 @@ async function addNewItemFromInput() {
   }
 }
 
-async function subSelectedItem(item) {
-  event.stopPropagation();
+async function subSelectedItem(item:any) {
 
   if (item.isChecked) {
     try {
@@ -209,7 +211,7 @@ async function subSelectedItem(item) {
   }
 }
 
- async function deleteItemFromList(innerId) {
+async function deleteItemFromList(innerId:number) {
   // 查找具有指定innerId的项目的索引
   const indexToDelete = items.value.findIndex(item => item.innerId === innerId);
   if (indexToDelete !== -1) {
@@ -220,75 +222,83 @@ async function subSelectedItem(item) {
 
 async function getItemList()
 {
-    const {data} = await ToDoWorkRequest.enumerate();
-    const jsonItems = JSON.parse(data.value);
+  const {data} = await ToDoWorkRequest.enumerate();
+  if (typeof data.value === 'string') {
+    let jsonItems: any;
+    try {
+      jsonItems = JSON.parse(data.value);
 
-  if (Array.isArray(jsonItems)) {
-    items.value = jsonItems.map((itemData) => ({
+      if (Array.isArray(jsonItems)) {
+        items.value = jsonItems.map((itemData) => ({
 
-      layer: itemData.layer,
-      innerId: itemData.innerId || null,
-      importancePriority: itemData.importancePriority,
-      emergencyPriority: itemData.emergencyPriority,
-      title: itemData.title,
-      subtitle: itemData.subtitle || null,
-      description: itemData.description,
-      createTime: itemData.createTime,
-      startTime: itemData.startTime,
-      deadLine: itemData.deadLine,
-      status: itemData.status,
-      subToDoWorkItemInnerIdList: itemData.subToDoWorkItemInnerIdList,
-      pomodoroRecordInnerIdList: itemData.pomodoroRecordInnerIdList,
+          layer: itemData.layer,
+          innerId: itemData.innerId || null,
+          importancePriority: itemData.importancePriority,
+          emergencyPriority: itemData.emergencyPriority,
+          title: itemData.title,
+          subtitle: itemData.subtitle || null,
+          description: itemData.description,
+          createTime: itemData.createTime,
+          startTime: itemData.startTime,
+          deadLine: itemData.deadLine,
+          status: itemData.status,
+          subToDoWorkItemInnerIdList: itemData.subToDoWorkItemInnerIdList,
+          pomodoroRecordInnerIdList: itemData.pomodoroRecordInnerIdList,
 
-      isChecked: itemData.isChecked || false,
-    }));
+          isChecked: itemData.isChecked || false,
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to parse data.value as JSON:', error);
+      return;
+    }
   }
+
+
 }
 
-function getDetailUrl(itemId) {
+function getDetailUrl(itemId:number) {
   return `/TodoDetails?itemId=${itemId}`;
 }
 
-  /**
-   * 到底要怎么样才能在卡片展开式按照itemid拉取相应item的内容啊
-   * @param item
-   * @returns {Promise<void>}
-   */
-  async function toggleCardDetails(item) {
-    if (isCardVisible.value) {
-      // 隐藏卡片，并清空内容（这里假设iframe会重新加载页面）
-      isCardVisible.value = false;
-      currentItemId.value = null;
-      console.error("隐藏卡片");
-    } else {
-      // 显示卡片，并设置当前选中项
-      isCardVisible.value = true;
-      currentItemId.value = item.innerId;
-      console.error("显示卡片:");
-    }
-    console.error("根本没有卡片");
+/**
+ * 到底要怎么样才能在卡片展开式按照itemid拉取相应item的内容啊
+ * @param item
+ * @returns {Promise<void>}
+ */
+async function toggleCardDetails(item:any): Promise<void> {
+  if (isCardVisible.value) {
+    // 隐藏卡片，并清空内容（这里假设iframe会重新加载页面）
+    isCardVisible.value = false;
+    currentItemId.value = null;
+    console.error("隐藏卡片");
+  } else {
+    // 显示卡片，并设置当前选中项
+    isCardVisible.value = true;
+    currentItemId.value = item.innerId;
+    console.error("显示卡片:");
   }
+  console.error("根本没有卡片");
+}
 
-  /**
-   * 点击整个item的鸡肋函数
-   * @param item
-   * @param event
-   */
-  function onItemOrBtnClick(item, event) {
-    event.stopPropagation();
-    //接受两个参数：item 表示被点击的项（即 v-list-item 中的数据项），event 表示触发点击事件的事件对象。
-    //使用 event.stopPropagation() 阻止事件冒泡，确保只有当前的 v-list-item 收到点击事件，而不会传播到其他元素。
-    console.log('Item clicked:', item);
-  }
+/**
+ * 点击整个item的鸡肋函数
+ * @param item
+ */
+function onItemOrBtnClick(item:any) {
+  //接受两个参数：item 表示被点击的项（即 v-list-item 中的数据项），event 表示触发点击事件的事件对象。
+  //使用 event.stopPropagation() 阻止事件冒泡，确保只有当前的 v-list-item 收到点击事件，而不会传播到其他元素。
+  console.log('Item clicked:', item);
+}
 
-  /**
-   * 跳转到特定item的番茄中进行计时??还是没想法
-   * @returns {Promise<void>}
-   */
-  async function toTomatoClock(item) {
-    await router.push({name: 'TomatoClock', params: {itemId: item.innerId}});
-    //进入番茄钟页面并传递该item的唯一id给它......
-    //计时完成后根据该itemid将数据绑定到item上
+/**
+ * 跳转到特定item的番茄中进行计时??还是没想法
+ * @returns {Promise<void>}
+ */
+async function toTomatoClock(innerId:number): Promise<void> {
+  await router.push({ path: '/TodoPage/TomatoClock/', query: { itemId:innerId } });
+  //进入番茄钟页面并传递该item的唯一id给它......
+  //计时完成后根据该itemid将数据绑定到item上
 
 }
 
@@ -330,7 +340,7 @@ body {
 .row {
   display: flex;
   border-inline-style: none;
-  //justify-content: space-between; /* 使子元素在主轴方向两端对齐 */
+//justify-content: space-between; /* 使子元素在主轴方向两端对齐 */
 }
 
 .row:after {
@@ -390,6 +400,6 @@ body {
   right:10px;
   float:right;
   text-align: center;
-  //position: absolute;
+//position: absolute;
 }
 </style>

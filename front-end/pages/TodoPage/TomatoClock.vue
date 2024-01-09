@@ -300,9 +300,9 @@
               你的目标已达成，进入下一段旅程吧!
             </v-card-text>
             <v-card-actions class="justify-end">
-            <v-btn color="blue darken-1" @click="closeDialog4AndEndPomodoro">
-              Close
-            </v-btn>
+              <v-btn color="blue darken-1" @click="closeDialog4AndEndPomodoro">
+                Close
+              </v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -337,14 +337,19 @@ const beforeYesterdayDialog = ref(false);
 const handleModifyTimeClickActive = ref(true); // 初始化为可点击状态
 const restTimeValue = ref<number>(5 * 60); // 默认休息时间为 5 分钟
 const formattedRestTime = computed(() => formatTime(restTimeValue.value));
+const route = useRoute();
 
 let innerId = ref<string | null>(null);
 let countdownTimer: NodeJS.Timeout | undefined;
 let remainingTotalSeconds = ref<number | null>(null);
 let countdownTimeRef = ref('25:00');
+let itemId: Ref<number | undefined>;
 
 onMounted(() => {
-  innerId.value = useRoute().params.innerId as string;
+  itemId = computed(() => Number(route.query.itemId));
+  if(itemId.value){
+    console.log('receivedInnerId:',itemId.value);
+  }
 });
 
 function saveAndCloseModifyTimeDialog() {
@@ -438,7 +443,7 @@ const handleFocus = () => {
   } else if (remainingTotalSeconds.value === null) {
     // 当倒计时尚未启动时（点击“开始专注”）
     // 确保 innerId 已经从路由参数中正确获取到，并转换为数字类型
-    const innerIdNumber = Number(innerId.value);
+    const innerIdNumber = Number(receivedInnerId);
     if (!isNaN(innerIdNumber)) {
       pomodoroService.start(innerIdNumber); // 使用捕获到的 innerId 参数（已转换为 number 类型）
     }
@@ -687,3 +692,4 @@ button.whiteButton{
   background-color: #EAECCC; /* 背景颜色 */
 }
 </style>
+

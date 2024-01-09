@@ -15,9 +15,7 @@ const sendRequest = (body: any) => {
 export default new class PomodoroRequest {
     start(innerId:number) {
         const requestBody = {
-            content: JSON.stringify({
-                innerId: innerId,
-            }),
+            content: innerId,
             requestType: 'StartPomodoro',
         };
         return sendRequest(requestBody);
