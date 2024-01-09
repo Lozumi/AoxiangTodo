@@ -23,6 +23,56 @@ import java.util.Optional;
  */
 public class RequestController {
 
+
+    public static ResponsePacket processExitApplication(RequestPacket request,RequestHandlerData userData) {
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Success);
+        AoXiangToDoListSystem.getInstance().exit();
+        return packet;
+    }
+    public static ResponsePacket processGetCurrentUser_FullInfo(RequestPacket request,RequestHandlerData userData){
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+        User currentUser = AoXiangToDoListSystem.getInstance().getCurrentUser();
+        if(currentUser == null){
+            packet.setStatus(ResponseStatus.Success);
+            packet.setMessage("当前没有登录任何用户。");
+            packet.setContent(null);
+            return packet;
+        }
+        String userStr;
+        try {
+            userStr = currentUser.toJsonString();
+            packet.setMessage(Messages.ZH_CN.SUCCESS);
+            packet.setStatus(ResponseStatus.Success);
+            packet.setContent(userStr);
+            return packet;
+        }catch (Exception ex){
+            packet.setMessage(String.format("[内部错误]尝试将当前用户转换为JSON字符串时发生异常：%s\n",ex.getMessage()));
+            return packet;
+        }
+    }
+
+    /**
+     * 处理同步请求。
+     * @param request 请求数据。
+     * @param userData 未使用。
+     * @return 向前端发送的请求。
+     */
+    public static ResponsePacket processSynchronization(RequestPacket request, RequestHandlerData userData){
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+        try {
+            AoXiangToDoListSystem.getInstance().synchronizeSystemData();
+        }catch (Exception exception){
+            packet.setMessage(String.format("[同步时错误] %s\n",exception.getMessage()));
+            return packet;
+        }
+
+        packet.setStatus(ResponseStatus.Success);
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        return packet;
+    }
     /**
      * 处理编辑番茄钟事项请求。
      *
@@ -161,7 +211,7 @@ public class RequestController {
         try {
             AoXiangToDoListSystem.getInstance().userLogout();
         } catch (Exception exception) {
-            var errString = "内部错误：用户登出错误。";
+            var errString = String.format("用户登出错误：%s",exception.getMessage());
             packet.setMessage(errString);
             return packet;
         }
@@ -435,13 +485,6 @@ public class RequestController {
             Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
             // 开始番茄钟
             pomodoro.startPomodoro();
-            PomodoroRecord pomodoroRecord = pomodoro.getPomodoroRecord();
-            var pomodoroRecordList = getSystemPomodoroCollection();
-            int availableId = pomodoroRecordList.getAvailableID();
-            pomodoroRecord.setInnerId(availableId);
-            // 绑定事件
-            pomodoroRecordList.add(pomodoroRecord);
-            item.getPomodoroRecordInnerIdList().add(pomodoroRecord.getInnerId());
         } catch (Exception e) {
             packet.setMessage(e.getMessage());
             return packet;
@@ -469,7 +512,7 @@ public class RequestController {
             Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
             var pomodoroList = getSystemPomodoroCollection();
             // 打断后台计时
-            pomodoroList.add(pomodoro.endPomodoro());
+            pomodoro.endPomodoro();
 
         } catch (Exception e) {
             packet.setMessage(e.getMessage());

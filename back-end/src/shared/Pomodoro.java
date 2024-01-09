@@ -1,6 +1,7 @@
 package shared;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import sys.AoXiangToDoListSystem;
 import sys.Messages;
 import util.DateHelper;
 import util.JsonUtility;
@@ -114,14 +115,15 @@ public class Pomodoro {
     /**
      * 结束番茄钟，同时计算番茄记录。如果番茄钟尚未开始工作，则抛出异常。
      */
-    public synchronized PomodoroRecord endPomodoro() {
+    public synchronized void endPomodoro() {
         if (!working)
             throw new IllegalStateException(Messages.ZH_CN.POMODORO_NOT_WORKING);
         endTimer();
         working = false;
         this.pomodoroRecord.setEndTime(Instant.now());
         calculateRecord();
-        return pomodoroRecord;
+        pomodoroRecord.setInnerId(AoXiangToDoListSystem.getInstance().getPomodoroRecordsCollection().getAvailableID());
+        AoXiangToDoListSystem.getInstance().getPomodoroRecordsCollection().add(pomodoroRecord);//添加番茄钟记录到集合。
     }
 
     /**
@@ -131,6 +133,7 @@ public class Pomodoro {
     public void calculateRecord() {
         Instant startTime = this.getPomodoroRecord().startTime;
         Instant endTime = this.getPomodoroRecord().endTime;
+
         // 计算状态
         int durationTime = (int) Duration.between(startTime, endTime).toMinutes();
         if (durationTime >= workTime) {

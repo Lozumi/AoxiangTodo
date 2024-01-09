@@ -87,7 +87,7 @@ public class CloudServer {
     static String requestPOST(String urlStr, String content) throws IOException {
         HttpClient httpClient = HttpClient.newHttpClient();
         HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:20220"))
+                .uri(URI.create(urlStr))
                 .header("Content-Type", "text/plain")
                 .POST(HttpRequest.BodyPublishers.ofString(content))
                 .build();

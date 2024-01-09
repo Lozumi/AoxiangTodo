@@ -1,9 +1,11 @@
 package unittest;
 
+import shared.UserInfo;
 import trans.RequestPacket;
 import trans.RequestType;
 import trans.ResponsePacket;
 import trans.ResponseStatus;
+import user.User;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -67,6 +69,37 @@ public class HttpTest {
         RequestPacket requestPacket = new RequestPacket();
         requestPacket.setRequestType(RequestType.QueryToDoWork);
         requestPacket.setContent(String.valueOf(innerId));
+        var response = this.tryRequest(requestPacket);
+        printTrace(requestPacket, response);
+        return response;
+    }
+
+    public ResponsePacket tryRequestSynchronize() {
+        return tryBasicRequest(RequestType.Synchronize);
+    }
+
+    public  ResponsePacket tryRequestUserRegister(UserInfo info) throws IOException {
+        return tryBasicRequest(RequestType.UserRegister,info.toJsonString());
+    }
+    public ResponsePacket tryRequestUserLogin(UserInfo info) throws IOException {
+        return tryBasicRequest(RequestType.UserLogin,info.toJsonString());
+    }
+    ResponsePacket tryBasicRequest(RequestType requestType, String content) {
+        RequestPacket requestPacket = new RequestPacket();
+        requestPacket.setRequestType(requestType);
+        requestPacket.setContent(content);
+        var response = this.tryRequest(requestPacket);
+        printTrace(requestPacket, response);
+        return response;
+    }
+
+    ResponsePacket tryBasicRequest(RequestType requestType) {
+        return tryBasicRequest(requestType,"");
+    }
+
+    public ResponsePacket tryRequestExit() {
+        RequestPacket requestPacket = new RequestPacket();
+        requestPacket.setRequestType(RequestType.ExitApplication);
         var response = this.tryRequest(requestPacket);
         printTrace(requestPacket, response);
         return response;

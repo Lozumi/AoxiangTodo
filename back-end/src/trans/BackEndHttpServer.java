@@ -12,6 +12,7 @@ public class BackEndHttpServer {
     BackEndHttpServerStartupInfo startupInfo;
     HttpServer httpServer;
     ExecutorService executorService;
+
     public void run() {
         try {
             initializeHttpServer();
@@ -24,19 +25,18 @@ public class BackEndHttpServer {
         httpServer = HttpServer.create(new InetSocketAddress(startupInfo.port), 0);
         executorService = Executors.newFixedThreadPool(startupInfo.maxThreadCount);
         httpServer.setExecutor(executorService);
-        httpServer.createContext("/",new BackEndHttpHandler()); //注册根处理器
+        httpServer.createContext("/", new BackEndHttpHandler()); //注册根处理器
         httpServer.start();
     }
 
     /**
      * 禁止新的HTTP连接，并在3秒后关闭HTTP服务器。
      */
-    public void stop(){
-        httpServer.stop(3);
-        AoXiangToDoListSystem.getInstance().localSaveSystemData("D:/test/1.json");
+    public void stop(int delay) {
+        httpServer.stop(delay);
     }
-    public BackEndHttpServer(BackEndHttpServerStartupInfo startupInfo)
-    {
+
+    public BackEndHttpServer(BackEndHttpServerStartupInfo startupInfo) {
         this.startupInfo = startupInfo;
     }
 }
