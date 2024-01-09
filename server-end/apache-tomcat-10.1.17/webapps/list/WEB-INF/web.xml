@@ -18,6 +18,14 @@
         <servlet-name>ChangeServlet</servlet-name>
         <servlet-class>ChangeServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>PullServlet</servlet-name>
+        <servlet-class>PullServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>OverwriteServlet</servlet-name>
+        <servlet-class>OverwriteServlet</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
@@ -34,5 +42,13 @@
     <servlet-mapping>
         <servlet-name>ChangeServlet</servlet-name>
         <url-pattern>/change-servlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PullServlet</servlet-name>
+        <url-pattern>/pull-servlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>OverwriteServlet</servlet-name>
+        <url-pattern>/overwrite-servlet</url-pattern>
     </servlet-mapping>
 </web-app>
