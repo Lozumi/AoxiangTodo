@@ -1,10 +1,10 @@
 <template>
   <v-card>
     <v-row no-gutters>
-      <v-col cols="6" class="d-flex">
-        <v-img src="/static/ckw.jpg" height="100%" max-width="100%"/>
+      <v-col cols="4" class="d-flex">
+        <v-img src="/static/yezi.jpeg" height="100%" max-width="100%"/>
       </v-col>
-      <v-col cols="6">
+      <v-col cols="8">
 
         <v-tabs
             v-model="state.tab"
@@ -286,12 +286,12 @@ async function handleRegister() {
 }
 
 // 可以删除
-onMounted(async () => {
-  state.loginData.account = "123"
-  state.loginData.password = "123"
-  const res = await AccountRequest.login(state.loginData)
-  console.log(res)
-})
+// onMounted(async () => {
+//   state.loginData.account = "123"
+//   state.loginData.password = "123"
+//   const res = await AccountRequest.login(state.loginData)
+//   console.log(res)
+// })
 
 </script>
 
