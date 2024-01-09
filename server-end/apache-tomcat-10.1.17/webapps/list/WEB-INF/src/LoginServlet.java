@@ -86,26 +86,38 @@ public class LoginServlet extends HttpServlet {
                 if (tokenResultSet.next()) {
                     String token = tokenResultSet.getString("token");
                     long expire = tokenResultSet.getLong("expire_time");
-                    TokenPair newToken = new TokenPair(token, expire).renew();
-                    statement.executeUpdate(String.format("UPDATE tokens SET expire_time=%d WHERE token=\"%s\";",
-                            newToken.getExpire(), newToken.getToken()));
-                    c.commit();
-                    System.out.println("User logged in with renewed token");
-                    out.print(newToken.getToken());
-                    out.flush();
-                } else {
-                    TokenPair tokenPair = new TokenPair();
-                    statement.executeUpdate("UPDATE users SET token=\"%s\" where account=\"%s\";".formatted(
-                            tokenPair.getToken(), parameters.get("account")));
-                    statement.executeUpdate(String.format("""
-                    INSERT INTO tokens (token, account, expire_time)
-                    VALUES ("%s", "%s", %d);
-                    """, tokenPair.getToken(), parameters.get("account"), tokenPair.getExpire()));
-                    c.commit();
-                    System.out.println("User logged in with new token");
-                    out.print(tokenPair.getToken());
-                    out.flush();
+                    if (System.currentTimeMillis() < expire) {
+                        TokenPair newToken = new TokenPair(token, expire).renew();
+                        statement.executeUpdate(String.format("UPDATE tokens SET expire_time=%d WHERE token=\"%s\";",
+                                newToken.getExpire(), newToken.getToken()));
+                        c.commit();
+                        System.out.println("User logged in with renewed token");
+                        out.print(newToken.getToken());
+                        out.flush();
+                        userResultSet.close();
+                        tokenResultSet.close();
+                        statement.close();
+                        return;
+                    } else {
+                        statement.executeUpdate("UPDATE users SET token=NULL where token=\"%s\";".formatted(token));
+                        statement.executeUpdate(String.format("DELETE FROM tokens WHERE token=\"%s\"; ", token));
+                        c.commit();
+                    }
                 }
+
+                TokenPair tokenPair = new TokenPair();
+                statement.executeUpdate("UPDATE users SET token=\"%s\" where account=\"%s\";".formatted(
+                        tokenPair.getToken(), parameters.get("account")));
+                statement.executeUpdate(String.format("""
+                   INSERT INTO tokens (token, account, expire_time)
+                   VALUES ("%s", "%s", %d);
+                   """, tokenPair.getToken(), parameters.get("account"), tokenPair.getExpire()));
+                c.commit();
+                System.out.println("User logged in with new token");
+                out.print(tokenPair.getToken());
+                out.flush();
+                tokenResultSet.close();
+
             } else {
                 System.out.println("Login failed: wrong account/passwd");
                 out.print("");
