@@ -4,7 +4,6 @@
       <h1>番茄专注</h1>
     </header>
     <aside>
-
       <button :class="{ whiteButton: !handleModifyTimeClickActive, active: handleModifyTimeClickActive }"
               @click="handleModifyTimeClick" :disabled="focusButtonActive">设立时间
       </button>
@@ -17,6 +16,7 @@
       >
         {{ focusButtonActive ? '放弃专注' : '开始专注' }}
       </button>
+
 
       <button :class="{ whiteButton: !recordButtonActive, active: recordButtonActive }"
               @click="handleRecord">专注记录
@@ -47,7 +47,7 @@
               elevation="12"
               class="rounded-lg"
               color="#ffffff"
-              hover>
+          >
             <v-card-title class="headline">
               {{ focusButtonActive ? '番茄专注' : '放弃专注' }}
             </v-card-title>
@@ -66,7 +66,7 @@
               elevation="12"
               class="rounded-lg"
               color="#ffffff"
-              hover>
+          >
             <v-card-title class=" custom-card-text headline">设立时间</v-card-title>
             <v-card-text class="custom-card2-text">
               番茄专注建议：专注时间25分钟，休息5分钟。
@@ -118,8 +118,8 @@
             </v-card-text>
 
             <v-card-actions class="justify-end">
-              <v-btn color="blue darken-1" @click="dialog2 = false; dialog1 = false">
-                Close
+              <v-btn color="blue darken-1" @click="saveAndCloseModifyTimeDialog">
+                确认并关闭
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -130,7 +130,6 @@
               elevation="12"
               class="rounded-lg"
               color="#EAECCC"
-              hover
           >
             <v-card-title class="headline">专注记录</v-card-title>
             <v-card-text>
@@ -171,7 +170,7 @@
                           <v-expansion-panels v-model="todayPanel" multiple>
                             <v-expansion-panel
                                 title="Foo"
-                                text="od tla."
+                                text="o."
                                 value="foo"
                             ></v-expansion-panel>
 
@@ -299,11 +298,11 @@
               优秀的人总是自律。<br>
               你的目标已达成，进入下一段旅程吧!
             </v-card-text>
-            <v-card-actions class="justify-end">
-              <v-btn color="blue darken-1" @click=" dialog4 = false;dialog1 = false">
-                Close
-              </v-btn>
-            </v-card-actions>
+            <  <v-card-actions class="justify-end">
+            <v-btn color="blue darken-1" @click="closeDialog4AndEndPomodoro">
+              Close
+            </v-btn>
+          </v-card-actions>
           </v-card>
         </v-dialog>
       </div>
@@ -312,7 +311,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import pomodoroService from '@/composables/PomodoroRequest'
 
 const sliderTimeValue = ref<number>(25*60);
 const formattedSelectedTime = computed(() => formatTime(sliderTimeValue.value));
@@ -336,6 +337,38 @@ const handleModifyTimeClickActive = ref(true); // 初始化为可点击状态
 const restTimeValue = ref<number>(5 * 60); // 默认休息时间为 5 分钟
 const formattedRestTime = computed(() => formatTime(restTimeValue.value));
 
+
+let countdownTimer: NodeJS.Timeout | undefined;
+let remainingTotalSeconds = ref<number | null>(null);
+let countdownTimeRef = ref('25:00');
+let innerId = ref<string | null>(null);
+
+onMounted(() => {
+  innerId.value = useRoute().params.innerId as string;
+});
+
+function saveAndCloseModifyTimeDialog() {
+  const workTimeInMinutes = formatTimeToMinutes(sliderTimeValue.value);
+  const restTimeInMinutes = formatTimeToMinutes(restTimeValue.value);
+  // 将分钟数转换为字符串
+  const workTimeString = workTimeInMinutes.toString();
+  const restTimeString = restTimeInMinutes.toString();
+
+  pomodoroService.edit(workTimeString, restTimeString);
+  dialog2.value = false;
+}
+
+
+function formatTime(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${remainingMinutes.toString().padStart(2, '0')}`;
+}
+
+function formatTimeToMinutes(seconds: number): number {
+  return Math.floor(seconds / 60);
+}
+
 function onRestTimeChange(value: number) {
   restTimeValue.value = value;
 }
@@ -357,11 +390,32 @@ function onSliderChange(value: number) {
   sliderTimeValue.value = value;
 }
 
-function formatTime(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-  return `${hours.toString().padStart(2, '0')}:${remainingMinutes.toString().padStart(2, '0')}`;
+
+const handleFocus = () => {
+  focusButtonActive.value = !focusButtonActive.value;
+  modifyTimeClicked.value = false;
+
+  if (!focusButtonActive.value) {
+    // 当处于专注状态时（点击“放弃专注”）
+    dialog1.value = true;
+  } else if (remainingTotalSeconds.value === null) {
+    // 当倒计时尚未启动时（点击“开始专注”）
+    // 确保 innerId 已经从路由参数中正确获取到，并转换为数字类型
+    const innerIdNumber = Number(innerId.value);
+    if (!isNaN(innerIdNumber)) {
+      pomodoroService.start(innerIdNumber); // 使用捕获到的 innerId 参数（已转换为 number 类型）
+    }
+    startCountdown();
+  } else {
+    focusButtonActive.value = true;
+  }
+};
+function closeDialog4AndEndPomodoro() {
+  dialog4.value = false;
+  dialog1.value = false;
+  pomodoroService.end();
 }
+
 
 function showTodayPanel() {
   currentDate.value = 'today';
@@ -402,23 +456,6 @@ function beforeYesterdayNone() {
   beforeYesterdayPanel.value = [];
 }
 
-let countdownTimer: NodeJS.Timeout | undefined;
-let remainingTotalSeconds = ref<number | null>(null);
-let countdownTimeRef = ref('25:00');
-
-const handleFocus = () => {
-  focusButtonActive.value = !focusButtonActive.value;
-  modifyTimeClicked.value = false;
-
-  if (!focusButtonActive.value) {
-    dialog1.value = true;
-  } else if (remainingTotalSeconds.value === null) {
-    startCountdown();
-  } else {
-    focusButtonActive.value = true;
-  }
-};
-
 const handleRecord = () => {
   recordButtonActive.value = !recordButtonActive.value;
   dialog3.value = true; // 弹出卡片
@@ -431,6 +468,7 @@ const handleModifyTimeClick = () => {
 };
 
 const confirmGiveUpFocus = () => {
+  pomodoroService.end();
   focusButtonActive.value = false;
   countdownTime.value = formatTime(sliderTimeValue.value);
   dialog1.value = false;
