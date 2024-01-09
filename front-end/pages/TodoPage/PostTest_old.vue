@@ -33,39 +33,40 @@
 </template>
 
 <script setup lang="ts">
-import ToDoWorkRequest from '~/composables/ToDoWorkRequest';
-import { ref, watch } from 'vue';
-import AccountRequest from "~/composables/AccountRequest";
-const result = ref(null);
 
 const sendPostRequest = async () => {
   await refresh();
 };
 
-  // const todoItem = JSON.stringify({
-  //   '@class': 'shared.ToDoWorkItem',
-  //   layer: 1,
-  //   innerId: 0,
-  //   importancePriority: 1,
-  //   emergencyPriority: 1,
-  //   title: '测试事项',
-  //   subtitle: '测试子事项',
-  //   description: '测试描述',
-  //   createTime: '2023-12-29T20:20:20',
-  //   startTime: '2023-12-29T21:20:20',
-  //   deadLine: '2023-12-29T22:20:20',
-  //   status: 'Activated',
-  //   subToDoWorkItemInnerIdList: [],
-  //   pomodoroRecordInnerIdList: [],
-  // });
+const apiUrl = 'http://localhost:20220/todoworkitem';
+const requestType = 'CreateToDoWork';
+const Content = JSON.stringify({
+  '@class': 'shared.ToDoWorkItem',
+  layer : 1,
+  innerId : 0,
+  importancePriority : 1,
+  emergencyPriority : 1,
+  title : '测试事项',
+  subtitle : '测试子事项',
+  description : '测试描述',
+  createTime : '2023-12-29T20:20:20',
+  startTime : '2023-12-29T21:20:20',
+  deadLine : '2023-12-29T22:20:20',
+  status : 'Activated',
+  subToDoWorkItemInnerIdList: [],
+  pomodoroRecordInnerIdList : []
+});
 
-  const {data, error, pending, refresh} = await AccountRequest.register('234','456','789');
-
-  if (error) {
-    console.error('Error:', error);
-  } else {
-    console.log('Data:', data);
-  }
+const { data, pending, error, refresh } = useFetch(apiUrl, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    content: Content,
+    requestType: requestType,
+  }),
+});
 
 // 使用 ref 来保存表格的头部信息
 const tableHeaders = ref([
@@ -73,6 +74,8 @@ const tableHeaders = ref([
   { title: 'Message', value: 'message' },
   { title: 'Content', value: 'content' },
 ]);
+
+const result = ref(null);
 
 onMounted(() => {
   refresh();

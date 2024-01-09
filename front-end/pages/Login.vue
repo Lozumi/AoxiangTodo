@@ -1,51 +1,65 @@
 <template>
-
   <v-card>
     <v-row no-gutters>
-      <v-col cols="6" class="d-flex">
-        <v-img src="/static/ax.png"  height="100%" max-width="100%" />
+      <v-col cols="4" class="d-flex">
+        <v-img src="/static/yezi.jpeg" height="100%" max-width="100%"/>
       </v-col>
-      <v-col cols="6">
-
+      <v-col cols="8">
 
         <v-tabs
-            v-model="tab"
+            v-model="state.tab"
             color="primary"
             align-tabs="end"
         >
-          <v-tab value="login"> 登录</v-tab>
+          <v-tab value="login">登录</v-tab>
           <v-tab value="register">注册</v-tab>
         </v-tabs>
 
         <v-card-text>
-          <v-window v-model="tab">
+          <v-window v-model="state.tab">
+            <!--            <登录窗口>-->
             <v-window-item value="login">
-
               <div>
+
                 <div class="text-h6 mb-1">
                   LOGIN
                 </div>
                 <v-text-field
-
                     label="请输入账号"
-                    :rules="rules"
                     hide-details="auto"
+                    v-model="state.loginData.account"
                 ></v-text-field>
 
                 <v-text-field
                     label="请输入密码"
-                    :rules="rules"
                     hide-details="auto"
+                    v-model="state.loginData.password"
                 ></v-text-field>
+                <v-card v-if="state.loginResult" class="mt-5">
+                  <v-card-title class="border-bottom mb-4">
+                    <p class="text-h5">登录返回包：</p>
+                  </v-card-title>
+                  <v-card-text>
+                    <pre>{{ state.loginResult }}</pre>
+                  </v-card-text>
+                </v-card>
 
+                <v-alert
+                    v-if="state.loginError"
+                    type="warning"
+                    class="mt-5"
+                    text="登录错误，请检查账号密码是否输入正确">
+
+                </v-alert>
+
+                <!--                -->
                 <v-btn
-                    :loading="loading"
-                    class="flex-grow-1"
+                    :loading="state.loading"
+                    class="mb-5"
                     height="48"
                     variant="tonal"
                     align-end
-                    @click="load"
-
+                    @click="handleLogin"
                 >
                   登入
                 </v-btn>
@@ -58,80 +72,232 @@
               <div class="text-h6 mb-1">
                 REGISTER
               </div>
-              <div>
 
-                <v-text-field
-                    label="设置账号"
-                    :rules="rules"
-                    hide-details="auto"
-                    class="custom-height custom-input"
-                ></v-text-field>
+              <v-text-field
+                  label="请设置账号"
+                  hide-details="auto"
+                  v-model="state.registerData.account"
+              ></v-text-field>
 
-                <v-text-field
-                    label="设置用户名"
-                    :rules="rules"
-                    hide-details="auto"
-                    class="custom-height custom-input"
-                ></v-text-field>
+              <v-text-field
+                  label="设置用户名"
+                  hide-details="auto"
+                  v-model="state.registerData.userName"
+              ></v-text-field>
 
-                <v-text-field
-                    label="设置密码"
-                    :rules="rules"
-                    hide-details="auto"
-                    class="custom-height custom-input"
-                ></v-text-field>
+              <v-text-field
+                  label="设置密码"
+                  type="password"
+                  hide-details="auto"
+                  v-model="state.registerData.password"
+              ></v-text-field>
 
-                <v-text-field
-                    label="确认密码"
-                    :rules="rules"
-                    hide-details="auto"
-                    class="custom-height custom-input"
-                ></v-text-field>
-                <v-btn
-                    :loading="loading"
-                    class="flex-grow-1"
-                    height="48"
-                    variant="tonal"
-                    align-end
-                    @click="load"
-                >
-                  注册
-                </v-btn>
-              </div>
+              <v-text-field
+                  label="确认密码"
+                  :rules="confirmPasswordRules"
+                  type="password"
+                  hide-details="auto"
+                  v-model="state.registerData.confirmPassword"
+              ></v-text-field>
+              <v-alert
+                  v-if="state.registerData.password !== '' && state.registerData.confirmPassword !== '' && state.registerData.password !== state.registerData.confirmPassword"
+                  type="error"
+                  class="mt-5"
+                  text="确认密码错误,请检查两次输入的密码是否一致">
+              </v-alert>
+              <!--              !isRegisterFormValid ||-->
+              <v-btn
+                  :disabled="state.registerData.password !== state.registerData.confirmPassword"
+                  :loading="state.loading"
+                  class="mb-5"
+                  height="48"
+                  variant="tonal"
+                  align-end
+                  @click="handleRegister"
+              >
+                注册
+              </v-btn>
+              <v-card v-if="state.registerResult" class="mt-5">
+                <v-card-title class="border-bottom mb-4">
+                  <p class="text-h5">注册返回包：</p>
+                </v-card-title>
+                <v-card-text>
+                  <pre>{{ state.registerResult }}</pre>
+                </v-card-text>
+              </v-card>
+              <v-alert
+                  v-if="state.registerError"
+                  type="error"
+                  class="mt-5">
+                <h2 class="text-h3">注册错误:</h2>
+                <pre>{{ state.registerError }}</pre>
+              </v-alert>
+
             </v-window-item>
-
           </v-window>
         </v-card-text>
-
       </v-col>
     </v-row>
   </v-card>
-
+  <v-progress-linear
+      v-if="state.isLoginPending || state.isRegisterPending"
+      class="mt-5">
+  </v-progress-linear>
 
 </template>
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<script setup>
+import AccountRequest from "../composables/AccountRequest.ts"
+import { useRouter } from "vue-router";
 
-<script>
-export default {
-  data: () => ({
-    loading: false,
-    rules: [
-      // value => !!value || 'Required.',
-      // value => (value && value.length >= 3) || 'Min 3 characters',
-      null
+// const loginSend = async () => {
+//   await refresh();
+// };
 
-    ],
-    tab: null,
-  }),
-  methods: {
-    load() {
-      this.loading = true
-      setTimeout(() => (this.loading = false), 3000)
-    },
-  },
+const confirmPasswordRules = {
+  sameAs: (value) => value === state.registerData.password,
+};
+
+const router = useRouter()
+
+
+const state = reactive({
+      loading: false,
+      tab: 'login',
+      loginData: {
+        account: '',
+        password: '',
+      },
+      registerData: {
+        account: '',
+        userName: '',
+        password: '',
+        confirmPassword: '',
+      },
+      loginResult: null,
+      isLoginPending: null,
+      loginError: null,
+
+      isRegisterPending: null,
+      registerResult: null,
+      registerError: null,
+    }
+);
+//**********************验证函数***************************
+// const base = 'http://10.60.50.102:20220/'
+// const apiUrlLogin = 'UserLogin';
+//
+// const apiUrlRegister = 'UserRegister';
+//
+// const loginResult = ref(null);
+//
+// const registerResult = ref(null);
+
+// const {
+//   pending: isLoginPending,
+//   error: loginError,
+//   refresh: refreshLogin,
+//   data: loginResponse
+// } = useFetch(apiUrlLogin, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: state.loginData,
+//       baseURL: base,
+//       immediate: false,
+//       watch: false,
+//     }
+// );
+
+
+
+// const {
+//   pending: isRegisterPending,
+//   error: registerError,
+//   refresh: refreshRegister,
+//   data: registerResponse
+// } = useFetch('/', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: {
+//         content: {
+//           '@class': 'shared.UserInfo',
+//           "account": "234", "userName": "345", "password": "345",
+//           // confirmPassword: undefined
+//         },
+//         requestType: 'UserRegister',
+//       },
+//       baseURL: base,
+//       immediate: false,
+//       watch: false,
+//     }
+// );
+
+async function handleLogin() {
+  if (state.loginData.account && state.loginData.password) {
+    // await refreshLogin();
+    if (state.isLoginPending === false && state.loginError === null) {
+      // 登录，并结构出data，pending，error三种状态进行赋值
+      const {data, pending, error} = await AccountRequest.login(state.loginData)
+      // 更新登录结果到组件内部状态
+      // TODO 此处根据接口返回值确定
+      state.loginResult = data
+      state.loginError = error
+      state.isLoginPending = pending
+
+      // 跳转到主页
+      await router.push("/index")
+    }
+  }
 }
 
+async function handleRegister() {
+  if (
+      state.registerData.account &&
+      state.registerData.userName &&
+      state.registerData.password &&
+      state.registerData.password === state.registerData.confirmPassword
+  ) {
+
+    // 演示
+
+    // 跳转至登录页面或其他逻辑
+    // return state.tab = "login";
+
+    // await refreshRegister();
+    if (state.isRegisterPending === false && state.registerError === null) {
+      const {data, pending, error} = await AccountRequest.register(state.registerData)
+      // 更新注册结果到组件内部状态
+      state.registerResult = data
+      state.registerError = error
+      state.isRegisterPending = pending
+
+      // 跳转至登录页面或其他逻辑
+      state.tab = "login"
+    }
+  }
+}
+
+// 可以删除
+// onMounted(async () => {
+//   state.loginData.account = "123"
+//   state.loginData.password = "123"
+//   const res = await AccountRequest.login(state.loginData)
+//   console.log(res)
+// })
+
 </script>
+
+
 <style>
+
 /* 应用整体样式 */
 body {
   background-color: #f5f5f5;
@@ -141,7 +307,7 @@ body {
 /* v-card样式 */
 .v-card {
   max-width: 800px; /*长度*/
-  margin: 80px auto; /*上方距离*/
+  margin: 40px auto; /*上方距离*/
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
@@ -168,8 +334,9 @@ body {
 .v-card-text {
   padding: 0;
 }
+
 .custom-height {
-  height: 52px; /* 或者你想要的任何较小的高度 */
+  height: 52px; /* 高度 */
 }
 
 /* v-window样式 */
@@ -186,6 +353,21 @@ body {
 .v-text-field {
   margin-bottom: 18px;
   background-color: white; /*输入框颜色*/
+}
+
+.v-input--is-danger {
+  margin-bottom: inherit !important;
+}
+
+/* 确保输入框之间的固定间距 */
+.v-text-field:not(:last-child) {
+  margin-bottom: 18px; /* 固定间距值 */
+}
+
+/* 可选：如果需要调整错误提示文本的样式 */
+.v-messages__message {
+  font-size: 14px;
+  margin-bottom: 8px; /* 避免输入框背景色溢出 */
 }
 
 .v-text-field__slot label {

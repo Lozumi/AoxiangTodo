@@ -1,6 +1,6 @@
 // nuxt项目目录/composables/Pomodoro.ts
 
-let baseUrl = 'http://10.60.50.102:20220'
+let baseUrl = 'http://localhost:20220'
 
 const sendRequest = (body: any) => {
     return useFetch(baseUrl, {
