@@ -33,7 +33,7 @@
                 :key="item.innerId"
                 value="newItem"
                 class="hover"
-                @click="onItemOrBtnClick(item)"
+                @click="onItemOrBtnClick(item,$event)"
             >
               <template v-slot:prepend>
 
@@ -60,7 +60,7 @@
                     icon=" mdi-file-document-outline"
                     variant="text"
                     style="font-size: 20px;"
-                    @click.stop="toggleCardDetails(item)"
+                    @click.stop="toggleCardDetails(item.innerId.valueOf())"
                 ></v-btn>
                 <v-btn
                     icon="mdi-minus"
@@ -86,7 +86,6 @@
       </div>
       <div class="column right"
            :class="{ 'hidden': !isCardVisible  }">
-
         <!-- ... 卡片内容 -->
         <v-card>
           <v-card-text>
@@ -100,7 +99,7 @@
           <template v-if="isCardVisible ">
             <v-btn
                 class="close-details-btn"
-                @click.stop="toggleCardDetails(items.find(i => i.innerId === currentItemId))"
+                @click.stop="toggleCardDetails(items.find(i => i.innerId == currentItemId))"
             >关闭详情</v-btn>
           </template>
         </v-card>
@@ -117,7 +116,7 @@ import { ref,onMounted } from 'vue';
 import ToDoWorkRequest from '@/composables/ToDoWorkRequest'
 
 let currentItemId = ref(null);
-let iframeSrc = ref('/TodoDetails');
+let iframeSrc = ref('getDetailUrl(currentItemId)');
 const apiUrl = 'http://127.0.0.1:20220';
 const isCardVisible = ref(false);
 
@@ -171,7 +170,8 @@ async function addNewItemFromInput() {
     });
 
     const {data, error} = await ToDoWorkRequest.create(newTodo);
-    const result=JSON.parse(data.value);
+    //原本为JSON.parse(data.value);
+    const result=JSON.parse(data.value as string);
     const createdTodoId = result.content;
     console.log(data);
     console.log(createdTodoId);
@@ -257,10 +257,37 @@ async function getItemList()
 
 }
 
-function getDetailUrl(itemId:number) {
-  return `/TodoDetails?itemId=${itemId}`;
+
+
+/**
+ * 点击整个item的鸡肋函数
+ * @param item
+ * @param stopPropagation
+ */
+function onItemOrBtnClick(item:any, {stopPropagation}: MouseEvent) {
+  stopPropagation();
+  //接受两个参数：item 表示被点击的项（即 v-list-item 中的数据项），event 表示触发点击事件的事件对象。
+  //使用 event.stopPropagation() 阻止事件冒泡，确保只有当前的 v-list-item 收到点击事件，而不会传播到其他元素。
+  console.log('Item clicked:', item);
 }
 
+/**
+ * 跳转到特定item的番茄中进行计时??还是没想法
+ * @returns {Promise<void>}
+ */
+async function toTomatoClock(innerId:number): Promise<void> {
+  await router.push({ path: '/TodoPage/TomatoClock/', query: { itemId:innerId } });
+  //进入番茄钟页面并传递该item的唯一id给它......
+  //计时完成后根据该itemid将数据绑定到item上
+
+}
+
+
+function getDetailUrl(itemId: number | null) {
+  if (itemId === null) return '/TodoDetails'; // 当没有选中项时返回默认地址
+
+  return `/TodoDetails?itemId=${itemId}`;
+}
 /**
  * 到底要怎么样才能在卡片展开式按照itemid拉取相应item的内容啊
  * @param item
@@ -280,34 +307,6 @@ async function toggleCardDetails(item:any): Promise<void> {
   }
   console.error("根本没有卡片");
 }
-
-/**
- * 点击整个item的鸡肋函数
- * @param item
- */
-function onItemOrBtnClick(item:any) {
-  //接受两个参数：item 表示被点击的项（即 v-list-item 中的数据项），event 表示触发点击事件的事件对象。
-  //使用 event.stopPropagation() 阻止事件冒泡，确保只有当前的 v-list-item 收到点击事件，而不会传播到其他元素。
-  console.log('Item clicked:', item);
-}
-
-/**
- * 跳转到特定item的番茄中进行计时??还是没想法
- * @returns {Promise<void>}
- */
-async function toTomatoClock(innerId:number): Promise<void> {
-  await router.push({ path: '/TodoPage/TomatoClock/', query: { itemId:innerId } });
-  //进入番茄钟页面并传递该item的唯一id给它......
-  //计时完成后根据该itemid将数据绑定到item上
-
-}
-
-//  需要nico配个路由才行  router.js (或相应的路由配置文件)
-// {
-//   path: '/TodoPage/TomatoClock/:itemId',
-//       component: TomatoPage,
-//     name: 'TomatoClock'
-// }
 
 </script>
 

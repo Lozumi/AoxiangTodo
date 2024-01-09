@@ -345,9 +345,11 @@ let remainingTotalSeconds = ref<number | null>(null);
 let countdownTimeRef = ref('25:00');
 let itemId: Ref<number | undefined>;
 
+
 onMounted(() => {
   itemId = computed(() => Number(route.query.itemId));
   if(itemId.value){
+
     console.log('receivedInnerId:',itemId.value);
   }
 });
@@ -355,11 +357,8 @@ onMounted(() => {
 function saveAndCloseModifyTimeDialog() {
   const workTimeInMinutes = formatTimeToMinutes(sliderTimeValue.value);
   const restTimeInMinutes = formatTimeToMinutes(restTimeValue.value);
-  // 将分钟数转换为字符串
-  const workTimeString = workTimeInMinutes.toString();
-  const restTimeString = restTimeInMinutes.toString();
 
-  pomodoroService.edit(workTimeString, restTimeString);
+  pomodoroService.edit(workTimeInMinutes, restTimeInMinutes);
   dialog2.value = false;
 }
 
@@ -443,7 +442,7 @@ const handleFocus = () => {
   } else if (remainingTotalSeconds.value === null) {
     // 当倒计时尚未启动时（点击“开始专注”）
     // 确保 innerId 已经从路由参数中正确获取到，并转换为数字类型
-    const innerIdNumber = Number(receivedInnerId);
+    const innerIdNumber = Number(itemId.value);
     if (!isNaN(innerIdNumber)) {
       pomodoroService.start(innerIdNumber); // 使用捕获到的 innerId 参数（已转换为 number 类型）
     }
@@ -452,10 +451,10 @@ const handleFocus = () => {
     focusButtonActive.value = true;
   }
 };
-function closeDialog4AndEndPomodoro() {
+async function closeDialog4AndEndPomodoro() {
   dialog4.value = false;
   dialog1.value = false;
-  pomodoroService.end();
+  const {data} = await pomodoroService.end();
 }
 
 const handleRecord = () => {
