@@ -35,17 +35,17 @@
                     hide-details="auto"
                     v-model="state.loginData.password"
                 ></v-text-field>
-                <v-card v-if="loginResult" class="mt-5">
+                <v-card v-if="state.loginResult" class="mt-5">
                   <v-card-title class="border-bottom mb-4">
                     <p class="text-h5">登录返回包：</p>
                   </v-card-title>
                   <v-card-text>
-                    <pre>{{ loginResult }}</pre>
+                    <pre>{{ state.loginResult }}</pre>
                   </v-card-text>
                 </v-card>
 
                 <v-alert
-                    v-if="loginError"
+                    v-if="state.loginError"
                     type="warning"
                     class="mt-5"
                     text="登录错误，请检查账号密码是否输入正确">
@@ -117,20 +117,20 @@
               >
                 注册
               </v-btn>
-              <v-card v-if="registerResult" class="mt-5">
+              <v-card v-if="state.registerResult" class="mt-5">
                 <v-card-title class="border-bottom mb-4">
                   <p class="text-h5">注册返回包：</p>
                 </v-card-title>
                 <v-card-text>
-                  <pre>{{ registerResult }}</pre>
+                  <pre>{{ state.registerResult }}</pre>
                 </v-card-text>
               </v-card>
               <v-alert
-                  v-if="registerError"
+                  v-if="state.registerError"
                   type="error"
                   class="mt-5">
                 <h2 class="text-h3">注册错误:</h2>
-                <pre>{{ registerError }}</pre>
+                <pre>{{ state.registerError }}</pre>
               </v-alert>
 
             </v-window-item>
@@ -140,7 +140,7 @@
     </v-row>
   </v-card>
   <v-progress-linear
-      v-if="isLoginPending || isRegisterPending"
+      v-if="state.isLoginPending || state.isRegisterPending"
       class="mt-5">
   </v-progress-linear>
 
@@ -151,13 +151,19 @@
 <!---->
 <!---->
 <script setup>
-const loginSend = async () => {
-  await refresh();
-};
+import AccountRequest from "../composables/AccountRequest.ts"
+import { useRouter } from "vue-router";
+
+// const loginSend = async () => {
+//   await refresh();
+// };
 
 const confirmPasswordRules = {
   sameAs: (value) => value === state.registerData.password,
 };
+
+const router = useRouter()
+
 
 const state = reactive({
       loading: false,
@@ -170,66 +176,84 @@ const state = reactive({
         account: '',
         userName: '',
         password: '',
-        // confirmPassword: '',
+        confirmPassword: '',
       },
       loginResult: null,
+      isLoginPending: null,
       loginError: null,
+
+      isRegisterPending: null,
       registerResult: null,
       registerError: null,
     }
 );
 //**********************验证函数***************************
-const base = 'http://10.60.50.102:20220/'
-const apiUrlLogin = 'UserLogin';
+// const base = 'http://10.60.50.102:20220/'
+// const apiUrlLogin = 'UserLogin';
+//
+// const apiUrlRegister = 'UserRegister';
+//
+// const loginResult = ref(null);
+//
+// const registerResult = ref(null);
 
-const apiUrlRegister = 'UserRegister';
+// const {
+//   pending: isLoginPending,
+//   error: loginError,
+//   refresh: refreshLogin,
+//   data: loginResponse
+// } = useFetch(apiUrlLogin, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: state.loginData,
+//       baseURL: base,
+//       immediate: false,
+//       watch: false,
+//     }
+// );
 
-const loginResult = ref(null);
 
-const registerResult = ref(null);
 
-const {
-  pending: isLoginPending,
-  error: loginError,
-  refresh: refreshLogin,
-  data: loginResponse
-} = useFetch(apiUrlLogin, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: state.loginData,
-      baseURL: base,
-      immediate: false,
-      watch: false,
-    }
-);
-
-const {
-  pending: isRegisterPending,
-  error: registerError,
-  refresh: refreshRegister,
-  data: registerResponse
-} = useFetch(apiUrlRegister, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: state.registerData,
-      baseURL: base,
-      immediate: false,
-      watch: false,
-    }
-);
+// const {
+//   pending: isRegisterPending,
+//   error: registerError,
+//   refresh: refreshRegister,
+//   data: registerResponse
+// } = useFetch('/', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: {
+//         content: {
+//           '@class': 'shared.UserInfo',
+//           "account": "234", "userName": "345", "password": "345",
+//           // confirmPassword: undefined
+//         },
+//         requestType: 'UserRegister',
+//       },
+//       baseURL: base,
+//       immediate: false,
+//       watch: false,
+//     }
+// );
 
 async function handleLogin() {
   if (state.loginData.account && state.loginData.password) {
-    await refreshLogin();
-    if (isLoginPending.value === false && loginError.value === null) {
+    // await refreshLogin();
+    if (state.isLoginPending === false && state.loginError === null) {
+      // 登录，并结构出data，pending，error三种状态进行赋值
+      const {data, pending, error} = await AccountRequest.login(state.loginData)
       // 更新登录结果到组件内部状态
-      state.loginResult = loginResponse.value;
-      loginError.value = null;
+      // TODO 此处根据接口返回值确定
+      state.loginResult = data
+      state.loginError = error
+      state.isLoginPending = pending
 
+      // 跳转到主页
+      await router.push("/index")
     }
   }
 }
@@ -241,16 +265,34 @@ async function handleRegister() {
       state.registerData.password &&
       state.registerData.password === state.registerData.confirmPassword
   ) {
-    await refreshRegister();
-    if (isRegisterPending.value === false && registerError.value === null) {
+
+    // 演示
+
+    // 跳转至登录页面或其他逻辑
+    // return state.tab = "login";
+
+    // await refreshRegister();
+    if (state.isRegisterPending === false && state.registerError === null) {
+      const {data, pending, error} = await AccountRequest.register(state.registerData)
       // 更新注册结果到组件内部状态
-      state.registerResult = registerResponse.value;
-      registerError.value = null;
+      state.registerResult = data
+      state.registerError = error
+      state.isRegisterPending = pending
 
       // 跳转至登录页面或其他逻辑
+      state.tab = "login"
     }
   }
 }
+
+// 可以删除
+onMounted(async () => {
+  state.loginData.account = "123"
+  state.loginData.password = "123"
+  const res = await AccountRequest.login(state.loginData)
+  console.log(res)
+})
+
 </script>
 
 

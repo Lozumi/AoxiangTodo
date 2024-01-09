@@ -1,6 +1,6 @@
 // nuxt项目目录/composables/AccountRequest.ts
 
-let baseUrl = 'http://localhost:20220'
+let baseUrl = 'http://10.60.50.102:20220'
 
 const sendRequest = (body: any) => {
     return useFetch(baseUrl, {
@@ -15,26 +15,27 @@ const sendRequest = (body: any) => {
 
 export default new class AccountRequest {
 
-    login(account: string,password: string) {
+    login(loginData: any) {
         const requestBody = {
             content:JSON.stringify({
                 '@class': 'shared.UserInfo',
                 userName : '',
-                account: account,
-                password: password
+                account: loginData.account,
+                password: loginData.password
             }),
             requestType: 'UserLogin',
         };
+        console.log(requestBody)
         return sendRequest(requestBody);
     }
 
-    register(userName: string,account: string,password: string) {
+    register(registerData: any) {
         const requestBody = {
             content:JSON.stringify({
                 '@class': 'shared.UserInfo',
-                userName : userName,
-                account: account,
-                password: password
+                userName : registerData.userName,
+                account: registerData.account,
+                password: registerData.password
             }),
             requestType: 'UserRegister',
         };
