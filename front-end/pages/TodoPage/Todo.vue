@@ -56,6 +56,7 @@
                 <v-btn
                     :ref="'btnInfo' + index"
                     class="details-btn"
+                    :disabled="isCardVisible "
                     icon=" mdi-file-document-outline"
                     variant="text"
                     style="font-size: 20px;"
@@ -83,10 +84,10 @@
           </v-list>
         </v-card>
       </div>
-
       <div class="column right"
-           :class="{ 'hidden': '' }">
-        <!-- ... 卡片内容 -->
+           :class="{ 'hidden': !isCardVisible  }">
+
+      <!-- ... 卡片内容 -->
         <v-card>
           <v-card-text>
             <iframe
@@ -95,6 +96,13 @@
                 class="right-card"
             ></iframe>
           </v-card-text>
+          <!-- 新增关闭卡片按钮，仅在卡片显示时出现 -->
+          <template v-if="isCardVisible ">
+            <v-btn
+                class="close-details-btn"
+                @click.stop="toggleCardDetails(items.find(i => i.innerId === currentItemId.value))"
+            >关闭详情</v-btn>
+          </template>
         </v-card>
       </div>
     </div>
@@ -109,7 +117,7 @@ import { ref,onMounted } from 'vue';
 import ToDoWorkRequest from '@/composables/ToDoWorkRequest'
 
 let currentItemId = ref(null);
-const iframeSrc = ref('/TodoDetails');
+let iframeSrc = ref('/TodoDetails');
 const apiUrl = 'http://127.0.0.1:20220';
 const isCardVisible = ref(false);
 
@@ -136,8 +144,9 @@ function formatISOString(date) {
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 }
 
-onMounted(() => {
+onMounted(async () => {
   // 如果有初始数据加载需求，请在此处使用useFetch或其他方式获取待办事项列表
+     await getItemList();
 });
 
 
@@ -209,13 +218,55 @@ async function subSelectedItem(item) {
   }
 }
 
+async function getItemList()
+{
+    const {data} = await ToDoWorkRequest.enumerate();
+    const jsonItems = JSON.parse(data.value);
+
+  if (Array.isArray(jsonItems)) {
+    items.value = jsonItems.map((itemData) => ({
+
+      layer: itemData.layer,
+      innerId: itemData.innerId || null,
+      importancePriority: itemData.importancePriority,
+      emergencyPriority: itemData.emergencyPriority,
+      title: itemData.title,
+      subtitle: itemData.subtitle || null,
+      description: itemData.description,
+      createTime: itemData.createTime,
+      startTime: itemData.startTime,
+      deadLine: itemData.deadLine,
+      status: itemData.status,
+      subToDoWorkItemInnerIdList: itemData.subToDoWorkItemInnerIdList,
+      pomodoroRecordInnerIdList: itemData.pomodoroRecordInnerIdList,
+
+      isChecked: itemData.isChecked || false,
+    }));
+  }
+}
+
+function getDetailUrl(itemId) {
+  return `/TodoDetails?itemId=${itemId}`;
+}
+
   /**
    * 到底要怎么样才能在卡片展开式按照itemid拉取相应item的内容啊
    * @param item
    * @returns {Promise<void>}
    */
   async function toggleCardDetails(item) {
-
+    if (isCardVisible.value) {
+      // 隐藏卡片，并清空内容（这里假设iframe会重新加载页面）
+      isCardVisible.value = false;
+      currentItemId.value = null;
+      console.error("隐藏卡片");
+    } else {
+      // 显示卡片，并设置当前选中项
+      isCardVisible.value = true;
+      currentItemId.value = item.innerId;
+      console.error("显示卡片:");
+    }
+    console.error("根本没有卡片");
   }
 
   /**
@@ -270,6 +321,12 @@ body {
   margin-left:-40px;
 }
 
+.column.right{
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  position: relative; /* 添加相对定位以便子元素绝对定位 */
+}
+
 .row {
   display: flex;
   border-inline-style: none;
@@ -317,11 +374,22 @@ body {
 }
 
 .right-card{
-  width:500px;
-  height:500px;
+  width: 550px;
+  height: 500px;
+  margin: auto; /* 垂直居中，配合position: absolute;使用 */
+
+  right: 0; /* 紧贴屏幕右侧 */
 }
 
 .details-btn{
   color:lightslategray;
+}
+
+.close-details-btn{
+  bottom:10px;
+  right:10px;
+  float:right;
+  text-align: center;
+  //position: absolute;
 }
 </style>
