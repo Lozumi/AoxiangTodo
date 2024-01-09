@@ -68,14 +68,14 @@ public class Main {
         httpTest.tryRequestQueryToDoWorkItem(0);
         httpTest.tryRequestStartPomodoro(0);
         AoXiangToDoListSystem.getInstance().localSaveSystemData("D:/test/1.json");
-        new Thread(() -> {
-            try {
-                Thread.sleep(61000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            httpServer.stop();
-        }).start();
+//        new Thread(() -> {
+//            try {
+//                Thread.sleep(61000);
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+//            httpServer.stop();
+//        }).start();
     }
 
     static ResponsePacket enumerateToDoWorkItems(SocketTest test) {
