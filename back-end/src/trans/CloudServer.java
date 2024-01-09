@@ -1,18 +1,11 @@
 package trans;
 
-import util.Encrypt;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 
 public class CloudServer {
     public static final String serverIpAddress = "8.210.61.64:8080";
@@ -22,7 +15,7 @@ public class CloudServer {
     public static boolean sendRegisterRequest(String userName, String account, String hashedPwd) throws IOException {
         String urlStr = String.format(
                 "http://%s/list/register-servlet?user-name=%s&account=%s&password=%s",
-                serverIpAddress, userName, account, hashedPwd
+                serverIpAddress, urlEncoderUTF8(userName), urlEncoderUTF8(account), urlEncoderUTF8(hashedPwd)
         );
         return requestGET(urlStr).equals("Success");
     }
@@ -30,7 +23,7 @@ public class CloudServer {
     public static String sendLoginRequest(String account, String hashedPwd) throws IOException {
         String urlStr = String.format(
                 "http://%s/list/login-servlet?account=%s&password=%s",
-                serverIpAddress, account, hashedPwd
+                serverIpAddress, urlEncoderUTF8(account), urlEncoderUTF8(hashedPwd)
         );
         String tokenResponse = requestGET(urlStr);
         return tokenResponse;
@@ -47,7 +40,7 @@ public class CloudServer {
     public static boolean sendChangeUserInfoRequest(String userToken, String newUserName, String oldHashedPwd, String newHashedPwd) throws IOException {
         String urlStr = String.format(
                 "http://%s/list/change-servlet?token=%s&new-user-name=%s&old-password=%s&new-password=%s",
-                serverIpAddress, userToken, newUserName, oldHashedPwd, newHashedPwd
+                serverIpAddress, urlEncoderUTF8(userToken), urlEncoderUTF8(newUserName), urlEncoderUTF8(oldHashedPwd), urlEncoderUTF8(newHashedPwd)
         );
         return requestGET(urlStr).equals(successString);
     }
@@ -55,14 +48,14 @@ public class CloudServer {
     public static String sendPullRequest(String userToken) throws IOException {
         String urlStr = String.format(
                 "http://%s/list/pull-servlet?token=%s",
-                serverIpAddress, userToken
+                serverIpAddress, urlEncoderUTF8(userToken)
         );
         return requestGET(urlStr);
     }
 
     public static boolean sendPushRequest(String userToken, String systemDataJson) throws IOException {
         String urlStr = String.format(
-                "http://%s/list/overwrite-servlet?token=%s", serverIpAddress, userToken
+                "http://%s/list/overwrite-servlet?token=%s", serverIpAddress, urlEncoderUTF8(userToken)
         );
         return requestPOST(urlStr, systemDataJson).equals(successString);
     }
@@ -98,5 +91,9 @@ public class CloudServer {
             System.err.printf("向%s发送POST请求时发生错误：%s",urlStr,e.getMessage());
             return "Failure";
         }
+    }
+
+    public static String urlEncoderUTF8(String str){
+        return URLEncoder.encode(str, StandardCharsets.UTF_8);
     }
 }
