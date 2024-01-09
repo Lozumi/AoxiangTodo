@@ -5,7 +5,6 @@
         <v-img src="/static/yezi.jpeg" height="100%" max-width="100%"/>
       </v-col>
       <v-col cols="8">
-
         <v-tabs
             v-model="state.tab"
             color="primary"
@@ -17,6 +16,7 @@
 
         <v-card-text>
           <v-window v-model="state.tab">
+
             <!--            <登录窗口>-->
             <v-window-item value="login">
               <div>
@@ -35,24 +35,22 @@
                     hide-details="auto"
                     v-model="state.loginData.password"
                 ></v-text-field>
+
+<!--                此处为登录返回包的界面-->
                 <v-card v-if="state.loginResult" class="mt-5">
                   <v-card-title class="border-bottom mb-4">
-                    <p class="text-h5">登录返回包：</p>
+                    <p class="text-h5"></p>
                   </v-card-title>
                   <v-card-text>
-                    <pre>{{ state.loginResult }}</pre>
+                    <pre>{{ JSON.parse(state.loginResult).message }}</pre>
                   </v-card-text>
                 </v-card>
-
                 <v-alert
                     v-if="state.loginError"
                     type="warning"
                     class="mt-5"
                     text="登录错误，请检查账号密码是否输入正确">
-
                 </v-alert>
-
-                <!--                -->
                 <v-btn
                     :loading="state.loading"
                     class="mb-5"
@@ -63,7 +61,6 @@
                 >
                   登入
                 </v-btn>
-
 
               </div>
             </v-window-item>
@@ -105,6 +102,7 @@
                   class="mt-5"
                   text="确认密码错误,请检查两次输入的密码是否一致">
               </v-alert>
+
               <!--              !isRegisterFormValid ||-->
               <v-btn
                   :disabled="state.registerData.password !== state.registerData.confirmPassword"
@@ -117,12 +115,14 @@
               >
                 注册
               </v-btn>
+
+<!--              此处为注册返回包的界面-->
               <v-card v-if="state.registerResult" class="mt-5">
                 <v-card-title class="border-bottom mb-4">
-                  <p class="text-h5">注册返回包：</p>
+                  <p class="text-h5"></p>
                 </v-card-title>
                 <v-card-text>
-                  <pre>{{ state.registerResult }}</pre>
+                  <pre>{{ JSON.parse(state.registerResult).message}}</pre>
                 </v-card-text>
               </v-card>
               <v-alert
@@ -148,11 +148,10 @@
 <!---->
 <!---->
 <!---->
-<!---->
-<!---->
 <script setup>
-import AccountRequest from "../composables/AccountRequest.ts"
-import { useRouter } from "vue-router";
+import AccountRequest, {baseUrl} from "../composables/AccountRequest.ts"
+import {useRouter} from "vue-router";
+import accountRequest from "../composables/AccountRequest.ts";
 
 // const loginSend = async () => {
 //   await refresh();
@@ -164,6 +163,7 @@ const confirmPasswordRules = {
 
 const router = useRouter()
 
+const resp = ref()
 
 const state = reactive({
       loading: false,
@@ -187,6 +187,8 @@ const state = reactive({
       registerError: null,
     }
 );
+
+
 //**********************验证函数***************************
 // const base = 'http://10.60.50.102:20220/'
 // const apiUrlLogin = 'UserLogin';
@@ -197,68 +199,60 @@ const state = reactive({
 //
 // const registerResult = ref(null);
 
-// const {
-//   pending: isLoginPending,
-//   error: loginError,
-//   refresh: refreshLogin,
-//   data: loginResponse
-// } = useFetch(apiUrlLogin, {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: state.loginData,
-//       baseURL: base,
-//       immediate: false,
-//       watch: false,
-//     }
-// );
-
-
-
-// const {
-//   pending: isRegisterPending,
-//   error: registerError,
-//   refresh: refreshRegister,
-//   data: registerResponse
-// } = useFetch('/', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: {
-//         content: {
-//           '@class': 'shared.UserInfo',
-//           "account": "234", "userName": "345", "password": "345",
-//           // confirmPassword: undefined
-//         },
-//         requestType: 'UserRegister',
-//       },
-//       baseURL: base,
-//       immediate: false,
-//       watch: false,
-//     }
-// );
 
 async function handleLogin() {
-  if (state.loginData.account && state.loginData.password) {
-    // await refreshLogin();
-    if (state.isLoginPending === false && state.loginError === null) {
-      // 登录，并结构出data，pending，error三种状态进行赋值
-      const {data, pending, error} = await AccountRequest.login(state.loginData)
-      // 更新登录结果到组件内部状态
-      // TODO 此处根据接口返回值确定
-      state.loginResult = data
-      state.loginError = error
-      state.isLoginPending = pending
 
-      // 跳转到主页
-      await router.push("/index")
+  state.loginError = null;
+
+  const {
+    pending: isLoginPending,
+    error: loginError,
+    refresh: refreshLogin,
+    data: loginResponse
+  } = AccountRequest.useLogin(state.loginData.account, state.loginData.password)
+
+  if (state.loginData.account && state.loginData.password) {
+
+    await refreshLogin();
+
+    if (!state.isLoginPending && state.loginError === null) {
+
+      // 登录，并结构出data，pending，error三种状态进行赋值
+      await refreshLogin()
+
+      // 更新登录结果到组件内部状态
+      state.loginResult = loginResponse
+      state.loginError = loginError
+      state.isLoginPending = isLoginPending
+      console.log("error:" +state.loginError)
+
+      // 解析json字符串
+      resp.value = parseJson(state.loginResult)
+      // todo(message） resp.message
+
+      // 通过字段中的status进行判断
+      if (resp.value.status !== "Failure") {
+        navigateTo("/")
+      }
     }
   }
 }
 
 async function handleRegister() {
+
+  state.registerError = null;
+
+  const {
+    pending: isRegisterPending,
+    error: registerError,
+    refresh: refreshRegister,
+    data: registerResponse
+  } = accountRequest.useRegister(state.registerData.userName,
+      state.registerData.account,
+      state.registerData.password,)
+
+// AccountRequest.useRegister(state.registerData.userName, state.registerData.account, state.registerData.password)
+
   if (
       state.registerData.account &&
       state.registerData.userName &&
@@ -266,25 +260,32 @@ async function handleRegister() {
       state.registerData.password === state.registerData.confirmPassword
   ) {
 
-    // 演示
+    if (!state.isRegisterPending && state.registerError === null) {
 
-    // 跳转至登录页面或其他逻辑
-    // return state.tab = "login";
+      await refreshRegister()
+      console.log(registerResponse);
 
-    // await refreshRegister();
-    if (state.isRegisterPending === false && state.registerError === null) {
-      const {data, pending, error} = await AccountRequest.register(state.registerData)
       // 更新注册结果到组件内部状态
-      state.registerResult = data
-      state.registerError = error
-      state.isRegisterPending = pending
+      state.registerResult = registerResponse
+      state.registerError = registerError
+      state.isRegisterPending = isRegisterPending
 
-      // 跳转至登录页面或其他逻辑
-      state.tab = "login"
+      // asdvy!12511
+      console.log(registerError)
+      setTimeout(() => {
+        if (!(registerError.value)) {
+          // 跳转至登录页面或其他逻辑
+          state.tab = "login"
+        }
+      }, 500)
     }
   }
 }
 
+
+function parseJson(response) {
+  return JSON.parse(response)
+}
 // 可以删除
 // onMounted(async () => {
 //   state.loginData.account = "123"
@@ -394,7 +395,15 @@ body {
   }
 }
 
+pre {
+  white-space: pre-wrap; /* 允许换行 */
+  word-break: break-all; /* 长单词换行 */
+  overflow-wrap: break-word; /* 强制在需要的地方断行 */
+  max-width: 100%; /* 按照容器宽度显示，避免过长导致的横向溢出 */
+  box-sizing: border-box;
+}
+
 .v-text-field__slot .v-messages {
-  color: red; /*输入有误会提示，但是如果产生提示输入框背景色会溢出*/
+  color: red;
 }
 </style>
