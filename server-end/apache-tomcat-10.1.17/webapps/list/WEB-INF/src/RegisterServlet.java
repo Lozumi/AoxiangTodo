@@ -16,11 +16,11 @@ public class RegisterServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final String success = "Success";
+    private static final String success = "Success";
 
-    private final String failure = "Failure";
+    private static final String failure = "Failure";
 
-    private final int expectedParamCount = 3;
+    private static final int expectedParamCount = 3;
 
     private Hashtable<String, String> parameters = new Hashtable<>() {{
         put("user-name", "");

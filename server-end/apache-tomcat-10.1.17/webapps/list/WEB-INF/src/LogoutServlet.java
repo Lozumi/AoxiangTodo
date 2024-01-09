@@ -16,11 +16,11 @@ public class LogoutServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final String success = "Success";
+    private static final String success = "Success";
 
-    private final String failure = "Failure";
+    private static final String failure = "Failure";
 
-    private final int expectedParamCount = 1;
+    private static final int expectedParamCount = 1;
 
     private Hashtable<String, String> parameters = new Hashtable<>() {{
         put("token", "");
@@ -85,7 +85,7 @@ public class LogoutServlet extends HttpServlet {
             statement.executeUpdate("UPDATE users SET token=NULL where token=\"%s\";".formatted(token));
             statement.executeUpdate(String.format("DELETE FROM tokens WHERE token=\"%s\"; ", token));
             c.commit();
-            System.out.println("User logged in");
+            System.out.println("User logged out");
             out.print(success);
             out.flush();
 

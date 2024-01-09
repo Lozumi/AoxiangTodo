@@ -16,7 +16,7 @@ public class LoginServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final int expectedParamCount = 2;
+    private static final int expectedParamCount = 2;
 
     private Hashtable<String, String> parameters = new Hashtable<>() {{
         put("account", "");
