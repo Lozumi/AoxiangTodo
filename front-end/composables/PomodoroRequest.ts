@@ -31,7 +31,7 @@ export default new class PomodoroRequest {
         return sendRequest(requestBody);
     }
 
-    edit(workTime:string,restTime:string) {
+    edit(workTime:number,restTime:number) {
         const requestBody = {
             content:JSON.stringify({
                 workTime: workTime,
