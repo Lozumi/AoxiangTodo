@@ -34,6 +34,7 @@ export default new class PomodoroRequest {
     edit(workTime:number,restTime:number) {
         const requestBody = {
             content:JSON.stringify({
+                '@class': 'shared.PomodoroInfo',
                 workTime: workTime,
                 restTime : restTime,
             }),
