@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.PreparedStatement;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -12,6 +13,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+/**
+ * RegisterServlet, handle register requests
+ *
+ * @author ZSC
+ */
 public class RegisterServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -71,9 +77,9 @@ public class RegisterServlet extends HttpServlet {
 
         Connection c = dbSingletonInstance.getConnectionToDB();
         try {
-            Statement statement = c.createStatement();
-            ResultSet resultSet = statement.executeQuery(
-                    "SELECT * FROM users WHERE account=\"%s\";".formatted(parameters.get("account")));
+            PreparedStatement statement = c.prepareStatement("SELECT * FROM users WHERE account=?;");
+            statement.setString(1, parameters.get("account"));
+            ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 resultSet.close();
                 statement.close();
@@ -83,11 +89,16 @@ public class RegisterServlet extends HttpServlet {
                 return;
             }
 
-            statement.executeUpdate("""
+            statement = c.prepareStatement("""
                     INSERT INTO users (account, user_name, password)
-                    VALUES ("%s", "%s", "%s");
-                    """.formatted(parameters.get("account"), parameters.get("user-name"), parameters.get("password")));
+                    VALUES (?, ?, ?);
+                    """);
+            statement.setString(1, parameters.get("account"));
+            statement.setString(2, parameters.get("user-name"));
+            statement.setString(3, parameters.get("password"));
+            statement.executeUpdate();
             c.commit();
+
             resultSet.close();
             statement.close();
         } catch (Exception e) {

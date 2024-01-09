@@ -2,6 +2,11 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
+/**
+ * TokenPair to generate and renew tokens
+ *
+ * @author ZSC
+ */
 public final class TokenPair {
     private String token;
     private long expire;

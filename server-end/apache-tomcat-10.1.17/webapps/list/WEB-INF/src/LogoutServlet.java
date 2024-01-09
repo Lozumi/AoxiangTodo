@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.PreparedStatement;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -12,6 +13,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+/**
+ * LogoutServlet, handle logout requests
+ *
+ * @author ZSC
+ */
 public class LogoutServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -69,9 +75,9 @@ public class LogoutServlet extends HttpServlet {
 
         Connection c = dbSingletonInstance.getConnectionToDB();
         try {
-            Statement statement = c.createStatement();
-            ResultSet resultSet = statement.executeQuery(
-                    "SELECT * FROM tokens WHERE token=\"%s\";".formatted(parameters.get("token")));
+            PreparedStatement statement = c.prepareStatement("SELECT * FROM tokens WHERE token=?;");
+            statement.setString(1, parameters.get("token"));
+            ResultSet resultSet = statement.executeQuery();
             if (!resultSet.next()) {
                 resultSet.close();
                 statement.close();
@@ -82,8 +88,12 @@ public class LogoutServlet extends HttpServlet {
             }
 
             String token = resultSet.getString("token");
-            statement.executeUpdate("UPDATE users SET token=NULL where token=\"%s\";".formatted(token));
-            statement.executeUpdate(String.format("DELETE FROM tokens WHERE token=\"%s\"; ", token));
+            statement = c.prepareStatement("UPDATE users SET token=NULL where token=?;");
+            statement.setString(1, token);
+            statement.executeUpdate();
+            statement = c.prepareStatement("DELETE FROM tokens WHERE token=?;");
+            statement.setString(1, token);
+            statement.executeUpdate();
             c.commit();
             System.out.println("User logged out");
             out.print(success);

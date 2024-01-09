@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.PreparedStatement;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -12,6 +13,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+/**
+ * PullServlet, handle pull requests
+ *
+ * @author ZSC
+ */
 public class PullServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -70,9 +76,9 @@ public class PullServlet extends HttpServlet {
         // connect & find token
         Connection c = dbSingletonInstance.getConnectionToDB();
         try {
-            Statement statement = c.createStatement();
-            ResultSet tokenResultSet = statement.executeQuery(
-                    "SELECT * FROM tokens WHERE token=\"%s\";".formatted(parameters.get("token")));
+            PreparedStatement statement = c.prepareStatement("SELECT * FROM tokens WHERE token=?;");
+            statement.setString(1, parameters.get("token"));
+            ResultSet tokenResultSet = statement.executeQuery();
             if (!tokenResultSet.next()) {
                 tokenResultSet.close();
                 statement.close();
@@ -97,13 +103,16 @@ public class PullServlet extends HttpServlet {
 
             // renew token
             TokenPair newToken = new TokenPair(token, expire).renew();
-            statement.executeUpdate(String.format("UPDATE tokens SET expire_time=%d WHERE token=\"%s\";",
-                    newToken.getExpire(), newToken.getToken()));
+            statement = c.prepareStatement("UPDATE tokens SET expire_time=? WHERE token=?;");
+            statement.setLong(1, newToken.getExpire());
+            statement.setString(2, newToken.getToken());
+            statement.executeUpdate();
             c.commit();
 
             // get list and ret
-            ResultSet listResultSet = statement.executeQuery(
-                    "SELECT * FROM users WHERE account=\"%s\"".formatted(account));
+            statement = c.prepareStatement("SELECT * FROM users WHERE account=?;");
+            statement.setString(1, account);
+            ResultSet listResultSet = statement.executeQuery();
             String todoList = listResultSet.getString("todo_list");
             if (todoList == null) {
                 out.print("");

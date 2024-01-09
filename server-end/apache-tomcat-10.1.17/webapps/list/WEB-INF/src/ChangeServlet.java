@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.PreparedStatement;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -12,6 +13,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+/**
+ * ChangeServlet, handle change requests
+ *
+ * @author ZSC
+ */
 public class ChangeServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -72,9 +78,9 @@ public class ChangeServlet extends HttpServlet {
 
         Connection c = dbSingletonInstance.getConnectionToDB();
         try {
-            Statement statement = c.createStatement();
-            ResultSet tokenResultSet = statement.executeQuery(
-                    "SELECT * FROM tokens WHERE token=\"%s\";".formatted(parameters.get("token")));
+            PreparedStatement statement = c.prepareStatement("SELECT * FROM tokens WHERE token=?;");
+            statement.setString(1, parameters.get("token"));
+            ResultSet tokenResultSet = statement.executeQuery();
             if (!tokenResultSet.next()) {
                 tokenResultSet.close();
                 statement.close();
@@ -96,19 +102,24 @@ public class ChangeServlet extends HttpServlet {
                 return;
             }
             TokenPair newToken = new TokenPair(token, expire).renew();
-            statement.executeUpdate(String.format("UPDATE tokens SET expire_time=%d WHERE token=\"%s\";",
-                    newToken.getExpire(), newToken.getToken()));
+            statement = c.prepareStatement("UPDATE tokens SET expire_time=? WHERE token=?;");
+            statement.setLong(1, newToken.getExpire());
+            statement.setString(2, newToken.getToken());
+            statement.executeUpdate();
             c.commit();
 
-            ResultSet userResultSet = statement.executeQuery(
-                    "SELECT * FROM users WHERE account=\"%s\"".formatted(account));
+            statement = c.prepareStatement("SELECT * FROM users WHERE account=?;");
+            statement.setString(1, account);
+            ResultSet userResultSet = statement.executeQuery();
             if (parameters.get("old-password").equals(userResultSet.getString("password"))) {
-                statement.executeUpdate("UPDATE users SET user_name=\"%s\" WHERE account=\"%s\"".formatted(
-                        parameters.get("new-user-name"), account
-                ));
-                statement.executeUpdate("UPDATE users SET password=\"%s\" WHERE account=\"%s\"".formatted(
-                        parameters.get("new-password"), account
-                ));
+                statement = c.prepareStatement("UPDATE users SET user_name=? WHERE account=?;");
+                statement.setString(1, parameters.get("new-user-name"));
+                statement.setString(2, account);
+                statement.executeUpdate();
+                statement = c.prepareStatement("UPDATE users SET password=? WHERE account=?;");
+                statement.setString(1, parameters.get("new-password"));
+                statement.setString(2, account);
+                statement.executeUpdate();
                 c.commit();
                 System.out.println("User info changed successfully");
                 out.print(success);

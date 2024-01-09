@@ -2,6 +2,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
+/**
+ * SingletonInstance providing sync sqlite db connection
+ *
+ * @author ZSC
+ */
 public final class DBSingletonInstance implements AutoCloseable {
     private volatile static DBSingletonInstance dbSingletonInstance;
 
