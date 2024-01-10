@@ -39,39 +39,11 @@ public class Main {
 
         HttpTest httpTest = new HttpTest("localhost:20220");
 
-        RequestPacket addItemRequestPacket = new RequestPacket();
-        ToDoWorkItem item = new ToDoWorkItem();
-        item.setStartTime(Instant.now().plusSeconds(60));
-        item.setDeadLine(Instant.now().plusSeconds(6000));
-        item.setTitle("玩原神");
-        item.setSubtitle("玩（）玩的");
-        item.setStatus(WorkItemStatus.Activated);
-        item.setImportancePriority(10);
-        item.setEmergencyPriority(10);
-        String itemJson = item.toJsonString();
-        addItemRequestPacket.setContent(itemJson);
-        addItemRequestPacket.setRequestType(RequestType.CreateToDoWork);
-        String st = addItemRequestPacket.toJsonString();
-        System.err.println(item.toJsonString());
-        System.out.printf("添加待办事项结果：%s\n", httpTest.tryRequest(addItemRequestPacket).toJsonString());
-         System.out.printf("添加待办事项结果：%s\n", httpTest.tryRequest(addItemRequestPacket).toJsonString());
-
-        RequestPacket enumerateRequestPacket = new RequestPacket();
-        enumerateRequestPacket.setRequestType(RequestType.EnumerateToDoWorkList);
-        System.out.printf("查询待办事项结果：%s\n", httpTest.tryRequest(enumerateRequestPacket).getContent());
-        UserInfo info = new UserInfo();
-        info.setAccount("uzi");
-        info.setPassword("uzi94yyds!");
-        info.setUserName("澡子哥");
-        httpTest.tryRequestUserRegister(info);
-        httpTest.tryRequestUserLogin(info);
-
-        httpTest.tryRequestSynchronize();
-//        httpTest.tryRequestQueryToDoWorkItem(0);
-//        httpTest.tryRequestStartPomodoro(0);
-//
-//        Thread.sleep(5000);
-//        httpTest.tryRequestExit();
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserName("你干嘛");
+        userInfo.setAccount("this");
+        userInfo.setPassword("jvavisthebestlanguage1!");
+        httpTest.tryRequestUserRegister(userInfo);
     }
 
     static ResponsePacket enumerateToDoWorkItems(SocketTest test) {

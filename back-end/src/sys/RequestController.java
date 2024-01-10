@@ -91,7 +91,7 @@ public class RequestController {
             return packet;
         }
 
-        if (pomodoroInfo.getWorkTime() < 10 || pomodoroInfo.getWorkTime() > 90) {
+        if (pomodoroInfo.getWorkTime() < 0 || pomodoroInfo.getWorkTime() > 90) {
             packet.setMessage(String.format("参数错误：番茄钟工作时间应当大于10分钟且小于90分钟，当前尝试将工作时间设为 %s 分钟", pomodoroInfo.getWorkTime()));
             return packet;
         }
@@ -165,14 +165,14 @@ public class RequestController {
         }
 
         User user = new User();
-        user.setPassword(userInfo.getPassword());
+        user.setEncryptedPassword(Encrypt.md5Hash(userInfo.getPassword()));
         user.setAccount(userInfo.getAccount());
 
-        if (!user.isValidAccount()) {
+        if (!User.isValidAccount(userInfo.getAccount())) {
             packet.setMessage(Messages.ZH_CN.USER_WRONG_ACCOUNT_FORMAT);
             return packet;
         }
-        if (!user.isValidPassword()) {
+        if (!User.isValidPassword(userInfo.getPassword())) {
             packet.setMessage(Messages.ZH_CN.USER_WRONG_PASSWORD_FORMAT);
             return packet;
         }

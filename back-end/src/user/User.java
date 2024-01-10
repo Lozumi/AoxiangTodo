@@ -1,5 +1,6 @@
 package user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import shared.JsonConvertable;
 import util.Encrypt;
 import util.JsonUtility;
@@ -21,7 +22,7 @@ public class User implements JsonConvertable {
      * 用户token（凭证）
      * 用户状态
      */
-    String userName, account, password, token;
+    String userName, account, encryptedPassword, token;
 
     /**
      * 设置用户账号
@@ -31,16 +32,6 @@ public class User implements JsonConvertable {
     public void setAccount(String account) {
         this.account = account;
     }
-
-    /**
-     * 设置用户密码
-     *
-     * @param password 用户密码
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     /**
      * 设置用户名
      *
@@ -90,19 +81,13 @@ public class User implements JsonConvertable {
      *
      * @return 加密过的密码（作为唯一识别，系统中不出现密码的明文对比）
      */
-    public String getEncryptedPassword() throws NoSuchAlgorithmException {
-        return Encrypt.md5Hash(password);
+    public String getEncryptedPassword() {
+        return encryptedPassword;
     }
 
-
-    public boolean isValidPassword() {
-        return isValidPassword(this.password);
+    public void setEncryptedPassword(String encryptedPassword){
+        this.encryptedPassword = encryptedPassword;
     }
-
-    public boolean isValidAccount() {
-        return isValidAccount(this.account);
-    }
-
     /**
      * 校验密码格式
      * 格式要求：可见的ASCII字符，长度在8-32个字符之间，必须同时包含字母、数字、符号三个种类的字符
@@ -125,7 +110,6 @@ public class User implements JsonConvertable {
 
         return matcher.matches();
     }
-
     public static boolean isValidAccount(String account) {
         if (account == null)
             return false;
