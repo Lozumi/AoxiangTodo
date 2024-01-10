@@ -98,9 +98,8 @@
           <!-- 新增关闭卡片按钮，仅在卡片显示时出现 -->
           <template v-if="isCardVisible ">
             <v-btn
-                class="close-details-btn"
-                @click.stop="toggleCardDetails(items.find(i => i.innerId == currentItemId))"
-            >关闭详情</v-btn>
+                class="close-details-btn"></v-btn>
+<!--                @click.stop="toggleCardDetails(item.innerId.valueOf())"-->
           </template>
         </v-card>
       </div>
@@ -225,6 +224,7 @@ async function getItemList()
   const {data} = await ToDoWorkRequest.enumerate();
   if (typeof data.value === 'string') {
     let jsonItems: any;
+    console.log('data.value:',data.value);
     try {
       jsonItems = JSON.parse(data.value);
 
@@ -288,24 +288,36 @@ function getDetailUrl(itemId: number | null) {
 
   return `/TodoDetails?itemId=${itemId}`;
 }
+
+/**
+ //  * 跳转到特定item的番茄中进行计时??还是没想法
+ //  * @returns {Promise<void>}
+ //  */
+// async function toTomatoClock(innerId:number): Promise<void> {
+//   await router.push({ path: '/TodoPage/TomatoClock/', query: { itemId:innerId } });
+//   //进入番茄钟页面并传递该item的唯一id给它......
+//   //计时完成后根据该itemid将数据绑定到item上
+//
+// }
+
 /**
  * 到底要怎么样才能在卡片展开式按照itemid拉取相应item的内容啊
- * @param item
  * @returns {Promise<void>}
  */
-async function toggleCardDetails(item:any): Promise<void> {
-  if (isCardVisible.value) {
-    // 隐藏卡片，并清空内容（这里假设iframe会重新加载页面）
-    isCardVisible.value = false;
-    currentItemId.value = null;
-    console.error("隐藏卡片");
-  } else {
-    // 显示卡片，并设置当前选中项
-    isCardVisible.value = true;
-    currentItemId.value = item.innerId;
-    console.error("显示卡片:");
-  }
-  console.error("根本没有卡片");
+async function toggleCardDetails(innerId:number): Promise<void> {
+  await router.push({ path: '/TodoPage/ToDoDetails/', query: { itemId:innerId} });
+  // if (isCardVisible.value) {
+  //   // 隐藏卡片，并清空内容（这里假设iframe会重新加载页面）
+  //   isCardVisible.value = false;
+  //   currentItemId.value = null;
+  //   console.error("隐藏卡片");
+  // } else {
+  //   // 显示卡片，并设置当前选中项
+  //   isCardVisible.value = true;
+  //   currentItemId.value = item.innerId;
+  //   console.error("显示卡片:");
+  // }
+  // console.error("根本没有卡片");
 }
 
 </script>

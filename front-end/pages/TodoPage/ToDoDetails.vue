@@ -305,7 +305,7 @@
 <script setup lang="ts">
 
 import {computed, ref, watch} from 'vue';
-import ToDoWorkRequest from "../composables/ToDoWorkRequest";
+import ToDoWorkRequest from "~/composables/ToDoWorkRequest";
 import { useRoute } from 'vue-router';
 
 const text = ref<string>('center');
@@ -356,7 +356,7 @@ const expansionTitle_1 = ref<string>('未设置');
 
 const expansionColor_1 = ref<string>('gray');
 
-const innerId = ref<number>(0);
+let itemId: Ref<number | undefined>;
 
 let importancePriority = ref<number>(0);
 
@@ -615,10 +615,13 @@ function changeExColor_1(color: string){
 }
 
 onMounted(() => {
-  innerId.value = computed(() => Number(route.query.innerId));
-  if(innerId.value){
-
-    console.log('receivedInnerId:',innerId.value);
+  itemId = computed(() => Number(route.query.itemId));
+  if(itemId){
+    console.log('received:',itemId);
+    console.log('receivedInnerId',itemId.value)
+  }
+  else{
+    console.error('error:真蚌埠住了');
   }
 });
 

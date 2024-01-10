@@ -348,8 +348,8 @@ let itemId: Ref<number | undefined>;
 
 onMounted(() => {
   itemId = computed(() => Number(route.query.itemId));
-  if(itemId.value){
-
+  if(itemId){
+    console.log('received',itemId);
     console.log('receivedInnerId:',itemId.value);
   }
 });
