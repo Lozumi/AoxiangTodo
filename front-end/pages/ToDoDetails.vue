@@ -265,15 +265,6 @@
               </v-card>
             </v-list-item>
 
-            <!--上传图片-->
-            <v-list-item>
-              <v-file-input
-                  label="上传图片"
-                  variant="underlined"
-                  color="#3A8FB7"></v-file-input>
-            </v-list-item>
-            <v-divider></v-divider>  <!--下划线-->
-
             <v-toolbar color="white">
               <template v-slot:append>
                 <v-btn
