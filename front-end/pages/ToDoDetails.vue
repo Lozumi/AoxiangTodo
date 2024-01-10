@@ -42,14 +42,12 @@
                       <v-avatar :color="tile.color"
                                 size = "x-small"></v-avatar>
                     </template>
-                    <v-list-content>
                       <v-list-item-title>
                         <!-- 使用条件语句判断是否要对该item实现特殊处理 -->
                         <span v-if="tile.title === specialTitle"
                               style="color: lightskyblue;">{{ tile.title }}</span>
                         <span v-else>{{ tile.title }}</span>
                       </v-list-item-title>
-                    </v-list-content>
 
                     <template v-slot:append>
                       <v-btn elevation="0">
@@ -69,8 +67,7 @@
                             <v-card-actions>
                               <v-btn color="primary"
                                      block
-                                     @click="_dialog = false;
-                                           removeFolder(index)">确定</v-btn>
+                                     @click="_dialog = false; removeFolder(tile.title)">确定</v-btn>
                             </v-card-actions>
                           </v-card>
                         </v-dialog>
@@ -116,6 +113,13 @@
                   color="#3A8FB7"
               ></v-text-field>
 
+              <!--任务备注-->
+              <v-text-field
+                  label="任务备注"
+                  color="#3A8FB7"
+                  variant="solo"
+              ></v-text-field>
+
               <!--任务描述-->
               <v-text-field
                   v-model="inputValue"
@@ -141,23 +145,24 @@
                 <v-btn>
                   明天
                 </v-btn>
-              </v-btn-toggle>
 
-              <v-btn class="ma-2"
-                     @click="expand = !expand; togglePanel"
-                     style="color: #9796f0"
-                     elevation="0"
-              >
-                <v-icon>mdi-calendar</v-icon>
-                <v-btn-title>{{formattedDate}}</v-btn-title>
-              </v-btn>
+                <v-btn @click="expand = !expand;
+                    togglePanel"
+                       elevation="0"
+                >
+                  <v-icon>mdi-calendar</v-icon>
+                  <v-btn-title>{{formattedDate}}</v-btn-title>
+                </v-btn>
+
+              </v-btn-toggle>
 
               <v-expand-transition>
                 <v-card
                     v-show="expand"
                 >
                   <v-date-picker color="#9796f0"
-                                 v-model="selectedDate"></v-date-picker>
+                                 v-model="selectedDate"
+                                 @click="expand = !expand"></v-date-picker>
                 </v-card>
               </v-expand-transition>
             </v-list-item>
@@ -178,24 +183,24 @@
                 <v-btn>
                   明天
                 </v-btn>
-              </v-btn-toggle>
 
-              <v-btn class="ma-2"
-                     @click="expand_over = !expand_over;
+                <v-btn @click="expand_over = !expand_over;
                          togglePanel_over"
-                     style="color: #ee9ca7"
-                     elevation="0"
-              >
-                <v-icon>mdi-calendar</v-icon>
-                <v-btn-title>{{formattedDate_over}}</v-btn-title>
-              </v-btn>
+                       elevation="0"
+                >
+                  <v-icon>mdi-calendar</v-icon>
+                  <v-btn-title>{{formattedDate_over}}</v-btn-title>
+                </v-btn>
+
+              </v-btn-toggle>
 
               <v-expand-transition>
                 <v-card
                     v-show="expand_over"
                 >
                   <v-date-picker color="#ee9ca7"
-                                 v-model="selectedDateOver"></v-date-picker>
+                                 v-model="selectedDateOver"
+                                 @click="expand_over = !expand_over"></v-date-picker>
                 </v-card>
               </v-expand-transition>
 
@@ -296,8 +301,6 @@
                     </v-card>
                   </v-dialog>
                 </v-btn>
-
-                <v-btn icon="mdi-dots-horizontal" color="#3A8FB7"></v-btn>
               </template>
             </v-toolbar>
 
@@ -308,244 +311,341 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "Test1.0",
-  data () {
-    return {
-      text: 'center',
-      icon: 'justify',
-      toggle_none: null,
-      toggle_one: 0,
-      toggle_exclusive: 2,
-      toggle_exclusive_over: 2,
-      toggle_multiple: [0, 1, 2],
-      expand: false,
-      expand_over: false,
-      _dialog: false,
-      dialog: false,
-      fileDialog: false,
-      buttonText: '未分类',
-      buttonColor: 'primary',
-      panelOpen: false,
-      sheet: false,
-      inputValue: '',
-      inputText: '',
-      selectedDate: null,
-      selectedDateOver: null,
-      expansionTitle:'未设置',
-      expansionColor:'gray',
-      expansionTitle_1:'未设置',
-      expansionColor_1:'gray',
+<script setup lang="ts">
 
-      tiles: [
-        { color: '#3A8FB7', title: '自定义'},
-        { color: '#dab8ee', title: '不选择文件夹' },
-        { color: '#96DEDA', title: '学习'},
-        { color: '#ffc500', title: '工作'},
-        { color: '#FFB88C', title: '日常'},
-        { color: '#49a09d', title: '旅行'},
-      ],
-      specialTitle: '自定义',
+import {computed, ref, watch} from 'vue';
+import ToDoWorkRequest from "../composables/ToDoWorkRequest";
+import { useRoute } from 'vue-router';
 
-      items: [
-        {
-          text: '不重要',
-          color: '#C3E2C2',
-          index: '1',
-        },
-        {
-          text: '较不重要',
-          color: '#EAECCC',
-          index: '2',
-        },
-        {
-          text: '比较重要',
-          color: '#DBCC95',
-          index: '3',
-        },
-        {
-          text: '很重要',
-          color: '#CD8D7A',
-          index: '4',
-        },
-      ],
-      loading: false,
-      search: '',
-      selected: [],
+const text = ref<string>('center');
 
-      items_1: [
-        {
-          text: '不紧急',
-          color: '#C3E2C2',
-          index: '1',
-        },
-        {
-          text: '较不紧急',
-          color: '#EAECCC',
-          index: '2',
-        },
-        {
-          text: '比较紧急',
-          color: '#DBCC95',
-          index: '3',
-        },
-        {
-          text: '很紧急',
-          color: '#CD8D7A',
-          index: '4',
-        },
-      ]
-    }
+const icon = ref<string>('justify');
+
+const toggle_none = ref<string | null>(null);
+
+const toggle_one = ref<number>(0);
+
+const toggle_exclusive = ref<number>(2);
+
+const toggle_exclusive_over = ref<number>(2);
+
+const toggle_multiple = Object.freeze([0, 1, 2]);
+
+const expand = ref<boolean>(false);
+
+const expand_over = ref<boolean>(false);
+
+const _dialog = ref<boolean>(false);
+
+const dialog = ref<boolean>(false);
+
+const fileDialog = ref<boolean>(false);
+
+const buttonText = ref<string>('未分类');
+
+const buttonColor = ref<string>('primary');
+
+const panelOpen = ref<boolean>(false);
+
+const sheet = ref<boolean>(false);
+
+const inputValue = ref<string>('');
+
+const inputText = ref<string>('');
+
+const selectedDate = ref<Date | null>(null);
+
+const selectedDateOver = ref<Date | null>(null);
+
+const expansionTitle = ref<string>('未设置');
+
+const expansionColor = ref<string>('gray');
+
+const expansionTitle_1 = ref<string>('未设置');
+
+const expansionColor_1 = ref<string>('gray');
+
+const innerId = ref<number>(0);
+
+let importancePriority = ref<number>(0);
+
+let emergencyPriority = ref<number>(0);
+
+let title = ref<string>('');
+
+let subtitle = ref<string>('');
+
+let description = ref<string>('');
+
+let startTime = ref<string>('');
+
+let deadLine = ref<string>('');
+
+const inputTodoTitle = ref<string>('');
+
+const inputTodoSubtitle = ref<string>('');
+
+const inputTodoDescription = ref<string>();
+
+const start_today = ref<string>('');
+
+const start_tomorrow = ref<string>('');
+
+const start_date = ref<string>('');
+
+const end_today = ref<string>('');
+
+const end_tomorrow = ref<string>('');
+
+const end_date = ref<string>('');
+
+const inputImportanceId = ref<number>(0);
+
+const inputEmergencyId = ref<number>(0);
+
+const route = useRoute();
+
+const tiles = ref<{color: string; title: string;}[]>([
+  { color: '#3A8FB7', title: '自定义' },
+  { color: '#dab8ee', title: '不选择文件夹' },
+  { color: '#96DEDA', title: '学习' },
+  { color: '#ffc500', title: '工作' },
+  { color: '#FFB88C', title: '日常' },
+  { color: '#49a09d', title: '旅行' },
+]);
+
+const specialTitle = ref<string>('自定义');
+
+const selected = ref<string[]>([]);
+
+const loading = ref<boolean>(false);
+
+const search = ref<string>('');
+
+const items = Object.freeze([
+  {
+    text: '不重要',
+    color: '#C3E2C2',
+    index: '1',
   },
-
-  computed: {
-    allSelected () {
-      return this.selected.length === this.items.length
-    },
-    categories () {
-      const search = this.search.toLowerCase()
-
-      if (!search) return this.items
-
-      return this.items.filter(item => {
-        const text = item.text.toLowerCase()
-
-        return text.indexOf(search) > -1
-      })
-    },
-    selections () {
-      const selections = []
-
-      for (const selection of this.selected) {
-        selections.push(selection)
-      }
-
-      return selections
-    },
-
-    formattedDate () {
-      // 格式化日期，你可以根据需要选择合适的日期格式
-      if (this.selectedDate) {
-        const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        return this.selectedDate.toLocaleDateString('en-US', options);
-      } else {
-        return '自定义';
-      }
-    },
-
-    formattedDate_over () {
-      // 格式化日期，你可以根据需要选择合适的日期格式
-      if (this.selectedDateOver) {
-        const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        return this.selectedDateOver.toLocaleDateString('en-US', options);
-      } else {
-        return '自定义';
-      }
-    },
-
+  {
+    text: '较不重要',
+    color: '#EAECCC',
+    index: '2',
   },
-
-  watch: {
-    selected () {
-      this.search = ''
-    },
+  {
+    text: '比较重要',
+    color: '#DBCC95',
+    index: '3',
   },
+  {
+    text: '很重要',
+    color: '#CD8D7A',
+    index: '4',
+  },
+]);
 
-  methods: {
-    buttonClicked(buttonName) {
-      // 处理按钮点击事件
-      console.log(`${buttonName} clicked`);
-    },
+const items_1 = Object.freeze([
+  {
+    text: '不紧急',
+    color: '#C3E2C2',
+    index: '1',
+  },
+  {
+    text: '较不紧急',
+    color: '#EAECCC',
+    index: '2',
+  },
+  {
+    text: '比较紧急',
+    color: '#DBCC95',
+    index: '3',
+  },
+  {
+    text: '很紧急',
+    color: '#CD8D7A',
+    index: '4',
+  },
+]);
+const allSelected = computed(() => isEqual());
 
-    next () {
-      this.loading = true
+function isEqual(){
+  return selected.value.length == items.length;
+}
 
-      setTimeout(() => {
-        this.search = ''
-        this.selected = []
-        this.loading = false
-      }, 2000)
-    },
+const categories = computed(() => getCategories());
 
-    togglePanel() {
-      this.panelOpen = !this.panelOpen;
-    },
+function getCategories(){
+  const search1 = search.value.toLocaleLowerCase();
 
-    togglePanel_over() {
-      this.panelOpen = !this.panelOpen;
-    },
+  if(!search1){
+    return items;
+  }
 
-    changeContent(parameter) {
-      if(parameter === '不选择文件夹'){
-        this.buttonText = '未分类';
-      }
-      else{
-        this.buttonText = parameter;
-      }
-    },
+  return items.filter(item => {
+    const text = item.text.toLocaleLowerCase();
 
-    changeColor(parameter) {
-      if(parameter === '不选择文件夹'){
-        this.buttonColor = 'primary';
-      }
-      else{
-        this.buttonColor = parameter;
-      }
-    },
+    return text.indexOf(search1) > -1;
+  })
+}
 
-    openDialog(parameter) {
-      if(parameter === '自定义'){
-        this.fileDialog = true;
-      }
-      else{
-        this.fileDialog = false;
-      }
-    },
+const selections = computed(() => getSelections())
 
-    changeSheet(parameter) {
-      if(parameter === '自定义'){
-        this.sheet = true;
-      }
-      else{
-        this.sheet = false;
-      }
-    },
+function getSelections(){
+  const selections1 = [];
 
-    addFolder(parameter) {
-      this.tiles.push({
-        color: this.getRandomColor(),
-        title: parameter,
-        index: this.tiles.length + 1,
-      });
-    },
+  for(const selection1 of selected.value){
+    selections1.push(selection1);
+  }
 
-    getRandomColor() {
-      // 生成随机颜色的函数
-      return `#${Math.floor(Math.random()*16777215).toString(16)}`;
-    },
+  return selections1;
+}
 
-    removeFolder(parameter) {
-      this.tiles.splice(parameter,1);
-    },
+const formattedDate = computed(() => formatStartDate());
 
-    changeTitle(parameter){
-      this.expansionTitle = parameter;
-    },
+const formattedDate_over = computed(() => formatEndDate());
 
-    changeTitle_1(parameter){
-      this.expansionTitle_1 = parameter;
-    },
-
-    changeExColor(parameter){
-      this.expansionColor = parameter;
-    },
-
-    changeExColor_1(parameter){
-      this.expansionColor_1 = parameter;
-    }
+function formatStartDate(){
+  if(selectedDate.value){
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return selectedDate.value.toLocaleString('en-US', options);
+  }
+  else{
+    let undef = '自定义';
+    return undef;
   }
 }
+
+function formatEndDate(){
+  if(selectedDateOver.value){
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return selectedDateOver.value.toLocaleString('en-US', options);
+  }
+  else{
+    let undef = '自定义';
+    return undef;
+  }
+}
+
+watch(selected, () => {
+  search.value = '';
+});
+
+
+
+function buttonClicked(buttonName: string){
+  console.log(`${buttonName} clicked`);
+}
+
+function next(){
+  loading.value = true;
+
+  setTimeout(() => {
+    search.value = '';
+    selected.value = [];
+    loading.value = false;
+  }, 2000)
+}
+
+function togglePanel(){
+  panelOpen.value = !panelOpen.value;
+}
+
+function togglePanel_over(){
+  panelOpen.value = !panelOpen.value;
+}
+
+function changeContent(title: string){
+  if(title == '不选择文件夹'){
+    buttonText.value = '未分类';
+  }
+  else{
+    buttonText.value = title;
+  }
+}
+
+function changeColor(color: string){
+  if(color == '不选择文件夹'){
+    buttonColor.value = 'primary';
+  }
+  else{
+    buttonColor.value = color;
+  }
+}
+
+function openDialog(title: string){
+  if(title == '自定义'){
+    fileDialog.value = true;
+  }
+  else{
+    fileDialog.value = false;
+  }
+}
+
+function changeSheet(title: string){
+  if(title === '自定义'){
+    sheet.value = true;
+  }
+  else{
+    sheet.value = false;
+  }
+}
+
+function addFolder(title: string){
+  tiles.value.push({
+    color: getRandomColor(),
+    title: title
+  })
+}
+
+function getRandomColor(){
+  // 生成随机颜色的函数
+  return `#${Math.floor(Math.random()*16777215).toString(16)}`;
+}
+
+function removeFolder(index: number){
+  tiles.value.splice(index, 1);
+}
+
+function changeTitle(text: string){
+  expansionTitle.value = text;
+}
+
+function changeTitle_1(text: string){
+  expansionTitle_1.value = text;
+}
+
+function changeExColor(color: string){
+  expansionColor.value = color;
+}
+
+function changeExColor_1(color: string){
+  expansionColor_1.value = color;
+}
+
+onMounted(() => {
+  innerId.value = computed(() => Number(route.query.innerId));
+  if(innerId.value){
+
+    console.log('receivedInnerId:',innerId.value);
+  }
+});
+
+async function QueryToDoWork(innerId: number){
+  const ToDoJson = await ToDoWorkRequest.query(innerId);
+
+  const ToDoString = JSON.parse(ToDoJson as string);
+
+  importancePriority = ToDoString.importancePriority;
+  emergencyPriority = ToDoString.emergencyPriority;
+  title = ToDoString.title;
+  subtitle = ToDoString.subtitle;
+  description = ToDoString.description;
+  startTime = ToDoString.startTime;
+  deadLine = ToDoString.deadLine;
+
+}
+
 </script>
 
 <style scoped>
