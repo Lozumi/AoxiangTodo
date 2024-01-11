@@ -223,32 +223,25 @@ async function getItemList()
 {
   const {data} = await ToDoWorkRequest.enumerate();
   if (typeof data.value === 'string') {
-    let jsonItems: any;
     console.log('data.value:',data.value);
     try {
-      jsonItems = JSON.parse(data.value);
+      const response = JSON.parse(data.value);
 
-      if (Array.isArray(jsonItems)) {
-        items.value = jsonItems.map((itemData) => ({
+      if (typeof response.content === 'string') {
+        const jsonItems = JSON.parse(response.content) as Array<{ [key: string]: any }>;
 
-          layer: itemData.layer,
-          innerId: itemData.innerId || null,
-          importancePriority: itemData.importancePriority,
-          emergencyPriority: itemData.emergencyPriority,
-          title: itemData.title,
-          subtitle: itemData.subtitle || null,
-          description: itemData.description,
-          createTime: itemData.createTime,
-          startTime: itemData.startTime,
-          deadLine: itemData.deadLine,
-          status: itemData.status,
-          subToDoWorkItemInnerIdList: itemData.subToDoWorkItemInnerIdList,
-          pomodoroRecordInnerIdList: itemData.pomodoroRecordInnerIdList,
-
-          isChecked: itemData.isChecked || false,
-        }));
+        if (Array.isArray(jsonItems)) {
+          items.value = jsonItems.map((itemData) => ({
+            innerId: itemData.innerId,
+            isChecked: false, // 默认值设为 false
+            title: itemData.title,
+            subtitle: itemData.subtitle || null,
+          }));
+          console.log(items.value);
+        }
       }
-    } catch (error) {
+        console.log(items.value);
+      } catch (error) {
       console.error('Failed to parse data.value as JSON:', error);
       return;
     }
