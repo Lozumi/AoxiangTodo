@@ -72,7 +72,7 @@ export default new class ToDoWorkRequest {
 
   enumerate() {
     const requestBody = {
-      requestType: 'EnumerateToDoWork',
+      requestType: 'EnumerateToDoWorkList',
     };
     return sendRequest(requestBody);
   }
