@@ -40,12 +40,9 @@ export default new class ToDoWorkRequest {
     return sendRequest(requestBody);
   }
 
-  query(innerId: any) {
+  query(innerId: number) {
     const requestBody = {
-      content:JSON.stringify({
-        '@class': 'shared.ToDoWorkItem',
-        innerId : innerId,
-      }),
+      content:innerId,
       requestType: 'QueryToDoWork',
     };
     return sendRequest(requestBody);
@@ -53,10 +50,7 @@ export default new class ToDoWorkRequest {
 
   delete(innerId: number) {
     const requestBody = {
-      content:JSON.stringify({
-        '@class': 'shared.ToDoWorkItem',
-        innerId : innerId,
-      }),
+      content:innerId,
       requestType: 'DeleteToDoWork',
     };
     return sendRequest(requestBody);
@@ -72,7 +66,8 @@ export default new class ToDoWorkRequest {
 
   enumerate() {
     const requestBody = {
-      requestType: 'EnumerateToDoWork',
+      content: '',
+      requestType: 'EnumerateToDoWorkList',
     };
     return sendRequest(requestBody);
   }

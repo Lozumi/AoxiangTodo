@@ -5,16 +5,21 @@
     </header>
     <aside>
 
-      <button :class="{ whiteButton: isCountDowning, active: !isCountDowning }" @click="handleModifyTimeClick"
-        :disabled="isCountDowning">设立时间
+      <button :class="{ whiteButton: !handleModifyTimeClickActive, active: handleModifyTimeClickActive }"
+              @click="handleModifyTimeClick" :disabled="focusButtonActive">设立时间
       </button>
 
-      <button :class="{ whiteButton: !isCountDowning, active: isCountDowning, redButton: isCountDowning }"
-        @mouseover="hoverFocusButton = true" @mouseleave="hoverFocusButton = false" @click="handleFocus">
-        {{ isCountDowning ? '放弃专注' : '开始专注' }}
+      <button
+          :class="{ whiteButton: !focusButtonActive, active: focusButtonActive, redButton: focusButtonActive }"
+          @mouseover="hoverFocusButton = true"
+          @mouseleave="hoverFocusButton = false"
+          @click="handleFocus"
+      >
+        {{ focusButtonActive ? '放弃专注' : '开始专注' }}
       </button>
 
-      <button :class="{ whiteButton: !recordButtonActive, active: recordButtonActive }" @click="handleRecord">专注记录
+      <button :class="{ whiteButton: !recordButtonActive, active: recordButtonActive }"
+              @click="handleRecord">专注记录
       </button>
 
     </aside>
@@ -22,8 +27,14 @@
     <main>
       <div class="countdown-container">
         <div class="countdown">
-          <v-img class="align-end text-white pulse-animation" height="400" width="400" src="/static/tomato_2.png"
-            opacity="0.9" cover>
+          <v-img
+              class="align-end text-white pulse-animation"
+              height="400"
+              width="400"
+              src="/static/tomato_2.png"
+              opacity="0.9"
+              cover
+          >
             <v-card-title v-if="focusButtonActive">专注中</v-card-title>
           </v-img>
           <div class="timer">
@@ -32,7 +43,11 @@
         </div>
 
         <v-dialog v-model="dialog1" max-width="290">
-          <v-card elevation="12" class="rounded-lg" color="#ffffff" hover>
+          <v-card
+              elevation="12"
+              class="rounded-lg"
+              color="#ffffff"
+              hover>
             <v-card-title class="headline">
               {{ focusButtonActive ? '番茄专注' : '放弃专注' }}
             </v-card-title>
@@ -47,15 +62,29 @@
         </v-dialog>
 
         <v-dialog v-model="dialog2" max-width="490">
-          <v-card elevation="12" class="rounded-lg" color="#ffffff" hover>
+          <v-card
+              elevation="12"
+              class="rounded-lg"
+              color="#ffffff"
+              hover>
             <v-card-title class=" custom-card-text headline">设立时间</v-card-title>
             <v-card-text class="custom-card2-text">
               番茄专注建议：专注时间25分钟，休息5分钟。
             </v-card-text>
             <v-card-text>
-              <v-slider color="#4cafa0" v-model="sliderTimeValue" min="0" max="3600" step="60" label="专注时间"
-                thumb-color="#fff" track-color="#e0f2f1" background-color="#B2DFDB" @change="onSliderChange"
-                class="custom-slider">
+              <v-slider
+                  color="#4cafa0"
+                  v-model="sliderTimeValue"
+                  min="0"
+                  max="3600"
+                  step="60"
+                  label="专注时间"
+                  thumb-color="#fff"
+                  track-color="#e0f2f1"
+                  background-color="#B2DFDB"
+                  @change="onSliderChange"
+                  class="custom-slider"
+              >
                 <template #thumb="{ value }">
                   <div class="slider-thumb-label">{{ formatTime(value / 60) }}</div>
                 </template>
@@ -66,9 +95,19 @@
 
             <v-card-text>
               <!-- 添加新的休息时间滑块 -->
-              <v-slider color="#4cafa0" v-model="restTimeValue" min="0" max="1200" step="60" label="休息时间"
-                thumb-color="#fff" track-color="#e0f2f1" background-color="#B2DFDB" @change="onRestTimeChange"
-                class="custom-slider">
+              <v-slider
+                  color="#4cafa0"
+                  v-model="restTimeValue"
+                  min="0"
+                  max="1200"
+                  step="60"
+                  label="休息时间"
+                  thumb-color="#fff"
+                  track-color="#e0f2f1"
+                  background-color="#B2DFDB"
+                  @change="onRestTimeChange"
+                  class="custom-slider"
+              >
                 <template #thumb="{ value }">
                   <div class="slider-thumb-label">{{ formatTime(value / 60) }}</div>
                 </template>
@@ -87,42 +126,66 @@
         </v-dialog>
 
         <v-dialog v-model="dialog3" max-width="290">
-          <v-card elevation="12" class="rounded-lg" color="#EAECCC" hover>
+          <v-card
+              elevation="12"
+              class="rounded-lg"
+              color="#EAECCC"
+              hover
+          >
             <v-card-title class="headline">专注记录</v-card-title>
             <v-card-text>
               <div>
                 <v-sheet elevation="2" class="my-4">
-                  <v-btn outlined color="#4cafa0" block @click="showTodayPanel">今天
-                  </v-btn>
-                  <v-btn outlined color="#4cafa0" block @click="showYesterdayPanel">昨天
-                  </v-btn>
-                  <v-btn outlined color="#4cafa0" block @click="showBeforeYesterdayPanel">前天
-                  </v-btn>
+                  <v-btn outlined
+                         color="#4cafa0"
+                         block
+                         @click="showTodayPanel">今天</v-btn>
+                  <v-btn outlined color="#4cafa0"
+                         block
+                         @click="showYesterdayPanel">昨天</v-btn>
+                  <v-btn outlined color="#4cafa0"
+                         block
+                         @click="showBeforeYesterdayPanel">前天</v-btn>
                 </v-sheet>
 
                 <div v-if="currentDate === 'today'">
                   <v-dialog v-model="todayDialog" width="500" max-width="90%" persistent>
-                    <v-card elevation="12" class="rounded-lg">
+                    <v-card elevation="12"
+                            class="rounded-lg">
                       <v-card-title class="d-flex align-center">
                         <span class="text-subtitle-2 mt-4 mb-2 custom-title">今天</span>
                         <v-spacer></v-spacer>
-                        <v-icon @click.stop="todayDialog = false" transition="scale-transition">mdi-close
-                        </v-icon>
+                        <v-icon @click.stop="todayDialog = false"
+                                transition="scale-transition">mdi-close</v-icon>
                       </v-card-title>
                       <v-card-text>
                         <div>
                           <div class="text-center d-flex pb-4">
-                            <v-btn class="rounded-lg" color="#C3E2C2" @click="todayAll"> All
-                            </v-btn>
-                            <v-btn class="rounded-lg" color="#C3E2C2" @click="todayNone"> None
-                            </v-btn>
+                            <v-btn class="rounded-lg"
+                                   color="#C3E2C2"
+                                   @click="todayAll"> All </v-btn>
+                            <v-btn class="rounded-lg"
+                                   color="#C3E2C2"
+                                   @click="todayNone"> None </v-btn>
                           </div>
                           <v-expansion-panels v-model="todayPanel" multiple>
-                            <v-expansion-panel title="Foo" text="od tla." value="foo"></v-expansion-panel>
+                            <v-expansion-panel
+                                title="Foo"
+                                text="od tla."
+                                value="foo"
+                            ></v-expansion-panel>
 
-                            <v-expansion-panel title="Bar" text="1" value="bar"></v-expansion-panel>
+                            <v-expansion-panel
+                                title="Bar"
+                                text="1"
+                                value="bar"
+                            ></v-expansion-panel>
 
-                            <v-expansion-panel title="Baz" text="1." value="baz"></v-expansion-panel>
+                            <v-expansion-panel
+                                title="Baz"
+                                text="1."
+                                value="baz"
+                            ></v-expansion-panel>
                           </v-expansion-panels>
                         </div>
 
@@ -142,18 +205,32 @@
                       <v-card-text>
                         <div>
                           <div class="text-center d-flex pb-4">
-                            <v-btn class="rounded-lg" color="#C3E2C2" @click="yesterdayAll"> All
-                            </v-btn>
-                            <v-btn class="rounded-lg" color="#C3E2C2" @click="yesterdayNone"> None
-                            </v-btn>
+                            <v-btn class="rounded-lg"
+                                   color="#C3E2C2"
+                                   @click="yesterdayAll"> All </v-btn>
+                            <v-btn class="rounded-lg"
+                                   color="#C3E2C2"
+                                   @click="yesterdayNone"> None </v-btn>
                           </div>
 
                           <v-expansion-panels v-model="yesterdayPanel" multiple>
-                            <v-expansion-panel title="Foo" text="od tla." value="foo"></v-expansion-panel>
+                            <v-expansion-panel
+                                title="Foo"
+                                text="od tla."
+                                value="foo"
+                            ></v-expansion-panel>
 
-                            <v-expansion-panel title="Bar" text="1" value="bar"></v-expansion-panel>
+                            <v-expansion-panel
+                                title="Bar"
+                                text="1"
+                                value="bar"
+                            ></v-expansion-panel>
 
-                            <v-expansion-panel title="Baz" text="1." value="baz"></v-expansion-panel>
+                            <v-expansion-panel
+                                title="Baz"
+                                text="1."
+                                value="baz"
+                            ></v-expansion-panel>
                           </v-expansion-panels>
                         </div>
                       </v-card-text>
@@ -172,17 +249,31 @@
                       <v-card-text>
                         <div>
                           <div class="text-center d-flex pb-4">
-                            <v-btn class="rounded-lg" color="#C3E2C2" @click="beforeYesterdayAll"> All
-                            </v-btn>
-                            <v-btn class="rounded-lg" color="#C3E2C2" @click="beforeYesterdayNone"> None
-                            </v-btn>
+                            <v-btn class="rounded-lg"
+                                   color="#C3E2C2"
+                                   @click="beforeYesterdayAll"> All </v-btn>
+                            <v-btn class="rounded-lg"
+                                   color="#C3E2C2"
+                                   @click="beforeYesterdayNone"> None </v-btn>
                           </div>
                           <v-expansion-panels v-model="beforeYesterdayPanel" multiple>
-                            <v-expansion-panel title="Foo" text="od tla." value="foo"></v-expansion-panel>
+                            <v-expansion-panel
+                                title="Foo"
+                                text="od tla."
+                                value="foo"
+                            ></v-expansion-panel>
 
-                            <v-expansion-panel title="Bar" text="1" value="bar"></v-expansion-panel>
+                            <v-expansion-panel
+                                title="Bar"
+                                text="1"
+                                value="bar"
+                            ></v-expansion-panel>
 
-                            <v-expansion-panel title="Baz" text="1." value="baz"></v-expansion-panel>
+                            <v-expansion-panel
+                                title="Baz"
+                                text="1."
+                                value="baz"
+                            ></v-expansion-panel>
                           </v-expansion-panels>
                         </div>
                       </v-card-text>
@@ -211,7 +302,6 @@
             <v-card-actions class="justify-end">
               <v-btn color="blue darken-1" @click="closeDialog4AndEndPomodoro">
                 Close
-                <!--                运行这个函数的时候跳转到todopage页面-->
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -226,9 +316,9 @@ import { ref, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import pomodoroService from '@/composables/PomodoroRequest'
 
-const sliderTimeValue = ref<number>(25 * 60);
+const sliderTimeValue = ref<number>(25*60);
 const formattedSelectedTime = computed(() => formatTime(sliderTimeValue.value));
-const countdownTime = ref('25:00');
+const countdownTime = ref('0:00');
 const focusButtonActive = ref(false);
 const recordButtonActive = ref(false);
 const modifyTimeClicked = ref(false);
@@ -250,10 +340,7 @@ const formattedRestTime = computed(() => formatTime(restTimeValue.value));
 const route = useRoute();
 
 let innerId = ref<string | null>(null);
-let countdownTimer = ref<NodeJS.Timeout | undefined>(undefined);
-const isCountDowning = computed(() => {
-  return countdownTimer.value !== undefined
-});
+let countdownTimer: NodeJS.Timeout | undefined;
 let remainingTotalSeconds = ref<number | null>(null);
 let countdownTimeRef = ref('25:00');
 let itemId: Ref<number | undefined>;
@@ -261,18 +348,17 @@ let itemId: Ref<number | undefined>;
 
 onMounted(() => {
   itemId = computed(() => Number(route.query.itemId));
-  if (itemId.value) {
-
-    console.log('receivedInnerId:', itemId.value);
+  if(itemId){
+    console.log('received',itemId);
+    console.log('receivedInnerId:',itemId.value);
   }
 });
 
-async function saveAndCloseModifyTimeDialog() {
+function saveAndCloseModifyTimeDialog() {
   const workTimeInMinutes = formatTimeToMinutes(sliderTimeValue.value);
   const restTimeInMinutes = formatTimeToMinutes(restTimeValue.value);
-  countdownTimeRef.value = `${formatTime(workTimeInMinutes * 60)}`
-  const { data } = await pomodoroService.edit(workTimeInMinutes, restTimeInMinutes);
 
+  pomodoroService.edit(workTimeInMinutes, restTimeInMinutes);
   dialog2.value = false;
 }
 
@@ -284,6 +370,14 @@ function onRestTimeChange(value: number) {
   restTimeValue.value = value;
 }
 
+
+watch(focusButtonActive, (newValue) => {
+  if (newValue === true) {
+    handleModifyTimeClickActive.value = false; // 开始专注时禁用修改时间按钮
+  } else {
+    handleModifyTimeClickActive.value = true; // 退出专注时启用修改时间按钮
+  }
+});
 
 watch(sliderTimeValue, (newValue) => {
   countdownTime.value = formatTime(newValue);
@@ -338,47 +432,29 @@ function beforeYesterdayNone() {
   beforeYesterdayPanel.value = [];
 }
 
-
-const stopCountDownTimer = () => {
-  clearInterval(countdownTimer.value);
-  countdownTimer.value = undefined;
-}
-
-const stopRestTimer = () => {
-  clearInterval(countdownTimer.value);
-  countdownTimer.value = undefined;
-}
-
-const handleFocus = async () => {
+const handleFocus = () => {
   focusButtonActive.value = !focusButtonActive.value;
   modifyTimeClicked.value = false;
 
   if (!focusButtonActive.value) {
     // 当处于专注状态时（点击“放弃专注”）
     dialog1.value = true;
-
   } else if (remainingTotalSeconds.value === null) {
     // 当倒计时尚未启动时（点击“开始专注”）
     // 确保 innerId 已经从路由参数中正确获取到，并转换为数字类型
-    if (isCountDowning.value) {
-      return;
-    }
-
     const innerIdNumber = Number(itemId.value);
-    if (innerIdNumber !== null && innerIdNumber !== undefined) {
-      const { data } = await pomodoroService.start(innerIdNumber); // 使用捕获到的 innerId 参数（已转换为 number 类型）
+    if (!isNaN(innerIdNumber)) {
+      pomodoroService.start(innerIdNumber); // 使用捕获到的 innerId 参数（已转换为 number 类型）
     }
     startCountdown();
   } else {
     focusButtonActive.value = true;
   }
 };
-
 async function closeDialog4AndEndPomodoro() {
   dialog4.value = false;
   dialog1.value = false;
-  const { data } = await pomodoroService.end();
-
+  const {data} = await pomodoroService.end();
 }
 
 const handleRecord = () => {
@@ -387,60 +463,56 @@ const handleRecord = () => {
 };
 
 const handleModifyTimeClick = () => {
-  if (isCountDowning.value) {
-    return;
-  }
-
   modifyTimeClicked.value = true;
   dialog1.value = false;
   dialog2.value = true; // 弹出卡片
 };
 
-const confirmGiveUpFocus = async () => {
+const confirmGiveUpFocus = () => {
   focusButtonActive.value = false;
   countdownTime.value = formatTime(sliderTimeValue.value);
   dialog1.value = false;
-  if (isCountDowning) {
-    stopCountDownTimer()
-    const { data } = await pomodoroService.end();
+  if (countdownTimer !== undefined) {
+    clearInterval(countdownTimer);
+    countdownTimer = undefined;
   }
 };
-
 
 const continueCountdown = () => {
   focusButtonActive.value = true;
   dialog1.value = false;
 
-  if (isCountDowning && remainingTotalSeconds.value !== null) {
-    countdownTimer.value = setInterval(() => {
+  if (countdownTimer === undefined && remainingTotalSeconds.value !== null) {
+    countdownTimer = setInterval(() => {
       if (remainingTotalSeconds.value !== null) {
         remainingTotalSeconds.value -= 1;
         const remainingMinutes = Math.floor(remainingTotalSeconds.value / 60);
         const remainingSeconds = remainingTotalSeconds.value % 60;
 
         countdownTimeRef.value = `${remainingMinutes.toString().padStart(2, '0')}:${remainingSeconds
-          .toString()
-          .padStart(2, '0')}`;
+            .toString()
+            .padStart(2, '0')}`;
 
         if (remainingTotalSeconds.value <= 0) {
-          stopRestTimer()
+          clearInterval(countdownTimer!);
+          countdownTimer = undefined;
           remainingTotalSeconds.value = null;
           focusButtonActive.value = false;
           dialog1.value = true;
         }
       }
     }, 1000);
-  } else if (isCountDowning) {
+  } else if (countdownTimer !== undefined) {
     // 如果倒计时已经在进行中，则无需重新启动定时器
     focusButtonActive.value = true;
   }
 };
 
 const startCountdown = () => {
-  const [minutes, seconds] = countdownTimeRef.value.split(':');
+  const [minutes, seconds] = countdownTime.value.split(':');
   let totalSeconds = parseInt(minutes!) * 60 + parseInt(seconds!);
 
-  countdownTimer.value = setInterval(() => {
+  countdownTimer = setInterval(() => {
     totalSeconds -= 1;
     const remainingMinutes = Math.floor(totalSeconds / 60);
     const remainingSeconds = totalSeconds % 60;
@@ -448,7 +520,8 @@ const startCountdown = () => {
     countdownTime.value = `${remainingMinutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 
     if (totalSeconds <= 0) {
-      stopCountDownTimer();
+      clearInterval(countdownTimer!);
+      countdownTimer = undefined;
 
       // 倒计时结束后，开始休息时间倒计时
       countdownTime.value = formattedRestTime.value;
@@ -461,7 +534,7 @@ const startRestCountdown = () => {
   const [minutes, seconds] = countdownTime.value.split(':');
   let totalSeconds = parseInt(minutes!) * 60 + parseInt(seconds!);
 
-  countdownTimer.value = setInterval(() => {
+  countdownTimer = setInterval(() => {
     totalSeconds -= 1;
     const remainingMinutes = Math.floor(totalSeconds / 60);
     const remainingSeconds = totalSeconds % 60;
@@ -469,7 +542,8 @@ const startRestCountdown = () => {
     countdownTime.value = `${remainingMinutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 
     if (totalSeconds <= 0) {
-      stopRestTimer();
+      clearInterval(countdownTimer!);
+      countdownTimer = undefined;
       focusButtonActive.value = false;
       dialog1.value = true;
       dialog4.value = true;
@@ -482,18 +556,15 @@ const startRestCountdown = () => {
 <style scoped>
 header {
   text-align: center;
-  background-color: #4CAF50;
-  /* 修改背景颜色 */
-  color: white;
-  /* 修改文字颜色 */
+  background-color: #4CAF50; /* 修改背景颜色 */
+  color: white; /* 修改文字颜色 */
   height: 10vh;
   padding: 20px;
 }
 
-aside {
+aside{
   text-align: center;
-  background-color: #4cafa0;
-  /* 修改背景颜色 */
+  background-color: #4cafa0; /* 修改背景颜色 */
   height: 3vh;
   padding: 1px;
 }
@@ -503,31 +574,25 @@ button {
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
-  transition: all 0.3s ease;
-  /* 添加过渡动画效果 */
-  font-size: 1.2rem;
-  /* 增加字体大小 */
+  transition: all 0.3s ease; /* 添加过渡动画效果 */
+  font-size: 1.2rem; /* 增加字体大小 */
 }
 
 button.active {
   background-color: #ffffff;
   color: black;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  /* 添加阴影效果 */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); /* 添加阴影效果 */
 }
 
 button.redButton {
   background-color: #ff3c00;
   color: white;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  /* 添加阴影效果 */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); /* 添加阴影效果 */
 }
-
-button.whiteButton {
+button.whiteButton{
   background-color: #faf7f6;
   color: #090808;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  /* 添加阴影效果 */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); /* 添加阴影效果 */
 }
 
 
@@ -541,15 +606,12 @@ button.whiteButton {
 }
 
 .custom-title {
-  font-size: 3rem;
-  /* 调整字体大小 */
-  font-family: 'Arial', sans-serif;
-  /* 更换字体，这里以 Arial 为例，你可以替换为你喜欢的字体 */
-  font-weight: bold;
-  /* 添加加粗效果（可选） */
+  font-size: 3rem; /* 调整字体大小 */
+  font-family: 'Arial', sans-serif; /* 更换字体，这里以 Arial 为例，你可以替换为你喜欢的字体 */
+  font-weight: bold; /* 添加加粗效果（可选） */
 }
 
-.countdown-container::before {
+.countdown-container::before{
   content: "";
   position: absolute;
   bottom: 0;
@@ -561,15 +623,14 @@ button.whiteButton {
   background-image: url(https://cdn.vuetifyjs.com/images/cards/docks.jpg);
   background-position: center;
   background-size: cover;
-  opacity: 0.5;
-  /*可选，设置图片的透明度*/
+  opacity: 0.5; /*可选，设置图片的透明度*/
 }
 
 .countdown {
   position: relative;
 }
 
-.v-expansion-panels {
+.v-expansion-panels  {
   background-color: #4cafa0;
 }
 
@@ -579,8 +640,7 @@ button.whiteButton {
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 3rem;
-  font-family: 'Arial', sans-serif;
-  /* 更改字体样式 */
+  font-family: 'Arial', sans-serif; /* 更改字体样式 */
 }
 
 .pulse-animation {
@@ -592,12 +652,10 @@ button.whiteButton {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
   }
-
   50% {
     transform: scale(1.1);
-    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    box-shadow: 0 0 0 0  rgba(0, 0, 0, 0);
   }
-
   100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
@@ -624,17 +682,13 @@ button.whiteButton {
 }
 
 .custom-card-text {
-  color: black;
-  /* 文字颜色 */
-  background-color: #C3E2C2;
-  /* 背景颜色 */
+  color: black; /* 文字颜色 */
+  background-color: #C3E2C2; /* 背景颜色 */
 }
 
 .custom-card2-text {
-  color: black;
-  /* 文字颜色 */
-  background-color: #EAECCC;
-  /* 背景颜色 */
+  color: black; /* 文字颜色 */
+  background-color: #EAECCC; /* 背景颜色 */
 }
 </style>
 

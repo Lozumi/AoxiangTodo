@@ -14,11 +14,11 @@
     <v-navigation-drawer :width="200" app :color="selectedTheme.primaryColor" :dark="selectedTheme.darkSideNav">
       <v-list dense>
         <v-list-item title="我的" subtitle="Vuetify"></v-list-item>
-        <v-list-item class="nav-item" @click="$router.push('/TodoPage/TodayTasks')">
-          <v-list-item-title class="white--text">今日待办</v-list-item-title>
-        </v-list-item>
+<!--        <v-list-item class="nav-item" @click="$router.push('/TodoPage/TodayTasks')">-->
+<!--          <v-list-item-title class="white&#45;&#45;text">今日待办</v-list-item-title>-->
+<!--        </v-list-item>-->
         <v-divider class="white--text"></v-divider>
-        <v-list-item class="nav-item" @click="$router.push('/TodoPage/RecentTasks')">
+        <v-list-item class="nav-item" @click="$router.push('/TodoPage/Todo')">
           <v-list-item-title class="white--text">最近待办</v-list-item-title>
         </v-list-item>
         <v-divider class="white--text"></v-divider>
