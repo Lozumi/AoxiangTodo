@@ -271,19 +271,23 @@ import ToDoWorkRequest from "~/composables/ToDoWorkRequest";
 import {useRoute} from 'vue-router';
 
 //任务标题相关
-const inputTodoTitle = ref<string>('');
-const inputTodoSubtitle = ref<string>('');
-const inputTodoDescription = ref<string>('');
+let inputTodoTitle = ref<string>('');
+let inputTodoSubtitle = ref<string>('');
+let inputTodoDescription = ref<string>('');
 
 //待办区间相关
-const toggleStart = ref<number>(2);
-const toggleEnd = ref<number>(2);
+let toggleStart = ref<number>(2);
+let toggleEnd = ref<number>(2);
+let createTime = ref<number>();
+let startTime = ref<number>();
+let endTime = ref<number>();
+let status = ref<string>();
 
 //任务程度相关
-const importancePriorityTitle = ref<string>('未设置');//任务重要程度
-const importancePriorityColor = ref<string>('gray');
-const emergencyPriorityTitle = ref<string>('未设置');//任务紧急程度
-const emergencyPriorityColor = ref<string>('gray');
+let importancePriorityTitle = ref<string>('未设置');//任务重要程度
+let importancePriorityColor = ref<string>('gray');
+let emergencyPriorityTitle = ref<string>('未设置');//任务紧急程度
+let emergencyPriorityColor = ref<string>('gray');
 
 const text = ref<string>('center');
 
@@ -326,7 +330,6 @@ let subtitle = ref<string>('');
 
 let description = ref<string>('');
 
-let startTime = ref<string>('');
 
 let deadLine = ref<string>('');
 
@@ -561,30 +564,59 @@ function changeExColor_1(color: string) {
 }
 
 onMounted(() => {
-  itemId = computed(() => Number(route.query.itemId));
+  itemId.value = computed(() => Number(route.query.itemId)).value;
   if (itemId) {
-    console.log('received:', itemId);
-    console.log('receivedInnerId', itemId.value)
+    // console.log('received:', itemId);
+    console.log('receivedInnerId:', itemId.value);
+    QueryToDoWork(itemId.value);
   } else {
     console.error('error:真蚌埠住了');
   }
 });
 
 async function QueryToDoWork(innerId: number) {
-  const ToDoJson = await ToDoWorkRequest.query(innerId);
-
-  const ToDoString = JSON.parse(ToDoJson as string);
-
-  importancePriority = ToDoString.importancePriority;
-  emergencyPriority = ToDoString.emergencyPriority;
-  title = ToDoString.title;
-  subtitle = ToDoString.subtitle;
-  description = ToDoString.description;
-  startTime = ToDoString.startTime;
-  deadLine = ToDoString.deadLine;
-
+  let currentToDoWork = await ToDoWorkRequest.query(innerId).data.value;
+  currentToDoWork = await ToDoWorkRequest.query(innerId).data.value;
+  console.log(currentToDoWork);
+  let currentToDoWorkObject = JSON.parse(currentToDoWork as string).content;
+  console.log(currentToDoWorkObject);
+  let currentToDoWorkObjectContent = JSON.parse(currentToDoWorkObject);
+  console.log(currentToDoWorkObjectContent)
+  importToDoWork(currentToDoWorkObjectContent);
 }
 
+function importToDoWork(currentToDoWork:any){
+  inputTodoTitle.value = currentToDoWork.title;
+  inputTodoSubtitle.value = currentToDoWork.subtitle;
+  inputTodoDescription.value = currentToDoWork.description;
+  startTime.value = currentToDoWork.startTime;
+  deadLine.value = currentToDoWork.deadLine;
+  importancePriority.value = currentToDoWork.importancePriority;
+  emergencyPriority.value = currentToDoWork.emergencyPriority;
+  createTime.value = currentToDoWork.createTime;
+  endTime.value = currentToDoWork.endTime;
+  status.value = currentToDoWork.status;
+}
+
+async function exportToDoWork(currentToDoWork:any){
+  const editToDoWork = JSON.stringify({
+    '@class': 'shared.ToDoWorkItem',
+    layer: 1,
+    innerId: 0,
+    importancePriority: importancePriority,
+    emergencyPriority: emergencyPriority,
+    title: inputTodoTitle,
+    subtitle: inputTodoSubtitle,
+    description: inputTodoDescription,
+    createTime: createTime,
+    startTime: startTime,
+    deadLine: deadLine,
+    status: status,
+    subToDoWorkItemInnerIdList: [],
+    pomodoroRecordInnerIdList: [],
+  });
+  const {data} = await ToDoWorkRequest.edit(editToDoWork);
+}
 
 </script>
 
