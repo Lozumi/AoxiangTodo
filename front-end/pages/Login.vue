@@ -32,6 +32,7 @@
 
                 <v-text-field
                     label="请输入密码"
+                    type="password"
                     hide-details="auto"
                     v-model="state.loginData.password"
                 ></v-text-field>
