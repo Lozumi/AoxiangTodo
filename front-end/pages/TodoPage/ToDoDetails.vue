@@ -4,7 +4,7 @@
       <!--应用栏-->
       <v-app-bar :elevation="0" color="#3A8FB7">
         <v-toolbar-title>待办详情</v-toolbar-title>
-        <v-btn icon="mdi-chevron-right"></v-btn>
+        <v-btn icon="mdi-chevron-right" @click="backToToDoList"></v-btn>
       </v-app-bar>
 
       <v-main>
@@ -31,6 +31,7 @@
                   <template v-slot:prepend>
                     <v-avatar :color="tile.color" size="x-small"></v-avatar>
                   </template>
+
                   <v-list-item-title>
                     <!-- 使用条件语句判断是否要对该item实现特殊处理 -->
                     <span v-if="tile.title === specialTitle" style="color: lightskyblue;">{{ tile.title }}</span>
@@ -147,8 +148,8 @@
                 <v-expansion-panel-text>
                   <v-list>
                     <v-list-item v-for="     item      in      items     " :key=" item.text "
-                      @click="changeTitle(item.text); changeExColor(item.color)"
-                      :style=" { 'background-color': item.color } ">
+                                 @click="changeTitle(item.text); changeExColor(item.color)"
+                                 :style=" { 'background-color': item.color } ">
                       <v-list-item-title>{{ item.text }}</v-list-item-title>
                     </v-list-item>
                   </v-list>
@@ -164,8 +165,8 @@
                 <v-expansion-panel-text>
                   <v-list>
                     <v-list-item v-for="     item      in      items_1     " :key=" item.text "
-                      @click="changeTitle_1(item.text); changeExColor_1(item.color)"
-                      :style=" { 'background-color': item.color } ">
+                                 @click="changeTitle_1(item.text); changeExColor_1(item.color)"
+                                 :style=" { 'background-color': item.color } ">
                       <v-list-item-title>{{ item.text }}</v-list-item-title>
                     </v-list-item>
                   </v-list>
@@ -521,6 +522,11 @@ function changeExColor_1(color: string) {
   emergencyPriorityColor.value = color;
 }
 
+// 当前实现是 选项修改以后就保存，点击返回图标就调回原来的列表
+async function backToToDoList() {
+  await navigateTo("/TodoPage/Todo");
+}
+
 onMounted(() => {
   itemId.value = computed(() => Number(route.query.itemId)).value;
   if (itemId) {
@@ -575,7 +581,7 @@ async function exportToDoWork(currentToDoWork: any) {
   });
   const { data } = await ToDoWorkRequest.edit(editToDoWork);
 }
-
+//*
 </script>
 
 <style scoped>
@@ -585,3 +591,5 @@ async function exportToDoWork(currentToDoWork: any) {
   cursor: auto !important;
 }
 </style>
+
+
