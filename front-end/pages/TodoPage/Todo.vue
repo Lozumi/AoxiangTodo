@@ -86,7 +86,6 @@
       </div>
       <div class="column right"
            :class="{ 'hidden': !isCardVisible  }">
-        <!-- ... 卡片内容 -->
         <v-card>
           <v-card-text>
             <iframe
