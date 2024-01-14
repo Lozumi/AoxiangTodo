@@ -2,9 +2,6 @@
 // 作者: 刘黎可
 // 版本: 1.0.0
 
-// 引入useFetch和randomUUID，假设在项目中已经引入
-import { useFetch } from 'some-fetch-library'; // 请替换成实际使用的库
-import { randomUUID } from 'uncrypto'; // 请替换成实际使用的库
 
 // 定义基础URL
 let baseUrl = 'http://localhost:20220';
