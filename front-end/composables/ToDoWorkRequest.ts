@@ -35,7 +35,7 @@ const createTodoWork = (workLayer:number,workInnerId:number,workImportancePriori
     deadLine: workDeadline,
     status: workStatus,
     subToDoWorkItemInnerIdList: workSubToDoWorkItemInnerIdList,
-    pomodoroRecordInnerIdList: workPomodoroRecordInnerIdList
+    pomodoroRecordInnerIdList: workPomodoroRecordInnerIdList,
   });
 }
 

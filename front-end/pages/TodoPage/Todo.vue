@@ -1,12 +1,16 @@
 <template>
+  <!-- 整体页面结构 -->
   <div>
+    <!-- 分为左右两栏的行 -->
     <div class="row">
-
+      <!-- 左侧栏 -->
       <div class="column left">
+        <!-- 待办列表的卡片 -->
         <v-card
             class="list-card"
             max-width="700"
         >
+          <!-- 输入框，用于创建新待办事项 -->
           <v-text-field
               v-model="newItemText"
               label="输入要创建的待办并按回车创建"
@@ -16,7 +20,7 @@
           ></v-text-field>
           <v-divider></v-divider>
 
-          <!--          加不加if真是个问题   <div v-if="items && items.length>0">-->
+          <!-- 待办事项列表 -->
           <v-list lines="two"
                   select-strategy="classic"
                   class="list1"
@@ -26,7 +30,7 @@
                 class="TodoTitle">最近待办</v-list-subheader>
 
             <v-divider></v-divider>
-            <!--              要把index改成innerId-->
+            <!-- 循环渲染待办事项 -->
             <!-- 新增项 -->
             <v-list-item
                 v-for="(item, index) in items"
@@ -35,8 +39,8 @@
                 class="hover"
                 @click.stop="onItemOrBtnClick(item)"
             >
+              <!-- 待办事项左侧的复选框 -->
               <template v-slot:prepend>
-
                 <v-list-item-action>
                   <v-checkbox-btn
                       @click.stop
@@ -45,7 +49,9 @@
                 </v-list-item-action>
               </template>
 
+              <!-- 待办事项右侧的操作按钮 -->
               <template v-slot:append>
+                <!-- 番茄钟按钮 -->
                 <v-btn
                     icon="mdi-clock"
                     size="x-small"
@@ -53,6 +59,7 @@
                     position="relative"
                     @click.stop="toTomatoClock(item.innerId.valueOf())">
                 </v-btn>
+                <!-- 查看待办详情按钮 -->
                 <v-btn
                     :ref="'btnInfo' + index"
                     class="details-btn"
@@ -62,6 +69,7 @@
                     style="font-size: 20px;"
                     @click.stop="toggleCardDetails(item.innerId.valueOf())"
                 ></v-btn>
+                <!-- 删除待办按钮 -->
                 <v-btn
                     icon="mdi-minus"
                     size="x-small"
@@ -71,6 +79,7 @@
                 </v-btn>
               </template>
 
+              <!-- 待办事项标题和描述 -->
               <v-list-item-title :class="{ 'strike-through': item.isChecked }">
                 {{item.title}}
               </v-list-item-title>
@@ -84,10 +93,12 @@
           </v-list>
         </v-card>
       </div>
+      <!-- 右侧栏，用于展示待办事项的详细信息 -->
       <div class="column right"
            :class="{ 'hidden': !isCardVisible  }">
         <v-card>
           <v-card-text>
+            <!-- 使用iframe展示详细信息 -->
             <iframe
                 v-if="isCardVisible "
                 :src="iframeSrc"
@@ -98,7 +109,7 @@
           <template v-if="isCardVisible ">
             <v-btn
                 class="close-details-btn"></v-btn>
-            <!--                @click.stop="toggleCardDetails(item.innerId.valueOf())"-->
+            <!--  @click.stop="toggleCardDetails(item.innerId.valueOf())"-->
           </template>
         </v-card>
       </div>
@@ -109,14 +120,16 @@
 
 
 <script setup lang="ts">
+// 导入相关组件和工具函数
 import { useRouter } from 'vue-router';
 import { ref,onMounted } from 'vue';
 import ToDoWorkRequest from '@/composables/ToDoWorkRequest'
 
-let currentItemId = ref(null);
-let iframeSrc = ref('getDetailUrl(currentItemId)');
+// 响应式变量
+let currentItemId = ref(null);// 当前待办事项的ID
+let iframeSrc = ref('getDetailUrl(currentItemId)');// iframe 的 src 属性
 const apiUrl = 'http://127.0.0.1:20220';
-const isCardVisible = ref(false);
+const isCardVisible = ref(false);// 卡片是否可见
 
 const router = useRouter();
 const items = ref([] as{
@@ -128,6 +141,7 @@ const items = ref([] as{
 const newItemText = ref('');
 
 
+// 日期格式化函数
 function formatISOString(date: Date) {
   // 获取年、月、日、小时、分钟、秒
   const year = date.getFullYear();
@@ -142,7 +156,7 @@ function formatISOString(date: Date) {
 }
 
 
-
+// 创建新待办事项
 async function addNewItemFromInput() {
   if (newItemText.value) {
     const newTodo = JSON.stringify({
@@ -186,9 +200,10 @@ async function addNewItemFromInput() {
     {
       console.error('Error adding new item:',error);
     }
-  }//现在可以了 你看看 咸等一下，大哥你能不能一起帮我把属性和数值绑了，咸鱼正常来，我实在不想再弄了。okok、现在要绑定什么东西
+  }
 }
 
+// 删除选中的待办事项
 async function subSelectedItem(item:any) {
 
   if (item.isChecked) {
@@ -206,6 +221,7 @@ async function subSelectedItem(item:any) {
   }
 }
 
+// 从列表中删除指定ID的待办事项
 async function deleteItemFromList(innerId:number) {
   // 查找具有指定innerId的项目的索引
   const indexToDelete = items.value.findIndex(item => item.innerId === innerId);
@@ -215,6 +231,7 @@ async function deleteItemFromList(innerId:number) {
   }
 }
 
+// 获取待办事项列表
 async function getItemList()
 {
   console.log('Fetching to-do items on page refresh...');
@@ -230,7 +247,7 @@ async function getItemList()
         if (Array.isArray(jsonItems)) {
           items.value = jsonItems.map((itemData) => ({
             innerId: itemData.innerId,
-            isChecked: false, // 默认值设为 false
+            isChecked: itemData.isChecked, // 默认值设为 false
             title: itemData.title,
             description: itemData.description || null,
           }));
@@ -244,7 +261,7 @@ async function getItemList()
   }
 }
 
-
+// 组件挂载时获取待办事项列表
 onMounted(async () => {
   // 如果有初始数据加载需求，请在此处使用useFetch或其他方式获取待办事项列表
   console.log('Component mounted, fetching to-do items...');
@@ -265,7 +282,7 @@ async function onItemOrBtnClick(item: any) {
 
 /**
  * 跳转到特定item的番茄中进行计时??还是没想法
- * @returns {Promise<void>}
+ *  @param innerId 待办事项的ID
  */
 async function toTomatoClock(innerId:number): Promise<void> {
   await router.push({ path: '/TodoPage/TomatoClock/', query: { itemId:innerId } });
@@ -274,7 +291,10 @@ async function toTomatoClock(innerId:number): Promise<void> {
 
 }
 
-
+/**
+ * 切换卡片的显示状态
+ * @param innerId 待办事项的ID
+ */
 function getDetailUrl(itemId: number | null) {
   if (itemId === null) return '/TodoDetails'; // 当没有选中项时返回默认地址
 
@@ -285,15 +305,9 @@ function getDetailUrl(itemId: number | null) {
  //  * 跳转到特定item的番茄中进行计时??还是没想法
  //  * @returns {Promise<void>}
  //  */
-// async function toTomatoClock(innerId:number): Promise<void> {
-//   await router.push({ path: '/TodoPage/TomatoClock/', query: { itemId:innerId } });
-//   //进入番茄钟页面并传递该item的唯一id给它......
-//   //计时完成后根据该itemid将数据绑定到item上
-//
-// }
 
 /**
- * 到底要怎么样才能在卡片展开式按照itemid拉取相应item的内容啊
+ * 怎么样才能在卡片展开式按照itemid拉取相应item的内容?
  * @returns {Promise<void>}
  */
 async function toggleCardDetails(innerId:number): Promise<void> {
@@ -315,47 +329,49 @@ async function toggleCardDetails(innerId:number): Promise<void> {
 </script>
 
 <style>
+/* 设置所有元素的盒模型为边框盒模型，使计算方式包含内边距和边框 */
 * {
   box-sizing: border-box;
 }
+/* 清除body的默认外边距并设置滚动条 */
 body {
   margin: 0;
   overflow:auto;
 }
-
+/* 定义一个通用的column类，左浮动，并添加内边距 */
 .column {
   float:left;
   padding: 40px;
 }
-
+/* 左侧列，宽度55%，高度100%，负外边距使列向左对齐 */
 .column.left {
   width:55%;
   height: 100%;
   margin-left:-40px;
 }
-
+/* 右侧列，使用flex布局实现居中，同时添加相对定位以便子元素绝对定位 */
 .column.right{
   display: flex;
   justify-content: center; /* 水平居中 */
   position: relative; /* 添加相对定位以便子元素绝对定位 */
 }
-
+/* 定义row类，使用flex布局，清除浮动 */
 .row {
   display: flex;
   border-inline-style: none;
   //justify-content: space-between; /* 使子元素在主轴方向两端对齐 */
 }
-
 .row:after {
   content: "";
   display: table;
   clear: both;
 }
-
+/* list1类，设置边框样式 */
 .list1{
   border: 0 solid #303030;
 }
 
+/* 响应式设计：当屏幕宽度小于或等于600px时，左侧列宽度变为100% */
 @media screen and (max-width: 600px) {
   .column.left {
     width: 100%;
@@ -363,46 +379,51 @@ body {
 }
 </style>
 
-<style scoped>
 
+//新的一组样式（scoped)
+<style scoped>
+/* 文本居中并对齐方式设为大号字体 */
 .TodoTitle{
   text-align: center;
   font-size: large;
 }
+/* 定义list-card类，添加左边距 */
 .list-card {
   margin-left: 50px;
 }
-
+/* hover伪类，鼠标悬停时背景色变为浅黄色，光标变为pointer形状 */
 .hover:hover {
   background-color: rgba(255, 250, 205, 1);
   cursor: pointer;
 }
-
+/* strike-through类，给文本添加删除线效果 */
 .strike-through {
   text-decoration: line-through;
 }
-
+/* 隐藏类，设置display为none隐藏元素 */
 .hidden{
   display:none;
 }
+/* right-card类，定义宽度、高度及垂直居中显示（需与position:absolute配合使用） */
+.right-card {
+  .right-card {
+    width: 550px;
+    height: 500px;
+    margin: auto; /* 垂直居中，配合position: absolute;使用 */
 
-.right-card{
-  width: 550px;
-  height: 500px;
-  margin: auto; /* 垂直居中，配合position: absolute;使用 */
-
-  right: 0; /* 紧贴屏幕右侧 */
-}
-
-.details-btn{
-  color:lightslategray;
-}
-
-.close-details-btn{
-  bottom:10px;
-  right:10px;
-  float:right;
-  text-align: center;
-  //position: absolute;
+    right: 0; /* 紧贴屏幕右侧 */
+  }
+  /* details-btn类，设置按钮颜色为浅石板灰 */
+  .details-btn {
+    color: lightslategray;
+  }
+  /* close-details-btn类，设置按钮位置在右下角，浮动到右边，文本居中 */
+  .close-details-btn {
+    bottom: 10px;
+    right: 10px;
+    float: right;
+    text-align: center;
+    //position: absolute;
+  }
 }
 </style>
