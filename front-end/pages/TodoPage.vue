@@ -2,7 +2,7 @@
   <v-app style="height: 100%;">
     <!-- 顶部导航栏 -->
     <v-app-bar :elevation="2" app :color="selectedTheme.primaryColor" :dark="selectedTheme.darkTopBar">
-      <v-icon class="mx-4 blue--text">mdi-clipboard-list</v-icon>
+      <v-icon class="mx-4 blue--text">mdi-airplane-takeoff</v-icon>
       <v-toolbar-title>翱翔清单</v-toolbar-title>
       <v-btn @click="toggleTheme" text>
         <v-icon>mdi-palette</v-icon>
@@ -15,26 +15,65 @@
     </v-app-bar>
 
     <!-- 侧面导航栏 -->
-    <v-navigation-drawer :width="200" app :color="selectedTheme.primaryColor" :dark="selectedTheme.darkSideNav">
-      <v-list dense>
-        <v-list-item v-if="isLogin" :title="`亲爱的 ${currentUser}`" subtitle="欢迎使用翱翔清单！"></v-list-item>
-        <v-list-item v-if="!isLogin" :title="`请登录`" subtitle="欢迎使用翱翔清单！"></v-list-item>
+    <v-navigation-drawer
+        :width="233" app
+        :color="selectedTheme.primaryColor"
+        :dark="selectedTheme.darkSideNav"
+        theme="light"
+    >
+      <v-container class="pa-4">
+
+        <v-row align="center">
+          <v-col cols="auto">
+            <v-avatar size="20">
+              <v-icon>mdi-account</v-icon>
+            </v-avatar>
+          </v-col>
+          <v-col>
+            <v-row>
+              <v-col>
+
+                <p style="font-weight: bold">{{ isLogin ? `亲爱的 ${currentUser}` : '请登录' }}</p>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <p>欢迎使用翱翔清单</p>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+
+      </v-container>
+      <v-list density="compact" nav>
+<!--        <v-list-item v-if="isLogin" :title="`亲爱的 ${currentUser}`" subtitle="欢迎使用翱翔清单！"></v-list-item>-->
+<!--        <v-list-item v-if="!isLogin" :title="`请登录`" subtitle="欢迎使用翱翔清单！"></v-list-item>-->
         <!--        <v-list-item class="nav-item" @click="$router.push('/TodoPage/TodayTasks')">-->
         <!--          <v-list-item-title class="white&#45;&#45;text">今日待办</v-list-item-title>-->
         <!--        </v-list-item>-->
-        <v-divider class="white--text"></v-divider>
-        <v-list-item class="nav-item" @click="$router.push('/TodoPage/Todo')">
-          <v-list-item-title class="white--text">最近待办</v-list-item-title>
+<!--        <v-divider class="white&#45;&#45;text"></v-divider>-->
+        <v-divider></v-divider>
+        <v-list-item prepend-icon="mdi-clipboard-list" class="nav-item mt-2 mb-2" @click="$router.push('/TodoPage/Todo')">
+          <v-list-item-title >最近待办</v-list-item-title>
         </v-list-item>
-        <v-divider class="white--text"></v-divider>
-        <v-list-item class="nav-item" @click="$router.push('/TodoPage/TomatoClock')">
-          <v-list-item-title class="white--text">番茄时钟</v-list-item-title>
+        <v-divider></v-divider>
+<!--        <v-divider class="white&#45;&#45;text"></v-divider>-->
+        <v-list-item prepend-icon="mdi-briefcase-clock" class="nav-item mt-2 mb-2" @click="$router.push('/TodoPage/TomatoClock')">
+          <v-list-item-title >番茄时钟</v-list-item-title>
         </v-list-item>
-        <v-divider class="white--text"></v-divider>
-        <v-list-item class="nav-item" @click="$router.push('/TodoPage/About')">
-          <v-list-item-title class="white--text">关于团队</v-list-item-title>
+        <v-divider></v-divider>
+<!--        <v-divider class="white&#45;&#45;text"></v-divider>-->
+        <v-list-item prepend-icon="mdi-information" class="nav-item mt-2 mb-2" @click="$router.push('/TodoPage/About')">
+          <v-list-item-title >关于团队</v-list-item-title>
         </v-list-item>
       </v-list>
+      <template v-slot:append>
+        <div class="pa-2">
+          <v-btn block>
+            这是彩蛋
+          </v-btn>
+        </div>
+      </template>
     </v-navigation-drawer>
 
     <!-- 内容区域 -->
@@ -114,6 +153,7 @@ export default {
             const { status, message, content} = JSON.parse(response.data.value);
 
             if (status === "Success") {
+              console.error("注销成功");
               this.isLogin = false;
               this.$router.push('/TodoPage/Login'); // 跳转到登录页面
             } else {
@@ -133,7 +173,6 @@ export default {
           console.log(status);
           console.log(content);
           if (status === "Success") {
-
             this.isLogin = true;
             this.currentUser = content;
             setTimeout(() => {
