@@ -12,6 +12,7 @@ import java.util.*;
  */
 public class PomodoroRecordCollection extends Vector<PomodoroRecord> {
 
+
     /**
      * 获取下一个可用的番茄钟记录ID。
      * @return ID。

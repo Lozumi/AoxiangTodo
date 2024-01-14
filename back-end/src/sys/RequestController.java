@@ -98,6 +98,7 @@ public class RequestController {
             return packet;
         }
 
+        AoXiangToDoListSystem.getInstance().updateSystemDataLastModifiedInstant();
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         packet.setStatus(ResponseStatus.Success);
         return packet;
@@ -163,6 +164,9 @@ public class RequestController {
             userInfo = JsonUtility.objectFromJsonString(request.getContent(), UserInfo.class);
         } catch (Exception e) {
             packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为UserInfo\n%s", request.getContent(), e.getMessage()));
+        var currentUser = AoXiangToDoListSystem.getInstance().getCurrentUser();
+        if (currentUser != null && currentUser.getAccount().equals(userInfo.getAccount())) {
+            packet.setMessage("不能重复登录同一个用户。");
             return packet;
         }
 
@@ -186,6 +190,8 @@ public class RequestController {
                 throw new Exception("登录失败，请检查账号与密码是否正确。");
             } else { //获取到token，登录成功
                 user.setToken(token);
+                if(currentUser != null) AoXiangToDoListSystem.getInstance().synchronizeSystemData();
+                AoXiangToDoListSystem.getInstance().innerUserLogout(); //注销之前登录的用户
                 AoXiangToDoListSystem.getInstance().systemData.setCurrentUser(user);
 
                 //todo:在登录用户后，自动进行一次数据同步。
@@ -227,9 +233,9 @@ public class RequestController {
         packet.setStatus(ResponseStatus.Failure);
         UserInfo userInfo;
         try {
-            userInfo = JsonUtility.objectFromJsonString(request.getContent(), UserInfo.class);
+            newUser = User.fromJsonString(request.getContent());
         } catch (Exception exception) {
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为UserInfo\n%s", request.getContent(), exception.getMessage()));
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为User\n%s", request.getContent(), exception.getMessage()));
             return packet;
         }
 
@@ -294,6 +300,7 @@ public class RequestController {
         requestItem.setInnerId(toDoWorkItemList.getNextAvailableInnerId());
         toDoWorkItemList.add(requestItem);
 
+        AoXiangToDoListSystem.getInstance().updateSystemDataLastModifiedInstant();
         //操作成功响应
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         packet.setStatus(ResponseStatus.Success);
@@ -401,6 +408,7 @@ public class RequestController {
             targetItem.setImportancePriority(toDoWorkItem.getImportancePriority());
             targetItem.setStartTime(toDoWorkItem.getStartTime());
 
+            AoXiangToDoListSystem.getInstance().updateSystemDataLastModifiedInstant();
             packet.setMessage(Messages.ZH_CN.SUCCESS);
             packet.setStatus(ResponseStatus.Success);
         } catch (Exception exception) {

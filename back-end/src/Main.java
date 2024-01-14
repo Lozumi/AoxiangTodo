@@ -29,28 +29,7 @@ public class Main {
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.GetCurrentUser, RequestController::processGetCurrentUser_FullInfo));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.Synchronize, RequestController::processSynchronization));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.ExitApplication, RequestController::processExitApplication));
-        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.ModifyUserInfo,RequestController::processUserModifyInformation));
-
 
         HttpTest httpTest = new HttpTest("localhost:20220");
-        ToDoWorkItem item = new ToDoWorkItem();
-        item.setTitle("name");
-        item.setStartTime(Instant.now().plusSeconds(1000));
-        item.setDeadLine(Instant.now().plusSeconds(20000));
-        RequestPacket packet = new RequestPacket();
-        packet.setContent(item.toJsonString());
-        packet.setRequestType(RequestType.CreateToDoWork);
-        httpTest.tryRequest(packet);
-        httpTest.tryRequestEnumeration();
-        httpTest.tryRequestQueryToDoWorkItem(0);
-        httpTest.tryRequestQueryToDoWorkItem(1);
-
-        UserInfo userInfo = new UserInfo();
-        userInfo.setUserName("你干嘛");
-        userInfo.setAccount("this");
-        userInfo.setPassword("Rrawgb773@");
-        httpTest.tryRequestUserRegister(userInfo);
-        httpTest.tryRequestUserLogin(userInfo);
-        AoXiangToDoListSystem.getInstance().localSaveSystemData("D:/test/1.json");
     }
 }

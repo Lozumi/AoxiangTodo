@@ -9,6 +9,7 @@ import util.FileHelper;
 import util.JsonUtility;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class AoXiangToDoListSystem {
     static AoXiangToDoListSystem system;
@@ -50,10 +51,24 @@ public class AoXiangToDoListSystem {
         return systemData.getPomodoro();
     }
 
+    /**
+     * 注销当前用户的登录。
+     * @throws IllegalStateException 没有登录任何用户时抛出。
+     */
     public void userLogout() throws IllegalStateException {
         if (getCurrentUser() == null)
             throw new IllegalStateException("当前没有登录任何用户");
-        systemData.setCurrentUser(null);
+        innerUserLogout();
+    }
+
+    /**
+     * 注销当前用户的登录。该方法不检测当前是否登录用户。
+     */
+    public void innerUserLogout(){
+//        systemData.setCurrentUser(null);
+//        systemData.setSynchronized(false);
+        systemData = new SystemData();
+        localSaveSystemData("D:/test/1.json");
     }
 
 
@@ -93,6 +108,10 @@ public class AoXiangToDoListSystem {
         } catch (IOException exception) {
             System.err.printf("将系统数据保存至\"%s\"时发生错误：%s", filePath, exception.getMessage());
         }
+    }
+
+    public void updateSystemDataLastModifiedInstant(){
+        systemData.updateLastModifiedInstant();
     }
 
     /**

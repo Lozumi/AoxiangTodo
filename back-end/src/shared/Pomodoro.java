@@ -124,6 +124,7 @@ public class Pomodoro {
         calculateRecord();
         pomodoroRecord.setInnerId(AoXiangToDoListSystem.getInstance().getPomodoroRecordsCollection().getAvailableID());
         AoXiangToDoListSystem.getInstance().getPomodoroRecordsCollection().add(pomodoroRecord);//添加番茄钟记录到集合。
+        AoXiangToDoListSystem.getInstance().updateSystemDataLastModifiedInstant();
     }
 
     /**
