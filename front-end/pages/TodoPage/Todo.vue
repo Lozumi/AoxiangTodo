@@ -173,7 +173,9 @@ async function addNewItemFromInput() {
         items.value.push({
           innerId: createdTodoId,
           isChecked: false,
-          description: 'None',
+          description: createdTodoId.toString(),
+          // 这样？ description 给后端传的就是 ;none
+          //好的嘞，能修改就行，还有那个列表，如果select好用用select吧。 ok
           title: newItemText.value
         });
         newItemText.value = '';
@@ -184,7 +186,7 @@ async function addNewItemFromInput() {
     {
       console.error('Error adding new item:',error);
     }
-  }
+  }//现在可以了 你看看 咸等一下，大哥你能不能一起帮我把属性和数值绑了，咸鱼正常来，我实在不想再弄了。okok、现在要绑定什么东西
 }
 
 async function subSelectedItem(item:any) {

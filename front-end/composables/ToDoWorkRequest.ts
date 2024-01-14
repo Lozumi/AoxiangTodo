@@ -1,5 +1,7 @@
 // nuxt项目目录/composables/ToDoWorkRequest.ts
 
+import {randomUUID} from "uncrypto";
+
 let baseUrl = 'http://localhost:20220'
 
 const sendRequest = (body: any) => {
@@ -9,6 +11,12 @@ const sendRequest = (body: any) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
+    immediate:true,
+    // getCachedData: (...key)=>{
+    //   console.log('try to get cached by key',key,body);
+    //   debugger
+    //   return undefined
+    // }
   });
 };
 
@@ -47,7 +55,6 @@ export default new class ToDoWorkRequest {
     };
     return sendRequest(requestBody);
   }
-
   delete(innerId: number) {
     const requestBody = {
       content:innerId,

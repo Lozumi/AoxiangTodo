@@ -143,36 +143,23 @@
               任务重要程度
             </p>
 
-            <v-expansion-panels>
-              <v-expansion-panel :title=" importancePriorityTitle " :color=" importancePriorityColor ">
-                <v-expansion-panel-text>
-                  <v-list>
-                    <v-list-item v-for="     item      in      items     " :key=" item.text "
-                                 @click="changeTitle(item.text); changeExColor(item.color)"
-                                 :style=" { 'background-color': item.color } ">
-                      <v-list-item-title>{{ item.text }}</v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-            </v-expansion-panels>
+            <v-select :items="depImportantEnumItems"
+                      item-title="text"
+                      v-model="importancePriority"
+            >
+            </v-select>
+
 
             <!--任务重要程度设置-->
             <p style="font-weight: bold;color: #3A8FB7">任务紧急程度</p>
 
-            <v-expansion-panels>
-              <v-expansion-panel :title=" emergencyPriorityTitle " :color=" emergencyPriorityColor ">
-                <v-expansion-panel-text>
-                  <v-list>
-                    <v-list-item v-for="     item      in      items_1     " :key=" item.text "
-                                 @click="changeTitle_1(item.text); changeExColor_1(item.color)"
-                                 :style=" { 'background-color': item.color } ">
-                      <v-list-item-title>{{ item.text }}</v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-            </v-expansion-panels>
+
+            <v-select :items="depEmergencyEnumItems"
+                      item-title="text"
+                      v-model="emergencyPriority"
+            >
+            </v-select>
+
 
             <v-toolbar color="white">
               <template v-slot:append>
@@ -206,9 +193,10 @@
 
 <script setup lang="ts">
 
-import { computed, ref, watch } from 'vue';
+import {computed, type Ref, ref, watch} from 'vue';
 import ToDoWorkRequest from "~/composables/ToDoWorkRequest";
 import { useRoute } from 'vue-router';
+import {isArray} from "lodash-es";
 
 //任务标题相关
 let inputTodoTitle = ref<string>('');
@@ -226,6 +214,7 @@ let status = ref<string>();
 //任务程度相关
 let importancePriorityTitle = ref<string>('未设置');//任务重要程度
 let importancePriorityColor = ref<string>('gray');
+const listModelImportancePriority = computed(()=>[importancePriority.value])
 let emergencyPriorityTitle = ref<string>('未设置');//任务紧急程度
 let emergencyPriorityColor = ref<string>('gray');
 
@@ -344,55 +333,68 @@ const loading = ref<boolean>(false);
 
 const search = ref<string>('');
 
-const items = Object.freeze([
+const depImportantEnumItems = [
   {
     text: '不重要',
     color: '#C3E2C2',
     index: '1',
+    value: 1,
   },
   {
     text: '较不重要',
     color: '#EAECCC',
     index: '2',
+    value:2,
   },
   {
     text: '比较重要',
     color: '#DBCC95',
     index: '3',
+    value:3,
   },
   {
     text: '很重要',
     color: '#CD8D7A',
     index: '4',
+    value:4,
   },
-]);
+]
 
-const items_1 = Object.freeze([
+
+const importantEnumItems = Object.freeze(depImportantEnumItems);
+
+const depEmergencyEnumItems = [
   {
     text: '不紧急',
     color: '#C3E2C2',
     index: '1',
+    value:1,
   },
   {
     text: '较不紧急',
     color: '#EAECCC',
     index: '2',
+    value:2,
   },
   {
     text: '比较紧急',
     color: '#DBCC95',
     index: '3',
+    value:3,
   },
   {
     text: '很紧急',
     color: '#CD8D7A',
     index: '4',
+    value:4,
   },
-]);
+]
+
+const emergencyEnumItems = Object.freeze(depEmergencyEnumItems);
 const allSelected = computed(() => isEqual());
 
 function isEqual() {
-  return selected.value.length == items.length;
+  return selected.value.length == importantEnumItems.length;
 }
 
 const categories = computed(() => getCategories());
@@ -401,10 +403,10 @@ function getCategories() {
   const search1 = search.value.toLocaleLowerCase();
 
   if (!search1) {
-    return items;
+    return importantEnumItems;
   }
 
-  return items.filter(item => {
+  return importantEnumItems.filter(item => {
     const text = item.text.toLocaleLowerCase();
 
     return text.indexOf(search1) > -1;
@@ -412,6 +414,7 @@ function getCategories() {
 }
 
 const selections = computed(() => getSelections())
+
 
 function getSelections() {
   const selections1 = [];
@@ -461,7 +464,9 @@ watch([
   // sheet,
   // inputText,
 
+  importancePriority,
   importancePriorityTitle,
+  emergencyPriority,
   emergencyPriorityTitle
 ], (...params) => {
   console.log('request', params)
@@ -561,9 +566,10 @@ function changeExColor_1(color: string) {
 async function backToToDoList() {
   await navigateTo("/TodoPage/Todo");
 }
-
 onMounted(() => {
-  itemId = computed(() => Number(route.query.itemId));
+  const route = useRoute()
+  const itemId = computed(()=>parseInt(route?.query?.itemId ?? '-1',10));
+
   if (itemId.value != null) {
     //receviedInnerId传输成功了17:39
     console.log('receivedInnerId:', itemId.value);
@@ -573,21 +579,34 @@ onMounted(() => {
   }
 });
 
+
+function changeImportanceItem(...e) {
+  console.log(e);
+}
+
 async function QueryToDoWork(innerId: number) {
   let currentToDoWork = null;
-  currentToDoWork = await ToDoWorkRequest.query(innerId).data.value;
+  const { data, pending, error, refresh }  =await (ToDoWorkRequest.query(innerId));
+  console.log({ data, pending, error, refresh });
+  await refresh()
+//这个可能是我Todo推进列表的时候有问题.
+  currentToDoWork = data?.value;
 
   if (typeof currentToDoWork === 'string') {
-    console.log('data.value:',currentToDoWork);
+    console.log('data.value...:',currentToDoWork);
 
     try {
       const response = JSON.parse(currentToDoWork);
-
 
       // 确保 content 是一个字符串化的数组，并将其转换为对象数组
       if (typeof response.content === 'string') {
         const jsonContentArrayString = response.content;
         const responseContentArray = JSON.parse(jsonContentArrayString) as ToDoWorkItem[];
+        if (!isArray(responseContentArray)) {
+          return importToDoWork(responseContentArray);
+        }
+
+        console.log('responseContentArray:',responseContentArray);
 
         // 在数组中查找与 innerId 匹配的待办事项对象
         const targetItem = responseContentArray.find(item => item.innerId === innerId);
@@ -608,6 +627,8 @@ async function QueryToDoWork(innerId: number) {
 }
 
 function importToDoWork(currentToDoWork: { [key: string]: any }) {
+  console.log(`importToDoWork currentToDoWork`, currentToDoWork)
+
   inputTodoTitle.value = currentToDoWork.title;
   inputTodoSubtitle.value = currentToDoWork.subtitle;
   inputTodoDescription.value = currentToDoWork.description;
@@ -625,15 +646,15 @@ async function exportToDoWork(currentToDoWork: any) {
     '@class': 'shared.ToDoWorkItem',
     layer: 1,
     innerId: 0,
-    importancePriority: importancePriority,
-    emergencyPriority: emergencyPriority,
-    title: inputTodoTitle,
-    subtitle: inputTodoSubtitle,
-    description: inputTodoDescription,
-    createTime: createTime,
-    startTime: startTime,
-    deadLine: deadLine,
-    status: status,
+    importancePriority: importancePriority.value,
+    emergencyPriority: emergencyPriority.value,
+    title: inputTodoTitle.value,
+    subtitle: inputTodoSubtitle.value,
+    description: inputTodoDescription.value,
+    createTime: createTime.value,
+    startTime: startTime.value,
+    deadLine: deadLine.value,
+    status: status.value,
     subToDoWorkItemInnerIdList: [],
     pomodoroRecordInnerIdList: [],
   });
