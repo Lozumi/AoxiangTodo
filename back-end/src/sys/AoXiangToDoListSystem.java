@@ -1,11 +1,10 @@
 package sys;
 
-import com.sun.net.httpserver.HttpServer;
 import shared.Pomodoro;
 import trans.BackEndHttpServer;
 import trans.BackEndHttpServerStartupInfo;
 import trans.CloudServer;
-import user.User;
+import shared.User;
 import util.FileHelper;
 import util.JsonUtility;
 

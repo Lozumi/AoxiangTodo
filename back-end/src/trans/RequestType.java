@@ -19,5 +19,6 @@ public enum RequestType {
     Synchronize,
     ToDoWorkItemNotification,
     GetCurrentUser,
-    ExitApplication
+    ExitApplication,
+    ModifyUserInfo
 }

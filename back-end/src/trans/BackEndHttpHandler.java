@@ -66,6 +66,7 @@ public class BackEndHttpHandler implements HttpHandler {
             responseBodyStream.flush();
             requestBodyStream.close();
             responseBodyStream.close();
+            exchange.close();
         }catch (IOException exception){
             System.err.printf("HTTP内部错误：无法发送响应，%s\n",exception.getMessage());
         }

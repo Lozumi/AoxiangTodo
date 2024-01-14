@@ -1,4 +1,4 @@
-package user;
+package shared;
 
 public class FormatException extends Exception {
     public FormatException(String message) {

@@ -3,17 +3,16 @@ package sys;
 import shared.*;
 import trans.CloudServer;
 import trans.RequestPacket;
-import trans.RequestType;
 import trans.ResponsePacket;
 import trans.ResponseStatus;
-import user.FormatException;
-import user.User;
+import shared.FormatException;
+import shared.User;
 import util.Encrypt;
 import util.JsonUtility;
 
 import java.io.IOException;
-import java.security.spec.ECField;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -24,17 +23,18 @@ import java.util.Optional;
 public class RequestController {
 
 
-    public static ResponsePacket processExitApplication(RequestPacket request,RequestHandlerData userData) {
+    public static ResponsePacket processExitApplication(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Success);
         AoXiangToDoListSystem.getInstance().exit();
         return packet;
     }
-    public static ResponsePacket processGetCurrentUser_FullInfo(RequestPacket request,RequestHandlerData userData){
+
+    public static ResponsePacket processGetCurrentUser_FullInfo(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
         User currentUser = AoXiangToDoListSystem.getInstance().getCurrentUser();
-        if(currentUser == null){
+        if (currentUser == null) {
             packet.setStatus(ResponseStatus.Success);
             packet.setMessage("当前没有登录任何用户。");
             packet.setContent(null);
@@ -47,25 +47,26 @@ public class RequestController {
             packet.setStatus(ResponseStatus.Success);
             packet.setContent(userStr);
             return packet;
-        }catch (Exception ex){
-            packet.setMessage(String.format("[内部错误]尝试将当前用户转换为JSON字符串时发生异常：%s\n",ex.getMessage()));
+        } catch (Exception ex) {
+            packet.setMessage(String.format("[内部错误]尝试将当前用户转换为JSON字符串时发生异常：%s\n", ex.getMessage()));
             return packet;
         }
     }
 
     /**
      * 处理同步请求。
-     * @param request 请求数据。
+     *
+     * @param request  请求数据。
      * @param userData 未使用。
      * @return 向前端发送的请求。
      */
-    public static ResponsePacket processSynchronization(RequestPacket request, RequestHandlerData userData){
+    public static ResponsePacket processSynchronization(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
         try {
             AoXiangToDoListSystem.getInstance().synchronizeSystemData();
-        }catch (Exception exception){
-            packet.setMessage(String.format("[同步时错误] %s\n",exception.getMessage()));
+        } catch (Exception exception) {
+            packet.setMessage(String.format("[同步时错误] %s\n", exception.getMessage()));
             return packet;
         }
 
@@ -73,6 +74,7 @@ public class RequestController {
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         return packet;
     }
+
     /**
      * 处理编辑番茄钟事项请求。
      *
@@ -113,9 +115,9 @@ public class RequestController {
         packet.setStatus(ResponseStatus.Failure);
         UserInfo userInfo;
         try {
-        userInfo = JsonUtility.objectFromJsonString(request.getContent(), UserInfo.class);
-        }catch (Exception exception){
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为UserInfo对象\n%s", request.getContent(),exception.getMessage()));
+            userInfo = JsonUtility.objectFromJsonString(request.getContent(), UserInfo.class);
+        } catch (Exception exception) {
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为UserInfo对象\n%s", request.getContent(), exception.getMessage()));
             return packet;
         }
 
@@ -160,7 +162,7 @@ public class RequestController {
         try {
             userInfo = JsonUtility.objectFromJsonString(request.getContent(), UserInfo.class);
         } catch (Exception e) {
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为UserInfo\n%s", request.getContent(),e.getMessage()));
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为UserInfo\n%s", request.getContent(), e.getMessage()));
             return packet;
         }
 
@@ -211,7 +213,7 @@ public class RequestController {
         try {
             AoXiangToDoListSystem.getInstance().userLogout();
         } catch (Exception exception) {
-            var errString = String.format("用户登出错误：%s",exception.getMessage());
+            var errString = String.format("用户登出错误：%s", exception.getMessage());
             packet.setMessage(errString);
             return packet;
         }
@@ -223,23 +225,37 @@ public class RequestController {
     public static ResponsePacket processUserModifyInformation(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
-        User newUser;
+        UserInfo userInfo;
         try {
-             newUser = User.fromJsonString(request.getContent());
-        }catch (Exception exception){
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为User\n%s", request.getContent(),exception.getMessage()));
+            userInfo = JsonUtility.objectFromJsonString(request.getContent(), UserInfo.class);
+        } catch (Exception exception) {
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为UserInfo\n%s", request.getContent(), exception.getMessage()));
             return packet;
         }
 
-        String jsonString;
-        try {
-            jsonString = newUser.toJsonString();
-        } catch (IOException ioException) {
-            var errString = "内部错误：内部发生转换错误。";
-            packet.setMessage(errString);
+        User currentUser = AoXiangToDoListSystem.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            packet.setMessage("不能修改用户信息，因为当前没有登录任何用户。");
             return packet;
         }
-        packet.setContent(jsonString);
+
+        String newHashedPwd = Encrypt.md5Hash(userInfo.getNewPassword());
+        //旧密码验证成功
+        boolean success;
+        try {
+            success = CloudServer.sendChangeUserInfoRequest(currentUser.getToken(), userInfo.getUserName(), currentUser.getEncryptedPassword(), newHashedPwd);
+        } catch (IOException e) {
+            packet.setMessage(String.format("连接服务器发生错误：%s", e.getMessage()));
+            return packet;
+        }
+        if(!success){
+            packet.setMessage("修改失败，旧密码可能错误。");
+            return packet;
+        }
+
+        //修改成功
+        currentUser.setEncryptedPassword(newHashedPwd);
+        currentUser.setUserName(userInfo.getUserName());
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         packet.setStatus(ResponseStatus.Success);
         return packet;
@@ -261,7 +277,7 @@ public class RequestController {
         try {
             requestItem = ToDoWorkItem.fromJsonString(request.getContent());
         } catch (Exception e) {
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为ToDoWorkItem\n%s", request.getContent(),e.getMessage()));
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为ToDoWorkItem\n%s", request.getContent(), e.getMessage()));
             return packet;
         }
         try {
@@ -409,7 +425,7 @@ public class RequestController {
         try {
             requestItem = ToDoWorkItem.fromJsonString(request.getContent());
         } catch (Exception e) {
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为ToDoWorkItem\n%s", request.getContent(),e.getMessage()));
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为ToDoWorkItem\n%s", request.getContent(), e.getMessage()));
             return packet;
         }
 
@@ -478,7 +494,7 @@ public class RequestController {
         //开始番茄钟（设置番茄钟开始时间）
         try {
             //如果没有提供innerId，直接返回。
-            if(request.getContent() == null || request.getContent().isBlank())
+            if (request.getContent() == null || request.getContent().isBlank())
                 throw new Exception(Messages.ZH_CN.POMODORO_INNER_ID_MISSING);
 
             ToDoWorkItem item = getToDoWorkItemByInnerId(request.getContent());

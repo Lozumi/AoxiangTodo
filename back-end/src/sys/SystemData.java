@@ -2,7 +2,7 @@ package sys;
 
 import shared.JsonConvertable;
 import shared.Pomodoro;
-import user.User;
+import shared.User;
 
 import java.time.Instant;
 
