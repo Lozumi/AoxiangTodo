@@ -62,6 +62,11 @@
           <v-list-item-title >番茄时钟</v-list-item-title>
         </v-list-item>
         <v-divider></v-divider>
+        <!--        <v-divider class="white&#45;&#45;text"></v-divider>-->
+        <v-list-item prepend-icon="mdi-information" class="nav-item mt-2 mb-2" @click="$router.push('/TodoPage/Stats')">
+          <v-list-item-title >数据统计</v-list-item-title>
+        </v-list-item>
+        <v-divider></v-divider>
 <!--        <v-divider class="white&#45;&#45;text"></v-divider>-->
         <v-list-item prepend-icon="mdi-information" class="nav-item mt-2 mb-2" @click="$router.push('/TodoPage/About')">
           <v-list-item-title >关于团队</v-list-item-title>
