@@ -33,7 +33,7 @@
                 :key="item.innerId"
                 value="newItem"
                 class="hover"
-                @click="onItemOrBtnClick(item,$event)"
+                @click.stop="onItemOrBtnClick(item)"
             >
               <template v-slot:prepend>
 
@@ -51,7 +51,7 @@
                     size="x-small"
                     style="font-size: 19px; color:olivedrab"
                     position="relative"
-                    @click="toTomatoClock(item.innerId.valueOf())">
+                    @click.stop="toTomatoClock(item.innerId.valueOf())">
                 </v-btn>
                 <v-btn
                     :ref="'btnInfo' + index"
@@ -67,7 +67,7 @@
                     size="x-small"
                     style="font-size: 15px"
                     position="relative"
-                    @click="subSelectedItem(item)">
+                    @click.stop="subSelectedItem(item)">
                 </v-btn>
               </template>
 
@@ -76,7 +76,7 @@
               </v-list-item-title>
 
               <v-list-item-subtitle :class="{ 'strike-through': item.isChecked }">
-                {{item.subtitle}}
+                {{item.description}}
               </v-list-item-subtitle>
 
 
@@ -98,7 +98,7 @@
           <template v-if="isCardVisible ">
             <v-btn
                 class="close-details-btn"></v-btn>
-<!--                @click.stop="toggleCardDetails(item.innerId.valueOf())"-->
+            <!--                @click.stop="toggleCardDetails(item.innerId.valueOf())"-->
           </template>
         </v-card>
       </div>
@@ -121,7 +121,7 @@ const isCardVisible = ref(false);
 const router = useRouter();
 const items = ref([] as{
   title: string;
-  subtitle: string | null; // 添加subtitle属性，并设置默认值为null
+  description: string | null; // 添加description属性，并设置默认值为null
   isChecked: boolean;
   innerId: number;
 }[]);
@@ -140,11 +140,6 @@ function formatISOString(date: Date) {
   // 拼接成 "年-月-日T时:分:秒" 格式
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 }
-
-onMounted(async () => {
-  // 如果有初始数据加载需求，请在此处使用useFetch或其他方式获取待办事项列表
-  await getItemList();
-});
 
 
 
@@ -178,7 +173,7 @@ async function addNewItemFromInput() {
         items.value.push({
           innerId: createdTodoId,
           isChecked: false,
-          subtitle: 'None',
+          description: 'None',
           title: newItemText.value
         });
         newItemText.value = '';
@@ -220,6 +215,7 @@ async function deleteItemFromList(innerId:number) {
 
 async function getItemList()
 {
+  console.log('Fetching to-do items on page refresh...');
   const {data} = await ToDoWorkRequest.enumerate();
   if (typeof data.value === 'string') {
     console.log('data.value:',data.value);
@@ -234,33 +230,35 @@ async function getItemList()
             innerId: itemData.innerId,
             isChecked: false, // 默认值设为 false
             title: itemData.title,
-            subtitle: itemData.subtitle || null,
+            description: itemData.description || null,
           }));
-          console.log(items.value);
         }
       }
-        console.log(items.value);
-      } catch (error) {
+      console.log(items.value);
+    } catch (error) {
       console.error('Failed to parse data.value as JSON:', error);
       return;
     }
   }
-
-
 }
+
+
+onMounted(async () => {
+  // 如果有初始数据加载需求，请在此处使用useFetch或其他方式获取待办事项列表
+  console.log('Component mounted, fetching to-do items...');
+  await nextTick();
+  await getItemList();
+});
 
 
 
 /**
- * 点击整个item的鸡肋函数
- * @param item
- * @param stopPropagation
+ * 测试item中独立点击组件的功能
+ * @param item 被点击的待办事项
  */
-function onItemOrBtnClick(item:any, {stopPropagation}: MouseEvent) {
-  stopPropagation();
-  //接受两个参数：item 表示被点击的项（即 v-list-item 中的数据项），event 表示触发点击事件的事件对象。
-  //使用 event.stopPropagation() 阻止事件冒泡，确保只有当前的 v-list-item 收到点击事件，而不会传播到其他元素。
+async function onItemOrBtnClick(item: any) {
   console.log('Item clicked:', item);
+  //点击事件绑定包含.stop修饰符，意味点击单个组件是独立触发，不会影响其他组件
 }
 
 /**
@@ -343,7 +341,7 @@ body {
 .row {
   display: flex;
   border-inline-style: none;
-//justify-content: space-between; /* 使子元素在主轴方向两端对齐 */
+  //justify-content: space-between; /* 使子元素在主轴方向两端对齐 */
 }
 
 .row:after {
@@ -403,6 +401,6 @@ body {
   right:10px;
   float:right;
   text-align: center;
-//position: absolute;
+  //position: absolute;
 }
 </style>

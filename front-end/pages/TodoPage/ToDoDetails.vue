@@ -229,6 +229,25 @@ let importancePriorityColor = ref<string>('gray');
 let emergencyPriorityTitle = ref<string>('未设置');//任务紧急程度
 let emergencyPriorityColor = ref<string>('gray');
 
+interface ToDoWorkItem{
+  layer: 1,
+  innerId: 0,
+  importancePriority: 1,
+  emergencyPriority: 1,
+  title: 'None',
+  subtitle: 'None',
+  description: 'None',
+  workCreateTime:'number',
+  workStartTime:'number',
+  workDeadline:'number',
+  workStatus:'number',
+  workSubToDoWorkItemInnerIdList:'',
+  workPomodoroRecordInnerIdList:'',
+}
+const ToDoWorkItems =ref ([] as ToDoWorkItem[]);
+
+const item =ref<undefined>;
+
 const text = ref<string>('center');
 
 const icon = ref<string>('justify');
@@ -258,7 +277,7 @@ const startDate = ref<Date | null>(null);
 const endDate = ref<Date | null>(null);
 
 
-let itemId = ref<number>;
+let itemId = ref<number|null>(null);
 
 let importancePriority = ref<number>(0);
 
@@ -272,6 +291,22 @@ let description = ref<string>('');
 
 
 let deadLine = ref<string>('');
+
+const receivedItems = ref<{
+  layer:number;
+  innerId: number;
+  importancePriority:number;
+  emergencyPriority:number;
+  title: string;
+  subtitle:string;
+  description?: string;
+  workCreateTime:string;
+  workStartTime:string;
+  workDeadline:string;
+  workStatus:string;
+  workSubToDoWorkItemInnerIdList:any;
+  workPomodoroRecordInnerIdList:any;
+}[]>([]);
 
 
 const start_today = ref<string>('');
@@ -528,9 +563,9 @@ async function backToToDoList() {
 }
 
 onMounted(() => {
-  itemId.value = computed(() => Number(route.query.itemId)).value;
-  if (itemId) {
-    // console.log('received:', itemId);
+  itemId = computed(() => Number(route.query.itemId));
+  if (itemId.value != null) {
+    //receviedInnerId传输成功了17:39
     console.log('receivedInnerId:', itemId.value);
     QueryToDoWork(itemId.value);
   } else {
@@ -539,24 +574,47 @@ onMounted(() => {
 });
 
 async function QueryToDoWork(innerId: number) {
-  let currentToDoWork = await ToDoWorkRequest.query(innerId).data.value;
+  let currentToDoWork = null;
   currentToDoWork = await ToDoWorkRequest.query(innerId).data.value;
-  console.log(currentToDoWork);
-  let currentToDoWorkObject = JSON.parse(currentToDoWork as string).content;
-  console.log(currentToDoWorkObject);
-  let currentToDoWorkObjectContent = JSON.parse(currentToDoWorkObject);
-  console.log(currentToDoWorkObjectContent)
-  importToDoWork(currentToDoWorkObjectContent);
+
+  if (typeof currentToDoWork === 'string') {
+    console.log('data.value:',currentToDoWork);
+
+    try {
+      const response = JSON.parse(currentToDoWork);
+
+
+      // 确保 content 是一个字符串化的数组，并将其转换为对象数组
+      if (typeof response.content === 'string') {
+        const jsonContentArrayString = response.content;
+        const responseContentArray = JSON.parse(jsonContentArrayString) as ToDoWorkItem[];
+
+        // 在数组中查找与 innerId 匹配的待办事项对象
+        const targetItem = responseContentArray.find(item => item.innerId === innerId);
+
+        if (targetItem) {
+          importToDoWork(targetItem);
+        } else {
+          console.error(`找不到ID为 ${innerId} 的待办事项`);
+        }
+      } else {
+        console.error('Failed to parse content property as JSON array.');
+      }
+    } catch (error) {
+      console.error('Failed to parse data.value as JSON:', error);
+      return;
+    }
+  }
 }
 
-function importToDoWork(currentToDoWork: any) {
+function importToDoWork(currentToDoWork: { [key: string]: any }) {
   inputTodoTitle.value = currentToDoWork.title;
   inputTodoSubtitle.value = currentToDoWork.subtitle;
   inputTodoDescription.value = currentToDoWork.description;
   startTime.value = currentToDoWork.startTime;
   deadLine.value = currentToDoWork.deadLine;
-  importancePriority.value = currentToDoWork.importancePriority;
-  emergencyPriority.value = currentToDoWork.emergencyPriority;
+  importancePriority.value = Number(currentToDoWork.importancePriority);
+  emergencyPriority.value = Number(currentToDoWork.emergencyPriority);
   createTime.value = currentToDoWork.createTime;
   endTime.value = currentToDoWork.endTime;
   status.value = currentToDoWork.status;
