@@ -37,24 +37,24 @@ public class Main {
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.ExitApplication, RequestController::processExitApplication));
 
         HttpTest httpTest = new HttpTest("localhost:20220");
-//
-//        UserInfo userInfo = new UserInfo();
-//        userInfo.setUserName("你干嘛");
-//        userInfo.setAccount("this3");
-//        userInfo.setPassword("jvavisthebestlanguage1!");
-//        httpTest.tryRequestUserRegister(userInfo);
-//        httpTest.tryRequestUserLogin(userInfo);
-//
-//        ToDoWorkItem item = new ToDoWorkItem();
-//        item.setTitle("测试待办事项");
-//        item.setStartTime(Instant.now());
-//        item.setDeadLine(Instant.now().plusSeconds(2000));
-//        //httpTest.tryRequestCreateToDoWork(item);
-//
-//
-//        httpTest.tryRequestSynchronize();
-//        httpTest.tryRequestEnumeration();
-//        //httpTest.tryRequestLogout();
+
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserName("你干嘛");
+        userInfo.setAccount("this3");
+        userInfo.setPassword("jvavisthebestlanguage1!");
+        //httpTest.tryRequestUserRegister(userInfo);
+        httpTest.tryRequestUserLogin(userInfo);
+
+        ToDoWorkItem item = new ToDoWorkItem();
+        item.setTitle("测试待办事项");
+        item.setStartTime(Instant.now());
+        item.setDeadLine(Instant.now().plusSeconds(2000));
+        //httpTest.tryRequestCreateToDoWork(item);
+
+        httpTest.tryRequestEnumeration();
+        httpTest.tryRequestSynchronize();
+        httpTest.tryRequestEnumeration();
+        //httpTest.tryRequestLogout();
     }
 
     static ResponsePacket enumerateToDoWorkItems(SocketTest test) {

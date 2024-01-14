@@ -52,11 +52,23 @@ public class AoXiangToDoListSystem {
         return systemData.getPomodoro();
     }
 
+    /**
+     * 注销当前用户的登录。
+     * @throws IllegalStateException 没有登录任何用户时抛出。
+     */
     public void userLogout() throws IllegalStateException {
         if (getCurrentUser() == null)
             throw new IllegalStateException("当前没有登录任何用户");
-        systemData.setCurrentUser(null);
-        systemData.setSynchronized(false);
+        innerUserLogout();
+    }
+
+    /**
+     * 注销当前用户的登录。该方法不检测当前是否登录用户。
+     */
+    public void innerUserLogout(){
+//        systemData.setCurrentUser(null);
+//        systemData.setSynchronized(false);
+        systemData = new SystemData();
         localSaveSystemData("D:/test/1.json");
     }
 
