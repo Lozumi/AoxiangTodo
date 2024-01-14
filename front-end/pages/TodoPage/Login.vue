@@ -1,11 +1,14 @@
 <template>
-
+  <!-- 主容器使用Vuetify的v-card组件 -->
   <v-card>
+    <!-- 左右分栏，左侧为图片，右侧为登录和注册内容 -->
     <v-row no-gutters>
       <v-col cols="4" class="d-flex">
+        <!-- 图片展示，路径为固定的'/static/yezi.jpeg' -->
         <v-img src="/static/yezi.jpeg" height="100%" max-width="100%"/>
       </v-col>
       <v-col cols="8">
+        <!-- 使用Vuetify的v-tabs实现登录和注册切换 -->
         <v-tabs
             v-model="state.tab"
             color="primary"
@@ -14,14 +17,15 @@
           <v-tab value="login">登录</v-tab>
           <v-tab value="register">注册</v-tab>
         </v-tabs>
-
+        <!-- 内容区域 -->
         <v-card-text>
+          <!-- 使用Vuetify的v-window和v-window-item实现切换不同页面 -->
           <v-window v-model="state.tab">
 
-            <!--            <登录窗口>-->
+            <!-- <登录窗口>-->
             <v-window-item value="login">
               <div>
-
+                <!-- 登录表单 -->
                 <div class="text-h6 mb-1">
                   LOGIN
                 </div>
@@ -38,7 +42,7 @@
                     v-model="state.loginData.password"
                 ></v-text-field>
 
-<!--                此处为登录返回包的界面-->
+                <!-- 登录结果展示 -->
                 <v-card v-if="state.loginResult" class="mt-5">
                   <v-card-title class="border-bottom mb-4">
                     <p class="text-h5"></p>
@@ -47,12 +51,16 @@
                     <pre>{{ JSON.parse(state.loginResult).message }}</pre>
                   </v-card-text>
                 </v-card>
+
+                <!-- 登录错误提示 -->
                 <v-alert
                     v-if="state.loginError"
                     type="warning"
                     class="mt-5"
                     text="登录错误，请检查账号密码是否输入正确">
                 </v-alert>
+
+                <!-- 登录按钮 -->
                 <v-btn
                     :loading="state.loading"
                     class="mb-5"
@@ -63,15 +71,16 @@
                 >
                   登入
                 </v-btn>
-
               </div>
             </v-window-item>
 
+            <!-- 注册窗口 -->
             <v-window-item value="register">
               <div class="text-h6 mb-1">
                 REGISTER
               </div>
 
+              <!-- 注册表单 -->
               <v-text-field
                   label="请设置账号"
                   hide-details="auto"
@@ -98,6 +107,8 @@
                   hide-details="auto"
                   v-model="state.registerData.confirmPassword"
               ></v-text-field>
+
+              <!-- 注册密码确认错误提示 -->
               <v-alert
                   v-if="state.registerData.password !== '' && state.registerData.confirmPassword !== '' && state.registerData.password !== state.registerData.confirmPassword"
                   type="error"
@@ -105,7 +116,7 @@
                   text="确认密码错误,请检查两次输入的密码是否一致">
               </v-alert>
 
-              <!--              !isRegisterFormValid ||-->
+              <!-- 注册按钮 -->
               <v-btn
                   :disabled="state.registerData.password !== state.registerData.confirmPassword"
                   :loading="state.loading"
@@ -118,7 +129,7 @@
                 注册
               </v-btn>
 
-<!--              此处为注册返回包的界面-->
+              <!-- 注册结果展示 -->
               <v-card v-if="state.registerResult" class="mt-5">
                 <v-card-title class="border-bottom mb-4">
                   <p class="text-h5"></p>
@@ -127,6 +138,8 @@
                   <pre>{{ JSON.parse(state.registerResult).message}}</pre>
                 </v-card-text>
               </v-card>
+
+              <!-- 注册错误提示 -->
               <v-alert
                   v-if="state.registerError"
                   type="error"
@@ -141,6 +154,7 @@
       </v-col>
     </v-row>
   </v-card>
+  <!-- 登录和注册过程中显示的加载进度条 -->
   <v-progress-linear
       v-if="state.isLoginPending || state.isRegisterPending"
       class="mt-5">
@@ -151,7 +165,7 @@
 <!---->
 <!---->
 <script setup>
-
+// 导入相关组件和工具函数
 import AccountRequest, {baseUrl} from "../../composables/AccountRequest.ts"
 
 import {useRouter} from "vue-router";
@@ -162,14 +176,18 @@ import accountRequest from "../../composables/AccountRequest.ts";
 //   await refresh();
 // };
 
+// 验证密码一致性的规则
 const confirmPasswordRules = {
   sameAs: (value) => value === state.registerData.password,
 };
 
+// 创建路由实例
 const router = useRouter()
 
+// 创建响应式变量和引用
 const resp = ref()
 
+// 创建响应式状态对象
 const state = reactive({
       loading: false,
       tab: 'login',
@@ -204,11 +222,12 @@ const state = reactive({
 //
 // const registerResult = ref(null);
 
-
+// 处理登录操作的函数
 async function handleLogin() {
 
   state.loginError = null;
 
+  // 使用AccountRequest的useLogin方法获取登录状态和结果
   const {
     pending: isLoginPending,
     error: loginError,
@@ -243,10 +262,12 @@ async function handleLogin() {
   }
 }
 
+// 处理注册操作的函数
 async function handleRegister() {
 
   state.registerError = null;
 
+  // 使用AccountRequest的useRegister方法获取注册状态和结果
   const {
     pending: isRegisterPending,
     error: registerError,
@@ -267,6 +288,8 @@ async function handleRegister() {
 
     if (!state.isRegisterPending && state.registerError === null) {
 
+
+      // 刷新注册状态
       await refreshRegister()
       console.log(registerResponse);
 
@@ -275,7 +298,7 @@ async function handleRegister() {
       state.registerError = registerError
       state.isRegisterPending = isRegisterPending
 
-      // asdvy!12511
+      // 延迟跳转至登录页面或其他逻辑
       console.log(registerError)
       setTimeout(() => {
         if (!(registerError.value)) {
@@ -287,7 +310,7 @@ async function handleRegister() {
   }
 }
 
-
+// 解析JSON字符串的函数
 function parseJson(response) {
   return JSON.parse(response)
 }
@@ -376,11 +399,13 @@ body {
   margin-bottom: 8px; /* 避免输入框背景色溢出 */
 }
 
+/* 设置标签文字颜色 */
 .v-text-field__slot label {
   font-size: 14px;
-  color: #1f1e33; /*这谁*/
+  color: #1f1e33;
 }
 
+/* 设置输入文字颜色 */
 .v-text-field__slot input {
   font-size: 16px;
   color: #212121;
@@ -408,6 +433,7 @@ pre {
   box-sizing: border-box;
 }
 
+/* 设置错误提示文本颜色 */
 .v-text-field__slot .v-messages {
   color: red;
 }
