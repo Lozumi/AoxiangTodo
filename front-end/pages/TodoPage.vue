@@ -13,7 +13,7 @@
     <!-- 侧面导航栏 -->
     <v-navigation-drawer :width="200" app :color="selectedTheme.primaryColor" :dark="selectedTheme.darkSideNav">
       <v-list dense>
-        <v-list-item title="我的" subtitle="Vuetify"></v-list-item>
+        <v-list-item title="亲爱的{{}}}" subtitle="欢迎使用翱翔清单！"></v-list-item>
 <!--        <v-list-item class="nav-item" @click="$router.push('/TodoPage/TodayTasks')">-->
 <!--          <v-list-item-title class="white&#45;&#45;text">今日待办</v-list-item-title>-->
 <!--        </v-list-item>-->
@@ -26,8 +26,8 @@
           <v-list-item-title class="white--text">番茄时钟</v-list-item-title>
         </v-list-item>
         <v-divider class="white--text"></v-divider>
-        <v-list-item class="nav-item" @click="$router.push('/TodoPage/PostTest')">
-          <v-list-item-title class="white--text">网络测试</v-list-item-title>
+        <v-list-item class="nav-item" @click="$router.push('/TodoPage/About')">
+          <v-list-item-title class="white--text">关于团队</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
@@ -44,13 +44,13 @@
           <v-icon>mdi-github</v-icon>
         </v-btn>
         <v-btn icon href="https://github.com/Lozumi" target="_blank" class="mx-4" variant="text">
-          <v-icon>mdi-github</v-icon>
+          <v-icon>mdi-qqchat</v-icon>
         </v-btn>
         <v-btn icon href="https://github.com/Lozumi" target="_blank" class="mx-4" variant="text">
-          <v-icon>mdi-github</v-icon>
+          <v-icon>mdi-wechat</v-icon>
         </v-btn>
         <v-col class="text-center mt-4" cols="12">
-          {{ new Date().getFullYear() }} — <strong>Vuetify</strong>
+          {{ new Date().getFullYear() }} — <strong>终南一梦组作品</strong>
         </v-col>
       </v-row>
     </v-footer>
