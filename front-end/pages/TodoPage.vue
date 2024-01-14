@@ -2,34 +2,78 @@
   <v-app style="height: 100%;">
     <!-- 顶部导航栏 -->
     <v-app-bar :elevation="2" app :color="selectedTheme.primaryColor" :dark="selectedTheme.darkTopBar">
-      <v-icon class="mx-4 blue--text">mdi-clipboard-list</v-icon>
+      <v-icon class="mx-4 blue--text">mdi-airplane-takeoff</v-icon>
       <v-toolbar-title>翱翔清单</v-toolbar-title>
       <v-btn @click="toggleTheme" text>
         <v-icon>mdi-palette</v-icon>
         主题
       </v-btn>
+      <v-btn v-if="isLogin" @click="userLogout" text>
+        <v-icon>mdi-logout</v-icon>
+        注销
+      </v-btn>
     </v-app-bar>
 
     <!-- 侧面导航栏 -->
-    <v-navigation-drawer :width="200" app :color="selectedTheme.primaryColor" :dark="selectedTheme.darkSideNav">
-      <v-list dense>
-        <v-list-item title="亲爱的{{}}}" subtitle="欢迎使用翱翔清单！"></v-list-item>
-<!--        <v-list-item class="nav-item" @click="$router.push('/TodoPage/TodayTasks')">-->
-<!--          <v-list-item-title class="white&#45;&#45;text">今日待办</v-list-item-title>-->
-<!--        </v-list-item>-->
-        <v-divider class="white--text"></v-divider>
-        <v-list-item class="nav-item" @click="$router.push('/TodoPage/Todo')">
-          <v-list-item-title class="white--text">最近待办</v-list-item-title>
+    <v-navigation-drawer
+        :width="233" app
+        :color="selectedTheme.primaryColor"
+        :dark="selectedTheme.darkSideNav"
+        theme="light"
+    >
+      <v-container class="pa-4">
+
+        <v-row align="center">
+          <v-col cols="auto">
+            <v-avatar size="20">
+              <v-icon>mdi-account</v-icon>
+            </v-avatar>
+          </v-col>
+          <v-col>
+            <v-row>
+              <v-col>
+<!--                <p style="font-weight: bold">{{ isLogin ? `亲爱的 ${currentUser}` : '请登录' }}</p>-->
+                <p style="font-weight: bold">{{ isLogin ? `亲爱的用户` : '请登录' }}</p>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <p>欢迎使用翱翔清单</p>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+
+      </v-container>
+      <v-list density="compact" nav>
+<!--        <v-list-item v-if="isLogin" :title="`亲爱的 ${currentUser}`" subtitle="欢迎使用翱翔清单！"></v-list-item>-->
+<!--        <v-list-item v-if="!isLogin" :title="`请登录`" subtitle="欢迎使用翱翔清单！"></v-list-item>-->
+        <!--        <v-list-item class="nav-item" @click="$router.push('/TodoPage/TodayTasks')">-->
+        <!--          <v-list-item-title class="white&#45;&#45;text">今日待办</v-list-item-title>-->
+        <!--        </v-list-item>-->
+<!--        <v-divider class="white&#45;&#45;text"></v-divider>-->
+        <v-divider></v-divider>
+        <v-list-item prepend-icon="mdi-clipboard-list" class="nav-item mt-2 mb-2" @click="$router.push('/TodoPage/Todo')">
+          <v-list-item-title >最近待办</v-list-item-title>
         </v-list-item>
-        <v-divider class="white--text"></v-divider>
-        <v-list-item class="nav-item" @click="$router.push('/TodoPage/TomatoClock')">
-          <v-list-item-title class="white--text">番茄时钟</v-list-item-title>
+        <v-divider></v-divider>
+<!--        <v-divider class="white&#45;&#45;text"></v-divider>-->
+        <v-list-item prepend-icon="mdi-briefcase-clock" class="nav-item mt-2 mb-2" @click="$router.push('/TodoPage/TomatoClock')">
+          <v-list-item-title >番茄时钟</v-list-item-title>
         </v-list-item>
-        <v-divider class="white--text"></v-divider>
-        <v-list-item class="nav-item" @click="$router.push('/TodoPage/About')">
-          <v-list-item-title class="white--text">关于团队</v-list-item-title>
+        <v-divider></v-divider>
+<!--        <v-divider class="white&#45;&#45;text"></v-divider>-->
+        <v-list-item prepend-icon="mdi-information" class="nav-item mt-2 mb-2" @click="$router.push('/TodoPage/About')">
+          <v-list-item-title >关于团队</v-list-item-title>
         </v-list-item>
       </v-list>
+      <template v-slot:append>
+        <div class="pa-2">
+          <v-btn block @click="bingo">
+            这是彩蛋
+          </v-btn>
+        </div>
+      </template>
     </v-navigation-drawer>
 
     <!-- 内容区域 -->
@@ -58,6 +102,9 @@
 </template>
 
 <script>
+import AccountRequest from "~/composables/AccountRequest";
+import {ref} from 'vue';
+
 export default {
   data: () => ({
     themes: [
@@ -87,6 +134,8 @@ export default {
       },
     ],
     selectedThemeIndex: 0,
+    currentUser: '',
+    isLogin: false,
   }),
   computed: {
     selectedTheme() {
@@ -98,6 +147,49 @@ export default {
       // 切换到下一个主题
       this.selectedThemeIndex = (this.selectedThemeIndex + 1) % this.themes.length;
     },
+    userLogout() {
+      AccountRequest.userLogout()
+          .then(response => {
+            const { status, message, content} = JSON.parse(response.data.value);
+
+            if (status === "Success") {
+              console.error("注销成功");
+              this.isLogin = false;
+              this.$router.push('/TodoPage/Login'); // 跳转到登录页面
+            } else {
+              console.error("注销失败");
+            }
+          })
+          .catch(error => {
+            console.error(error);
+          });
+    },
+    bingo(){
+      console.log("加入我们！lozumi at qq.com~");
+    }
+  },
+  created() {
+    AccountRequest.getCurrentUser()
+        .then(response => {
+          console.log(response);
+          const { status, message, content} = JSON.parse(response.data.value);
+          console.log(status);
+          console.log(content);
+          if (status === "Success") {
+            this.isLogin = true;
+            this.currentUser = content;
+            setTimeout(() => {
+              this.$router.push('/TodoPage/Todo');
+            }, 1000); // 等待1秒
+          } else {
+            setTimeout(() => {
+              this.$router.push('/TodoPage/Login');
+            }, 1000); // 等待1秒
+          }
+        })
+        .catch(error => {
+          console.error(error);
+        });
   },
 };
 </script>

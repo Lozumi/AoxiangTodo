@@ -218,7 +218,7 @@ async function handleLogin() {
 
   if (state.loginData.account && state.loginData.password) {
 
-    await refreshLogin();
+    // await refreshLogin();
 
     if (!state.isLoginPending && state.loginError === null) {
 
