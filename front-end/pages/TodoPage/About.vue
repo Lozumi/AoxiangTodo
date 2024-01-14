@@ -6,10 +6,10 @@
     </header>
     <section class="team-info">
       <h2>终南一梦队作品</h2>
-      <h3>组长: 刘黎可</h3>
-      <h3>前端: 刘黎可、徐薏茜、韩紫琪、于李源、傅钰</h3>
-      <h3>后端: 贾聪毅、李振国</h3>
-      <h3>服务端: 张书畅</h3>
+      <p>组长: 刘黎可</p>
+      <p>前端: 刘黎可、徐薏茜、韩紫琪、于李源、傅钰</p>
+      <p>后端: 贾聪毅、李振国</p>
+      <p>服务端: 张书畅</p>
     </section>
     <section class="project-links">
       <h2>项目链接</h2>
@@ -48,10 +48,6 @@ header {
 
 .team-info h2 {
   margin-bottom: 10px;
-}
-
-.team-info h3 {
-  margin: 5px 0;
 }
 
 .project-links {
