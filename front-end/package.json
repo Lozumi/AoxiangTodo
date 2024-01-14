@@ -10,9 +10,20 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
+    "@css-render/vue3-ssr": "^0.15.10",
     "@nuxt/devtools": "latest",
+    "@nuxtjs/tailwindcss": "^6.10.1",
+    "@sidebase/nuxt-auth": "^0.6.4",
+    "daisyui": "^4.4.23",
+    "naive-ui": "^2.36.0",
     "nuxt": "^3.8.2",
     "vue": "^3.3.12",
-    "vue-router": "^4.2.5"
+    "vue-router": "^4.2.5",
+    "vuetify-nuxt-module": "^0.7.3"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.5.1",
+    "date-fns-tz": "^2.0.0",
+    "pinia": "^2.1.7"
   }
 }
