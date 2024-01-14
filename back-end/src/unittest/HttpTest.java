@@ -88,6 +88,10 @@ public class HttpTest {
         return tryBasicRequest(RequestType.Synchronize);
     }
 
+    public ResponsePacket tryRequestGetUser(){
+        return tryBasicRequest(RequestType.GetCurrentUser,null);
+    }
+
     public  ResponsePacket tryRequestUserRegister(UserInfo info) throws IOException {
         return tryBasicRequest(RequestType.UserRegister,info.toJsonString());
     }
