@@ -1,4 +1,5 @@
 <template>
+
   <v-card>
     <v-row no-gutters>
       <v-col cols="4" class="d-flex">
@@ -151,11 +152,11 @@
 <!---->
 <script setup>
 
-import AccountRequest, {baseUrl} from "../composables/AccountRequest.ts"
+import AccountRequest, {baseUrl} from "../../composables/AccountRequest.ts"
 
 import {useRouter} from "vue-router";
 
-import accountRequest from "../composables/AccountRequest.ts";
+import accountRequest from "../../composables/AccountRequest.ts";
 
 // const loginSend = async () => {
 //   await refresh();
