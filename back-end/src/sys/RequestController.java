@@ -194,6 +194,7 @@ public class RequestController {
                 throw new Exception("登录失败，请检查账号与密码是否正确。");
             } else { //获取到token，登录成功
                 user.setToken(token);
+                if(currentUser != null) AoXiangToDoListSystem.getInstance().synchronizeSystemData();
                 AoXiangToDoListSystem.getInstance().innerUserLogout(); //注销之前登录的用户
                 AoXiangToDoListSystem.getInstance().systemData.setCurrentUser(user);
 
