@@ -96,6 +96,7 @@ public class RequestController {
             return packet;
         }
 
+        AoXiangToDoListSystem.getInstance().updateSystemDataLastModifiedInstant();
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         packet.setStatus(ResponseStatus.Success);
         return packet;
@@ -278,6 +279,7 @@ public class RequestController {
         requestItem.setInnerId(toDoWorkItemList.getNextAvailableInnerId());
         toDoWorkItemList.add(requestItem);
 
+        AoXiangToDoListSystem.getInstance().updateSystemDataLastModifiedInstant();
         //操作成功响应
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         packet.setStatus(ResponseStatus.Success);
@@ -385,6 +387,7 @@ public class RequestController {
             targetItem.setImportancePriority(toDoWorkItem.getImportancePriority());
             targetItem.setStartTime(toDoWorkItem.getStartTime());
 
+            AoXiangToDoListSystem.getInstance().updateSystemDataLastModifiedInstant();
             packet.setMessage(Messages.ZH_CN.SUCCESS);
             packet.setStatus(ResponseStatus.Success);
         } catch (Exception exception) {
