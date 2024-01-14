@@ -8,7 +8,7 @@ async function toLogin() {
 
 <template>
   <section>
-    <p>此页面将显示在 /about 路由。</p>
+    {{ new Date().getFullYear() }} — <strong>终南一梦组作品</strong>
     <button @click="toLogin">toLogin</button>
 
 
