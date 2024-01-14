@@ -32,8 +32,8 @@
           <v-col>
             <v-row>
               <v-col>
-
-                <p style="font-weight: bold">{{ isLogin ? `亲爱的 ${currentUser}` : '请登录' }}</p>
+<!--                <p style="font-weight: bold">{{ isLogin ? `亲爱的 ${currentUser}` : '请登录' }}</p>-->
+                <p style="font-weight: bold">{{ isLogin ? `亲爱的用户` : '请登录' }}</p>
               </v-col>
             </v-row>
             <v-row>
@@ -69,7 +69,7 @@
       </v-list>
       <template v-slot:append>
         <div class="pa-2">
-          <v-btn block>
+          <v-btn block @click="bingo">
             这是彩蛋
           </v-btn>
         </div>
@@ -164,6 +164,9 @@ export default {
             console.error(error);
           });
     },
+    bingo(){
+      console.log("加入我们！lozumi at qq.com~");
+    }
   },
   created() {
     AccountRequest.getCurrentUser()
