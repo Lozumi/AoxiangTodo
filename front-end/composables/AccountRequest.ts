@@ -41,4 +41,20 @@ export default new class AccountRequest {
         return useSendRequest(requestBody);
     }
 
+    userLogout(){
+        const requestBody = {
+            content: JSON.stringify(''),
+            requestType: 'UserLogout',
+        };
+        return useSendRequest(requestBody);
+    }
+
+    getCurrentUser(){
+        const requestBody = {
+            content: JSON.stringify(''),
+            requestType: 'GetCurrentUser',
+        };
+        return useSendRequest(requestBody);
+    }
+
 }
