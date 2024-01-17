@@ -8,20 +8,21 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * @author 贾聪毅
  * 待办事项。
  */
-public class ToDoWorkItem implements JsonConvertable {
+public class ToDoWorkItem implements JsonConvertable, Observable<ToDoWorkItem> {
     //属性定义
-    int layer; //从1开始
-    int innerId, importancePriority, emergencyPriority;
-    String title, subtitle, description;
-    Instant createTime, startTime, deadLine;
-    WorkItemStatus status;
-    List<Integer> subToDoWorkItemInnerIdList;
-    List<Integer> pomodoroRecordInnerIdList;
+    private int layer; //从1开始
+    private int innerId, importancePriority, emergencyPriority;
+    private String title, subtitle, description;
+    private Instant createTime, startTime, deadLine;
+    private WorkItemStatus status = WorkItemStatus.None;
+    private List<Integer> subToDoWorkItemInnerIdList;
+    private List<Integer> pomodoroRecordInnerIdList;
 
     /**
      * 获取层级（1为顶层，递增）。
@@ -263,7 +264,7 @@ public class ToDoWorkItem implements JsonConvertable {
      * @param expectedLength 预期的字节长度。如果该值小于等于0，则读取流的所有字节。
      * @return 新构造的ToDoWorkItem对象。失败返回null，并尝试回溯流数据到未调用此方法前的状态。
      */
-    public static ToDoWorkItem fromJsonStream(InputStream stream, int expectedLength) throws Exception{
+    public static ToDoWorkItem fromJsonStream(InputStream stream, int expectedLength) throws Exception {
         return JsonUtility.objectFromInputStream(stream, expectedLength, ToDoWorkItem.class);
     }
 
@@ -274,5 +275,47 @@ public class ToDoWorkItem implements JsonConvertable {
         }
 
         return false;
+    }
+
+
+    private final Vector<Observer<ToDoWorkItem>> observers = new Vector<>();
+    private boolean notifySuppressed; //通知观察者是否被暂停。
+    private boolean notifyRequired; //在暂停期间，是否有属性被更改。
+
+    @Override
+    public void addObserver(Observer<ToDoWorkItem> observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(Observer<ToDoWorkItem> observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void suppressNotify() {
+        notifySuppressed = true;
+    }
+
+    @Override
+    public void resumeNotifyAndForget() {
+        notifySuppressed = false;
+    }
+
+    @Override
+    public void resumeAndNotifyOnceOnChanged() {
+        notifySuppressed = false;
+        if (notifyRequired)
+            notifyObservers();
+    }
+
+    /**
+     * 通知所有观察者。如果在暂停通知期间，则将notifyRequired设为true。
+     */
+    void notifyObservers() {
+        if (!notifySuppressed) {
+            notifyRequired = false;
+            observers.forEach(o -> o.propertyChanged(this));
+        } else notifyRequired = true;
     }
 }

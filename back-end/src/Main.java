@@ -13,7 +13,7 @@ import java.time.Instant;
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
         AoXiangToDoListSystem.getInstance().runHttpServer(new BackEndHttpServerStartupInfo(20220,12));
-
+        AoXiangToDoListSystem.getInstance().runSocketServer(new BackEndServerStartupInfo("127.0.0.1",20221,12));
         var controller = AoXiangToDoListSystem.getInstance().getSystemController();
         var token = controller.registerRequestHandler(new RequestHandlerInfo(RequestType.CreateToDoWork, RequestController::processToDoWorkCreation));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.QueryToDoWork, RequestController::processQueryToDoWorkRequest));
@@ -35,22 +35,30 @@ public class Main {
         HttpTest httpTest = new HttpTest("localhost:20220");
         ToDoWorkItem item = new ToDoWorkItem();
         item.setTitle("name");
-        item.setStartTime(Instant.now().plusSeconds(1000));
-        item.setDeadLine(Instant.now().plusSeconds(20000));
+        item.setStartTime(Instant.now().plusSeconds(0));
+        item.setDeadLine(Instant.now().plusSeconds(70));
         RequestPacket packet = new RequestPacket();
         packet.setContent(item.toJsonString());
         packet.setRequestType(RequestType.CreateToDoWork);
         httpTest.tryRequest(packet);
+        httpTest.tryRequest(packet);
+        httpTest.tryRequest(packet);
+        httpTest.tryRequest(packet);
+        httpTest.tryRequest(packet);
+        httpTest.tryRequest(packet);
+        httpTest.tryRequest(packet);
+        httpTest.tryRequest(packet);
+        httpTest.tryRequest(packet);
+        httpTest.tryRequest(packet);
         httpTest.tryRequestEnumeration();
         httpTest.tryRequestQueryToDoWorkItem(0);
-        httpTest.tryRequestQueryToDoWorkItem(1);
 
-        UserInfo userInfo = new UserInfo();
-        userInfo.setUserName("你干嘛");
-        userInfo.setAccount("this");
-        userInfo.setPassword("Rrawgb773@");
-        httpTest.tryRequestUserRegister(userInfo);
-        httpTest.tryRequestUserLogin(userInfo);
-        AoXiangToDoListSystem.getInstance().localSaveSystemData("D:/test/1.json");
+//        UserInfo userInfo = new UserInfo();
+//        userInfo.setUserName("你干嘛");
+//        userInfo.setAccount("this");
+//        userInfo.setPassword("Rrawgb773@");
+//        httpTest.tryRequestUserRegister(userInfo);
+//        httpTest.tryRequestUserLogin(userInfo);
+//        AoXiangToDoListSystem.getInstance().localSaveSystemData("D:/test/1.json");
     }
 }

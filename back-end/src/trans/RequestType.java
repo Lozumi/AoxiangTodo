@@ -17,8 +17,8 @@ public enum RequestType {
     UserLogin,
     UserLogout,
     Synchronize,
-    ToDoWorkItemNotification,
     GetCurrentUser,
     ExitApplication,
-    ModifyUserInfo
+    ModifyUserInfo,
+    RegisterNotificationCallback
 }

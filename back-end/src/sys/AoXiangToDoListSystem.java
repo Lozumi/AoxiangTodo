@@ -1,9 +1,7 @@
 package sys;
 
 import shared.Pomodoro;
-import trans.BackEndHttpServer;
-import trans.BackEndHttpServerStartupInfo;
-import trans.CloudServer;
+import trans.*;
 import shared.User;
 import util.FileHelper;
 import util.JsonUtility;
@@ -13,6 +11,7 @@ import java.io.IOException;
 public class AoXiangToDoListSystem {
     static AoXiangToDoListSystem system;
     BackEndHttpServer httpServer;
+    BackEndServer socketServer;
     String systemDataJsonPath = "D:/test/1.json";
 
     public static synchronized AoXiangToDoListSystem getInstance() {
@@ -62,6 +61,13 @@ public class AoXiangToDoListSystem {
             httpServer = new BackEndHttpServer(startupInfo);
         httpServer.run();
         System.err.println("http服务器正在运行......");
+    }
+
+    public void runSocketServer(BackEndServerStartupInfo startupInfo){
+        if(socketServer == null)
+            socketServer = new BackEndServer(startupInfo);
+        socketServer.run();
+        System.err.println("socket服务器正在运行......");
     }
 
     /**
@@ -148,7 +154,7 @@ public class AoXiangToDoListSystem {
             }
         }
 
-        if (systemData.isSynchronized && systemData.lastModifiedInstant.isAfter(cloudSystemData.lastModifiedInstant)) {
+        if (systemData.isSynchronized() && systemData.lastModifiedInstant.isAfter(cloudSystemData.lastModifiedInstant)) {
             //本地的数据比云端数据更新，推送
             try {
                 saveAndPush();
@@ -174,7 +180,7 @@ public class AoXiangToDoListSystem {
      */
     void saveAndPush() throws IOException {
         localSaveSystemData(systemDataJsonPath);
-        boolean oldSynchronized = systemData.isSynchronized;
+        boolean oldSynchronized = systemData.isSynchronized();
         try {
             systemData.setSynchronized(true);
             CloudServer.sendPushRequest(getCurrentUser().getToken(), systemData.toJsonString());

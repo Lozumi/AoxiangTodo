@@ -10,12 +10,12 @@ import java.time.Instant;
  * 定义了需要保存或同步的系统数据。
  */
 public class SystemData implements JsonConvertable {
-    User currentUser;
-    ToDoWorkItemCollection toDoWorkItemCollection = new ToDoWorkItemCollection();
-    PomodoroRecordCollection pomodoroRecordCollection = new PomodoroRecordCollection();
-    Pomodoro pomodoro = new Pomodoro();
+    private User currentUser;
+    private ToDoWorkItemCollection toDoWorkItemCollection = new ToDoWorkItemCollection();
+    private PomodoroRecordCollection pomodoroRecordCollection = new PomodoroRecordCollection();
+    private Pomodoro pomodoro = new Pomodoro();
 
-    boolean isSynchronized;
+    private boolean isSynchronized;
 
     public boolean isSynchronized() {
         return isSynchronized;
