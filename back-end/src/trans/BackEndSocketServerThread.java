@@ -1,13 +1,11 @@
 package trans;
 
-import shared.SharedConfigurations;
 import sys.AoXiangToDoListSystem;
-import sys.SystemController;
 
 import java.io.*;
 import java.net.Socket;
 
-public class BackEndServerThread implements Runnable {
+public class BackEndSocketServerThread implements Runnable {
 
     Socket clientSocket;
     DataInputStream inputStream;
@@ -61,7 +59,7 @@ public class BackEndServerThread implements Runnable {
         }
     }
 
-    public BackEndServerThread(Socket clientSocket) throws IOException {
+    public BackEndSocketServerThread(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
         this.outputStream = new DataOutputStream(clientSocket.getOutputStream());
         this.inputStream = new DataInputStream(clientSocket.getInputStream());

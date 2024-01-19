@@ -1,3 +1,4 @@
+import shared.NetworkProtocol;
 import shared.ToDoWorkItem;
 import shared.UserInfo;
 import sys.AoXiangToDoListSystem;
@@ -12,8 +13,8 @@ import java.time.Instant;
 
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
-        AoXiangToDoListSystem.getInstance().runHttpServer(new BackEndHttpServerStartupInfo(20220,12));
-        AoXiangToDoListSystem.getInstance().runSocketServer(new BackEndServerStartupInfo("127.0.0.1",20221,12));
+        AoXiangToDoListSystem.getInstance().runHttpServer(new BackEndHttpServerStartupInfo(20220, 12));
+        AoXiangToDoListSystem.getInstance().runSocketServer(new BackEndServerStartupInfo("127.0.0.1", 20221, 12));
         var controller = AoXiangToDoListSystem.getInstance().getSystemController();
         var token = controller.registerRequestHandler(new RequestHandlerInfo(RequestType.CreateToDoWork, RequestController::processToDoWorkCreation));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.QueryToDoWork, RequestController::processQueryToDoWorkRequest));
@@ -29,7 +30,12 @@ public class Main {
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.GetCurrentUser, RequestController::processGetCurrentUser_FullInfo));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.Synchronize, RequestController::processSynchronization));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.ExitApplication, RequestController::processExitApplication));
-        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.ModifyUserInfo,RequestController::processUserModifyInformation));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.ModifyUserInfo, RequestController::processUserModifyInformation));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.RegisterNotificationCallback, RequestController::processRegisterNotificationCallback));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.UnregisterNotificationCallback, RequestController::processUnregisterNotificationCallback));
+
+        var notifyController = AoXiangToDoListSystem.getInstance().getNotificationController();
+        notifyController.registerNotificationRaiser(NetworkProtocol.Socket, new SocketNotificationRaiser());
 
 
         HttpTest httpTest = new HttpTest("localhost:20220");
@@ -40,6 +46,7 @@ public class Main {
         RequestPacket packet = new RequestPacket();
         packet.setContent(item.toJsonString());
         packet.setRequestType(RequestType.CreateToDoWork);
+        httpTest.tryRequest(packet);
         httpTest.tryRequest(packet);
         httpTest.tryRequest(packet);
         httpTest.tryRequest(packet);

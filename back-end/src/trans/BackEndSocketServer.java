@@ -8,15 +8,15 @@ import java.util.ArrayList;
 /**
  * 表示后端服务器。
  */
-public class BackEndServer {
+public class BackEndSocketServer {
     boolean aborting = false;
     boolean disposed = false;
     BackEndServerStartupInfo startupInfo;
     ServerSocket serverSocket;
     Thread mainServerThread;
-    ArrayList<BackEndServerThread> runningServerThreads = new ArrayList<>();
+    ArrayList<BackEndSocketServerThread> runningServerThreads = new ArrayList<>();
 
-    public BackEndServer(BackEndServerStartupInfo startupInfo) {
+    public BackEndSocketServer(BackEndServerStartupInfo startupInfo) {
         this.startupInfo = startupInfo;
     }
 
@@ -68,7 +68,7 @@ public class BackEndServer {
 
     private void startServerThread(Socket clientSocket) throws IOException{
         //针对clientSocket运行服务线程。
-        var backgroundRunnable = new BackEndServerThread(clientSocket);
+        var backgroundRunnable = new BackEndSocketServerThread(clientSocket);
         Thread serveThread = new Thread(backgroundRunnable);
         runningServerThreads.add(backgroundRunnable);
         serveThread.start();

@@ -11,7 +11,7 @@ import java.io.IOException;
 public class AoXiangToDoListSystem {
     static AoXiangToDoListSystem system;
     BackEndHttpServer httpServer;
-    BackEndServer socketServer;
+    BackEndSocketServer socketServer;
     String systemDataJsonPath = "D:/test/1.json";
 
     public static synchronized AoXiangToDoListSystem getInstance() {
@@ -26,11 +26,16 @@ public class AoXiangToDoListSystem {
         this.reloadFromFile(systemDataJsonPath);
     }
 
-    SystemData systemData;
-    SystemController systemController = new SystemController();
+    private final SystemController systemController = new SystemController();
+    private final NotificationController notificationController = new NotificationController();
+    public NotificationController getNotificationController(){return notificationController;}
+
+    public SystemData getSystemData() {
+        return SystemData.getInstance();
+    }
 
     public PomodoroRecordCollection getPomodoroRecordsCollection() {
-        return systemData.getPomodoroRecordCollection();
+        return getSystemData().getPomodoroRecordCollection();
     }
 
     public SystemController getSystemController() {
@@ -38,21 +43,21 @@ public class AoXiangToDoListSystem {
     }
 
     public ToDoWorkItemCollection getToDoWorkItemCollection() {
-        return systemData.getToDoWorkItemCollection();
+        return getSystemData().getToDoWorkItemCollection();
     }
 
     public User getCurrentUser() {
-        return systemData.getCurrentUser();
+        return getSystemData().getCurrentUser();
     }
 
     public Pomodoro getPomodoro() {
-        return systemData.getPomodoro();
+        return getSystemData().getPomodoro();
     }
 
     public void userLogout() throws IllegalStateException {
         if (getCurrentUser() == null)
             throw new IllegalStateException("当前没有登录任何用户");
-        systemData.setCurrentUser(null);
+        getSystemData().setCurrentUser(null);
     }
 
 
@@ -63,9 +68,9 @@ public class AoXiangToDoListSystem {
         System.err.println("http服务器正在运行......");
     }
 
-    public void runSocketServer(BackEndServerStartupInfo startupInfo){
-        if(socketServer == null)
-            socketServer = new BackEndServer(startupInfo);
+    public void runSocketServer(BackEndServerStartupInfo startupInfo) {
+        if (socketServer == null)
+            socketServer = new BackEndSocketServer(startupInfo);
         socketServer.run();
         System.err.println("socket服务器正在运行......");
     }
@@ -91,10 +96,8 @@ public class AoXiangToDoListSystem {
      * @param filePath 文件路径。
      */
     public void localSaveSystemData(String filePath) {
-        if (systemData == null)
-            return;
         try {
-            var systemDataJsonString = systemData.toJsonString();
+            var systemDataJsonString = getSystemData().toJsonString();
             FileHelper.saveStringToFile(filePath, systemDataJsonString);
         } catch (IOException exception) {
             System.err.printf("将系统数据保存至\"%s\"时发生错误：%s", filePath, exception.getMessage());
@@ -109,12 +112,9 @@ public class AoXiangToDoListSystem {
     public void reloadFromFile(String filePath) {
         try {
             var jsonStr = FileHelper.readStringFromFile(filePath);
-            systemData = JsonUtility.objectFromJsonString(jsonStr, SystemData.class);
-            if (systemData == null)
-                throw new Exception(String.format("文件%s中存储的不是有效的系统数据JSON字符串", filePath));
+            getSystemData().update(jsonStr);
         } catch (Exception ex) {
             System.err.printf("从\"%s\"重新加载系统数据时发生错误：%s，创建默认实例\n", filePath, ex.getMessage());
-            systemData = new SystemData();
         }
     }
 
@@ -127,8 +127,8 @@ public class AoXiangToDoListSystem {
      *
      * @throws Exception 当数据同步失败时抛出，包含失败说明文本。
      */
-    public void synchronizeSystemData() throws Exception {
-        User currentUser = systemData.getCurrentUser();
+    public synchronized void synchronizeSystemData() throws Exception {
+        User currentUser = getSystemData().getCurrentUser();
         if (currentUser == null || currentUser.getToken() == null)
             throw new Exception("用户未登录。");
         String cloudSystemDataJsonStr;
@@ -154,7 +154,7 @@ public class AoXiangToDoListSystem {
             }
         }
 
-        if (systemData.isSynchronized() && systemData.lastModifiedInstant.isAfter(cloudSystemData.lastModifiedInstant)) {
+        if (getSystemData().isSynchronized() && getSystemData().lastModifiedInstant.isAfter(cloudSystemData.lastModifiedInstant)) {
             //本地的数据比云端数据更新，推送
             try {
                 saveAndPush();
@@ -180,12 +180,12 @@ public class AoXiangToDoListSystem {
      */
     void saveAndPush() throws IOException {
         localSaveSystemData(systemDataJsonPath);
-        boolean oldSynchronized = systemData.isSynchronized();
+        boolean oldSynchronized = getSystemData().isSynchronized();
         try {
-            systemData.setSynchronized(true);
-            CloudServer.sendPushRequest(getCurrentUser().getToken(), systemData.toJsonString());
+            getSystemData().setSynchronized(true);
+            CloudServer.sendPushRequest(getCurrentUser().getToken(), getSystemData().toJsonString());
         } catch (Exception exception) {
-            systemData.setSynchronized(oldSynchronized);
+            getSystemData().setSynchronized(oldSynchronized);
             throw exception;
         }
     }

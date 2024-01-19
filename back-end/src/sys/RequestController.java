@@ -23,6 +23,50 @@ import java.util.Optional;
 public class RequestController {
 
 
+    public static ResponsePacket processUnregisterNotificationCallback(RequestPacket request, RequestHandlerData userData) {
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+        int port;
+        try {
+            port = Integer.parseInt(request.getContent().trim());
+        } catch (Exception exception) {
+            packet.setMessage(String.format("参数错误：%s不是一个有效的端口号\n", packet.getContent()));
+            return packet;
+        }
+        try {
+            AoXiangToDoListSystem.getInstance().getNotificationController().unregisterReceiver(port);
+        } catch (Exception exception) {
+            packet.setMessage(exception.getMessage());
+            return packet;
+        }
+
+        packet.setStatus(ResponseStatus.Success);
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        return packet;
+    }
+
+    public static ResponsePacket processRegisterNotificationCallback(RequestPacket request, RequestHandlerData userData) {
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+        NotificationRegisterInfo registerInfo;
+        try {
+            registerInfo = JsonUtility.objectFromJsonString(request.getContent(), NotificationRegisterInfo.class);
+        } catch (Exception exception) {
+            packet.setMessage(String.format("无法将\"%s\"解析为NotificationRegisterInfo对象：%s", packet.getContent(), exception.getMessage()));
+            return packet;
+        }
+        try {
+            AoXiangToDoListSystem.getInstance().getNotificationController().registerReceiver(registerInfo);
+        } catch (Exception exception) {
+            packet.setMessage(exception.getMessage());
+            return packet;
+        }
+
+        packet.setStatus(ResponseStatus.Success);
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        return packet;
+    }
+
     public static ResponsePacket processExitApplication(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Success);
@@ -186,8 +230,8 @@ public class RequestController {
                 throw new Exception("登录失败，请检查账号与密码是否正确。");
             } else { //获取到token，登录成功
                 user.setToken(token);
-                AoXiangToDoListSystem.getInstance().systemData.setCurrentUser(user);
-
+                AoXiangToDoListSystem.getInstance().getSystemData().setCurrentUser(user);
+                AoXiangToDoListSystem.getInstance().synchronizeSystemData();
                 //todo:在登录用户后，自动进行一次数据同步。
             }
         } catch (Exception exception) {
@@ -248,7 +292,7 @@ public class RequestController {
             packet.setMessage(String.format("连接服务器发生错误：%s", e.getMessage()));
             return packet;
         }
-        if(!success){
+        if (!success) {
             packet.setMessage("修改失败，旧密码可能错误。");
             return packet;
         }

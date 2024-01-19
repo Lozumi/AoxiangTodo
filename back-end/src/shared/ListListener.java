@@ -12,4 +12,6 @@ public interface ListListener<T> {
     void beforeRemove(T item);
     void afterRemove(T item);
     void afterElementPropertyChange(T item);
+    void beforeClear();
+    void afterClear();
 }
