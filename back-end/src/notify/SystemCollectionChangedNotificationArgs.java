@@ -1,8 +1,6 @@
 package notify;
 
-import java.util.ArrayList;
-
-public class ToDoCollectionChangedNotificationArgs {
+public class SystemCollectionChangedNotificationArgs {
     CollectionOperationType operationType = CollectionOperationType.NotIndicated;
 
     Integer addedItemInnerId, removedItemInnerId, modifiedItemInnerId;

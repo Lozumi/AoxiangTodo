@@ -34,6 +34,7 @@ public class BackEndSocketServerThread implements Runnable {
      */
     @Override
     public void run(){
+        System.out.println("[BackEndServerThread.run] 正在新的线程上建立套接字连接，线程ID为" + Thread.currentThread().threadId());
         while (true) {
             try {
                 int requestLength = inputStream.readInt();
@@ -41,10 +42,6 @@ public class BackEndSocketServerThread implements Runnable {
 
                 ResponsePacket responsePacket;
                 responsePacket = AoXiangToDoListSystem.getInstance().getSystemController().invokeRequestHandler(requestPacket,"default");
-                //编码响应
-                //ResponsePacket responsePacket = new ResponsePacket();
-//                responsePacket.setMessage("该模块尚未实现。");
-//                responsePacket.setStatus(ResponseStatus.Failure);
                 byte[] responseBytes = responsePacket.toJsonBytes();
 
                 //发送响应
@@ -53,7 +50,7 @@ public class BackEndSocketServerThread implements Runnable {
                 outputStream.write(responseBytes);
             }catch (Exception ex)
             {
-                System.err.printf("[BackEndServerThread.run]与客户端通讯时发生IO异常：%s\n",ex.getMessage());
+                System.err.printf("[BackEndServerThread.run]与客户端通讯时发生异常：%s\n",ex.getMessage());
                 break;
             }
         }

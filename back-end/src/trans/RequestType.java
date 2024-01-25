@@ -11,6 +11,7 @@ public enum RequestType {
     EditToDoWork,
     DeleteToDoWork,
     EditPomodoro,
+    GetPomodoro,
     StartPomodoro,
     EndPomodoro,
     UserRegister,
@@ -20,6 +21,10 @@ public enum RequestType {
     GetCurrentUser,
     ExitApplication,
     ModifyUserInfo,
-    RegisterNotificationCallback,
-    UnregisterNotificationCallback
+    RegisterNotificationContext,
+    UnregisterNotificationContext,
+    GetNotification,
+    ClearNotification,
+    TrapConnectionForNotifications,
+    SaveSystemData
 }

@@ -1,12 +1,10 @@
 import shared.NetworkProtocol;
 import shared.ToDoWorkItem;
-import shared.UserInfo;
 import sys.AoXiangToDoListSystem;
 import sys.RequestController;
 import sys.RequestHandlerInfo;
 import trans.*;
 import unittest.HttpTest;
-import unittest.SocketTest;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -31,18 +29,24 @@ public class Main {
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.Synchronize, RequestController::processSynchronization));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.ExitApplication, RequestController::processExitApplication));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.ModifyUserInfo, RequestController::processUserModifyInformation));
-        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.RegisterNotificationCallback, RequestController::processRegisterNotificationCallback));
-        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.UnregisterNotificationCallback, RequestController::processUnregisterNotificationCallback));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.RegisterNotificationContext, RequestController::processRegisterNotificationContext));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.UnregisterNotificationContext, RequestController::processUnregisterNotificationContext));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.GetNotification, RequestController::processGetNotification));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.GetPomodoro, RequestController::processGetPomodoro));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.SaveSystemData, RequestController::processSaveSystemData));
 
         var notifyController = AoXiangToDoListSystem.getInstance().getNotificationController();
-        notifyController.registerNotificationRaiser(NetworkProtocol.Socket, new SocketNotificationRaiser());
 
 
         HttpTest httpTest = new HttpTest("localhost:20220");
         ToDoWorkItem item = new ToDoWorkItem();
-        item.setTitle("name");
+        item.setTitle("测试待办事项");
         item.setStartTime(Instant.now().plusSeconds(0));
-        item.setDeadLine(Instant.now().plusSeconds(70));
+        item.setDeadLine(Instant.now().plusSeconds(3600 * 48));
+        item.setSubtitle("下班下班");
+        item.setImportancePriority(5);
+        item.setEmergencyPriority(10);
+        item.setDescription("总之就是要保证前后端程序不论先后启动均能正常工作，待办事项的更改能及时通知到前端。");
         RequestPacket packet = new RequestPacket();
         packet.setContent(item.toJsonString());
         packet.setRequestType(RequestType.CreateToDoWork);
@@ -66,6 +70,6 @@ public class Main {
 //        userInfo.setPassword("Rrawgb773@");
 //        httpTest.tryRequestUserRegister(userInfo);
 //        httpTest.tryRequestUserLogin(userInfo);
-//        AoXiangToDoListSystem.getInstance().localSaveSystemData("D:/test/1.json");
+        AoXiangToDoListSystem.getInstance().localSaveSystemData("D:/test/1.json");
     }
 }

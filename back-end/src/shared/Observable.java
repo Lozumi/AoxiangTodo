@@ -16,15 +16,15 @@ public interface Observable<T> {
     /**
      * 暂时压制对观察者的通知。
      */
-    void suppressNotify();
+    default void suppressNotify(){}
 
     /**
      * 恢复对观察者的通知，不对暂停期间的改变进行任何通知。
      */
-    void resumeNotifyAndForget();
+    default void resumeNotifyAndForget(){}
 
     /**
      * 恢复对观察者的通知，对于暂停期间的改变，进行一次性通知。
      */
-    void resumeAndNotifyOnceOnChanged();
+    default void resumeAndNotifyOnceOnChanged(){}
 }

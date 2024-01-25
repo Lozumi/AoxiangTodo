@@ -15,7 +15,10 @@ public class AoXiangToDoListSystem {
     String systemDataJsonPath = "D:/test/1.json";
 
     public static synchronized AoXiangToDoListSystem getInstance() {
-        if (system == null) system = new AoXiangToDoListSystem();
+        if (system == null) {
+            system = new AoXiangToDoListSystem();
+            system.reloadFromFile(system.systemDataJsonPath);
+        }
         return system;
     }
 
@@ -23,12 +26,14 @@ public class AoXiangToDoListSystem {
      * 初始化系统实例，自动从文件中读取数据。
      */
     private AoXiangToDoListSystem() {
-        this.reloadFromFile(systemDataJsonPath);
     }
 
     private final SystemController systemController = new SystemController();
     private final NotificationController notificationController = new NotificationController();
-    public NotificationController getNotificationController(){return notificationController;}
+
+    public NotificationController getNotificationController() {
+        return notificationController;
+    }
 
     public SystemData getSystemData() {
         return SystemData.getInstance();
@@ -85,7 +90,7 @@ public class AoXiangToDoListSystem {
                 System.exit(0); //退出本程序。
             }).start();
             Pomodoro pomodoro = getPomodoro();
-            pomodoro.endPomodoro();
+            pomodoro.stop();
             AoXiangToDoListSystem.getInstance().localSaveSystemData("D:/test/1.json");
         }
     }
@@ -99,6 +104,7 @@ public class AoXiangToDoListSystem {
         try {
             var systemDataJsonString = getSystemData().toJsonString();
             FileHelper.saveStringToFile(filePath, systemDataJsonString);
+            System.out.printf("系统数据保存至\" %s \"。\n", filePath);
         } catch (IOException exception) {
             System.err.printf("将系统数据保存至\"%s\"时发生错误：%s", filePath, exception.getMessage());
         }

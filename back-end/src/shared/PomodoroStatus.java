@@ -1,10 +1,10 @@
 package shared;
 
-/**
- * @author 贾聪毅
- */
 public enum PomodoroStatus {
     None,
+    NotStarted,
+    Working,
+    Resting,
     Finished,
     Interrupted
 }

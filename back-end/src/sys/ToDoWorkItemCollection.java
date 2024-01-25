@@ -2,7 +2,7 @@ package sys;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import notify.CollectionOperationType;
-import notify.ToDoCollectionChangedNotificationArgs;
+import notify.SystemCollectionChangedNotificationArgs;
 import shared.ListListener;
 import shared.Listenable;
 import shared.ToDoWorkItem;
@@ -10,7 +10,6 @@ import trans.NotificationPacket;
 import trans.NotificationType;
 import util.JsonUtility;
 
-import javax.naming.OperationNotSupportedException;
 import java.util.*;
 
 public class ToDoWorkItemCollection extends Vector<ToDoWorkItem> implements Listenable<ToDoWorkItem> {
@@ -39,7 +38,7 @@ public class ToDoWorkItemCollection extends Vector<ToDoWorkItem> implements List
         listeners.forEach(l -> l.beforeAdd(item));
         boolean baseFlag = super.add(item);
         listeners.forEach(l -> l.afterAdd(item));
-
+        System.out.println("添加了ID为" + item.getInnerId() + "的事项");
         //注册属性变化监听器
         if (baseFlag)
             item.addObserver(this::onToDoWorkItemPropertyChanged);
@@ -52,7 +51,7 @@ public class ToDoWorkItemCollection extends Vector<ToDoWorkItem> implements List
             listeners.forEach(l -> l.beforeRemove(item));
             boolean baseFlag = super.remove(obj);
             listeners.forEach(l -> l.afterRemove(item));
-
+            System.out.println("移除了ID为" + item.getInnerId() + "的事项");
             if (baseFlag)
                 item.removeObserver(this::onToDoWorkItemPropertyChanged);
             return baseFlag;
@@ -113,6 +112,16 @@ public class ToDoWorkItemCollection extends Vector<ToDoWorkItem> implements List
         listeners.forEach(l -> l.afterElementPropertyChange(item));
     }
 
+    /**
+     * 寻找innerId为指定值的ToDoWorkItem。
+     * @param innerId 参数。
+     * @return ToDoWorkItem对象，或null。
+     */
+    public ToDoWorkItem findFirst(int innerId) {
+        var optional = this.stream().filter(t -> t.getInnerId() == innerId).findFirst();
+        return optional.orElse(null);
+    }
+
     public ToDoWorkItemCollection() {
         this.addListener(new ToDoWorkCollectionListener());
     }
@@ -157,19 +166,10 @@ class ToDoWorkCollectionListener implements ListListener<ToDoWorkItem> {
     }
 
     void post(CollectionOperationType type, Integer innerId) {
-        ToDoCollectionChangedNotificationArgs args = new ToDoCollectionChangedNotificationArgs();
-        args.setOperationType(type);
-        switch (type) {
-            case ItemAdded -> args.setAddedItemInnerId(innerId);
-            case ItemRemoved -> args.setRemovedItemInnerId(innerId);
-            case ItemPropertyChanged -> args.setModifiedItemInnerId(innerId);
-        }
-
         try {
-            packet.setContent(JsonUtility.objectToJsonString(args));
-            notifyController.distribute(packet);
-        } catch (Exception e) {
-            System.err.println("通知对象转换为JSON失败：" + e.getMessage());
+            notifyController.distributeCollectionChanged(NotificationType.ToDoWorkCollectionChanged, type, innerId);
+        } catch (Exception exception) {
+            System.err.printf("推送待办事项集合变更通知(type=%s, innerId=%s) 时发生错误：%s\n", type, innerId, exception.getMessage());
         }
     }
 

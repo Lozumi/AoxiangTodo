@@ -1,18 +1,14 @@
 package sys;
 
 import shared.*;
-import trans.CloudServer;
-import trans.RequestPacket;
-import trans.ResponsePacket;
-import trans.ResponseStatus;
-import shared.FormatException;
+import trans.*;
+import exception.FormatException;
 import shared.User;
 import util.Encrypt;
 import util.JsonUtility;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -22,41 +18,77 @@ import java.util.Optional;
  */
 public class RequestController {
 
-
-    public static ResponsePacket processUnregisterNotificationCallback(RequestPacket request, RequestHandlerData userData) {
-        ResponsePacket packet = new ResponsePacket();
-        packet.setStatus(ResponseStatus.Failure);
-        int port;
+    public static ResponsePacket processSaveSystemData(RequestPacket request, RequestHandlerData userData){
+        AoXiangToDoListSystem.getInstance().localSaveSystemData(AoXiangToDoListSystem.getInstance().systemDataJsonPath);
+        return makeDefaultResponse().withSuccessResponse();
+    }
+    /**
+     * 处理获取指定上下文的下一个通知的请求。
+     *
+     * @param request  请求包。
+     * @param userData 用户数据，未使用。
+     * @return 响应包。
+     */
+    public static ResponsePacket processGetNotification(RequestPacket request, RequestHandlerData userData) {
+        ResponsePacket packet = makeDefaultResponse();
+        NotificationPacket notification;
         try {
-            port = Integer.parseInt(request.getContent().trim());
-        } catch (Exception exception) {
-            packet.setMessage(String.format("参数错误：%s不是一个有效的端口号\n", packet.getContent()));
-            return packet;
-        }
-        try {
-            AoXiangToDoListSystem.getInstance().getNotificationController().unregisterReceiver(port);
+            //此方法会造成堵塞，直到指定上下文的通知队列至少有一个通知可用。
+            notification = AoXiangToDoListSystem.getInstance().getNotificationController().pollNotificationForContext(request.getContent());
+            packet.setContent(JsonUtility.objectToJsonString(notification));
         } catch (Exception exception) {
             packet.setMessage(exception.getMessage());
             return packet;
         }
+        return packet.withSuccessResponse();
+    }
 
+
+    public static ResponsePacket processGetPomodoro(RequestPacket request, RequestHandlerData userData) {
+        ResponsePacket response = makeDefaultResponse();
+        try {
+            response.setContent(JsonUtility.objectToJsonString(AoXiangToDoListSystem.getInstance().getPomodoro()));
+        } catch (Exception ex) {
+            response.setMessage(ex.getMessage());
+            return response;
+        }
+
+        return response.withSuccessResponse();
+    }
+
+    /**
+     * 处理注销通知上下文的请求。
+     *
+     * @param request  请求包。
+     * @param userData 用户数据。
+     * @return 响应包。
+     */
+    public static ResponsePacket processUnregisterNotificationContext(RequestPacket request, RequestHandlerData userData) {
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+        try {
+            AoXiangToDoListSystem.getInstance().getNotificationController().unregisterContext(request.getContent());
+        } catch (Exception ex) {
+            packet.setMessage(ex.getMessage());
+            return packet;
+        }
         packet.setStatus(ResponseStatus.Success);
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         return packet;
     }
 
-    public static ResponsePacket processRegisterNotificationCallback(RequestPacket request, RequestHandlerData userData) {
+    public static ResponsePacket processRegisterNotificationContext(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
-        NotificationRegisterInfo registerInfo;
+        NotificationContext context;
         try {
-            registerInfo = JsonUtility.objectFromJsonString(request.getContent(), NotificationRegisterInfo.class);
+            context = JsonUtility.objectFromJsonString(request.getContent(), NotificationContext.class);
         } catch (Exception exception) {
-            packet.setMessage(String.format("无法将\"%s\"解析为NotificationRegisterInfo对象：%s", packet.getContent(), exception.getMessage()));
+            packet.setMessage(String.format("无法将\"%s\"解析为NotificationContext对象：%s", packet.getContent(), exception.getMessage()));
             return packet;
         }
         try {
-            AoXiangToDoListSystem.getInstance().getNotificationController().registerReceiver(registerInfo);
+            AoXiangToDoListSystem.getInstance().getNotificationController().registerContext(context);
         } catch (Exception exception) {
             packet.setMessage(exception.getMessage());
             return packet;
@@ -142,6 +174,14 @@ public class RequestController {
             return packet;
         }
 
+        if (pomodoroInfo.getRestTime() < 0 || pomodoroInfo.getRestTime() > 90) {
+            packet.setMessage(String.format("参数错误：番茄钟休息时间应当大于10分钟且小于90分钟，当前尝试将休息时间设为 %s 分钟", pomodoroInfo.getWorkTime()));
+            return packet;
+        }
+
+        var pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
+        pomodoro.setWorkTime(pomodoroInfo.getWorkTime());
+        pomodoro.setRestTime(pomodoroInfo.getRestTime());
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         packet.setStatus(ResponseStatus.Success);
         return packet;
@@ -336,6 +376,8 @@ public class RequestController {
         var toDoWorkItemList = getSystemToDoWorkItemCollection();
         requestItem.setCreateTime(Instant.now());
         requestItem.setInnerId(toDoWorkItemList.getNextAvailableInnerId());
+
+        //添加该事项
         toDoWorkItemList.add(requestItem);
 
         //操作成功响应
@@ -389,7 +431,7 @@ public class RequestController {
         return packet;
     }
 
-    public static ResponsePacket processDeleteToDoWorkRequest(RequestPacket request, RequestHandlerData userData) {
+    public static synchronized ResponsePacket processDeleteToDoWorkRequest(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
 //        int innerId;
@@ -435,6 +477,7 @@ public class RequestController {
             ToDoWorkItem targetItem = getToDoWorkItemByInnerId(innerId);
 
             //设置各种属性。注意不能设置innerId和createTime
+            targetItem.suppressNotify();
             targetItem.setTitle(toDoWorkItem.getTitle());
             targetItem.setSubtitle(toDoWorkItem.getSubtitle());
             targetItem.setLayer(toDoWorkItem.getLayer());
@@ -444,6 +487,7 @@ public class RequestController {
             targetItem.setEmergencyPriority(toDoWorkItem.getEmergencyPriority());
             targetItem.setImportancePriority(toDoWorkItem.getImportancePriority());
             targetItem.setStartTime(toDoWorkItem.getStartTime());
+            targetItem.resumeAndNotifyOnceOnChanged();
 
             packet.setMessage(Messages.ZH_CN.SUCCESS);
             packet.setStatus(ResponseStatus.Success);
@@ -541,10 +585,9 @@ public class RequestController {
             if (request.getContent() == null || request.getContent().isBlank())
                 throw new Exception(Messages.ZH_CN.POMODORO_INNER_ID_MISSING);
 
-            ToDoWorkItem item = getToDoWorkItemByInnerId(request.getContent());
             Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
             // 开始番茄钟
-            pomodoro.startPomodoro();
+            pomodoro.start(Integer.parseInt(request.getContent()));
         } catch (Exception e) {
             packet.setMessage(e.getMessage());
             return packet;
@@ -572,7 +615,7 @@ public class RequestController {
             Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
             var pomodoroList = getSystemPomodoroCollection();
             // 打断后台计时
-            pomodoro.endPomodoro();
+            pomodoro.stop();
 
         } catch (Exception e) {
             packet.setMessage(e.getMessage());
@@ -648,6 +691,14 @@ public class RequestController {
     private static PomodoroRecordCollection getSystemPomodoroCollection() {
         return AoXiangToDoListSystem.getInstance().getPomodoroRecordsCollection();
     }
+
+    private static ResponsePacket makeDefaultResponse() {
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+        packet.setMessage("");
+        return packet;
+    }
+
 
     private static User getSystemCurrentUser() {
         return AoXiangToDoListSystem.getInstance().getCurrentUser();

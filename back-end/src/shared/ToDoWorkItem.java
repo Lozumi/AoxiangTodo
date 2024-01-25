@@ -40,6 +40,7 @@ public class ToDoWorkItem implements JsonConvertable, Observable<ToDoWorkItem> {
      */
     public void setLayer(int layer) {
         this.layer = layer;
+        notifyObservers();
     }
 
     /**
@@ -65,6 +66,7 @@ public class ToDoWorkItem implements JsonConvertable, Observable<ToDoWorkItem> {
      */
     public void setImportancePriority(int importancePriority) {
         this.importancePriority = importancePriority;
+        notifyObservers();
     }
 
     /**
@@ -81,6 +83,7 @@ public class ToDoWorkItem implements JsonConvertable, Observable<ToDoWorkItem> {
      */
     public void setEmergencyPriority(int emergencyPriority) {
         this.emergencyPriority = emergencyPriority;
+        notifyObservers();
     }
 
     /**
@@ -99,6 +102,7 @@ public class ToDoWorkItem implements JsonConvertable, Observable<ToDoWorkItem> {
      */
     public void setTitle(String title) {
         this.title = title;
+        notifyObservers();
     }
 
     /**
@@ -117,6 +121,7 @@ public class ToDoWorkItem implements JsonConvertable, Observable<ToDoWorkItem> {
      */
     public void setSubtitle(String subtitle) {
         this.subtitle = subtitle;
+        notifyObservers();
     }
 
     /**
@@ -135,6 +140,7 @@ public class ToDoWorkItem implements JsonConvertable, Observable<ToDoWorkItem> {
      */
     public void setDescription(String description) {
         this.description = description;
+        notifyObservers();
     }
 
     /**
@@ -162,6 +168,7 @@ public class ToDoWorkItem implements JsonConvertable, Observable<ToDoWorkItem> {
      */
     public void setStartTime(Instant startTime) {
         this.startTime = startTime;
+        notifyObservers();
     }
 
     /**
@@ -180,6 +187,7 @@ public class ToDoWorkItem implements JsonConvertable, Observable<ToDoWorkItem> {
      */
     public void setDeadLine(Instant deadLine) {
         this.deadLine = deadLine;
+        notifyObservers();
     }
 
     /**
@@ -198,14 +206,17 @@ public class ToDoWorkItem implements JsonConvertable, Observable<ToDoWorkItem> {
      */
     public void setStatus(WorkItemStatus status) {
         this.status = status;
+        notifyObservers();
     }
 
     public void setInnerId(int innerId) {
         this.innerId = innerId;
+        notifyObservers();
     }
 
     public void setCreateTime(Instant createTime) {
         this.createTime = createTime;
+        notifyObservers();
     }
 
     public List<Integer> getSubToDoWorkItemInnerIdList() {
@@ -227,6 +238,9 @@ public class ToDoWorkItem implements JsonConvertable, Observable<ToDoWorkItem> {
                          @JsonProperty("pomodoroRecordInnerIdList") List<Integer> pomodoroRecordInnerIdList) {
         this.subToDoWorkItemInnerIdList = subToDoWorkItemInnerIdList;
         this.pomodoroRecordInnerIdList = pomodoroRecordInnerIdList;
+        //保证列表的非null性。
+        if(subToDoWorkItemInnerIdList == null) this.subToDoWorkItemInnerIdList = new ArrayList<>();
+        if(pomodoroRecordInnerIdList == null) this.pomodoroRecordInnerIdList = new ArrayList<>();
     }
 
     /**
@@ -310,7 +324,7 @@ public class ToDoWorkItem implements JsonConvertable, Observable<ToDoWorkItem> {
     }
 
     /**
-     * 通知所有观察者。如果在暂停通知期间，则将notifyRequired设为true。
+     * 通知所有观察者属性发生变化。如果在暂停通知期间，则将notifyRequired设为true。
      */
     void notifyObservers() {
         if (!notifySuppressed) {
