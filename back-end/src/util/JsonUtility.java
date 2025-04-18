@@ -3,12 +3,10 @@ package util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import shared.SharedConfigurations;
-import shared.ToDoWorkItem;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.time.Period;
 
 public class JsonUtility {
     public static <T> T objectFromJsonString(String json, Class<T> type) throws Exception {

@@ -18,10 +18,37 @@ import java.util.Optional;
  */
 public class RequestController {
 
-    public static ResponsePacket processSaveSystemData(RequestPacket request, RequestHandlerData userData){
+
+    public static ResponsePacket processEnumeratePomodoroRecordRequest(RequestPacket request, RequestHandlerData userData){
+        ResponsePacket response = makeDefaultResponse();
+        try {
+            String json = JsonUtility.objectToJsonString(getSystemPomodoroCollection().toArray());
+            response.withSuccessResponse().setContent(json);
+            return response;
+        }catch (Exception exception){
+            response.setMessage("查询所有番茄钟记录错误：" + exception.getMessage());
+            return response;
+        }
+    }
+    public static ResponsePacket processQueryPomodoroRecord(RequestPacket requestPacket, RequestHandlerData userData) {
+        ResponsePacket packet = makeDefaultResponse();
+        PomodoroRecord record;
+        try {
+            record = getPomodoroRecordByInnerId(requestPacket.getContent());
+            packet.setContent(JsonUtility.objectToJsonString(record));
+            packet.withSuccessResponse();
+            return packet;
+        } catch (Exception exception) {
+            packet.setMessage(String.format("查询番茄钟记录错误：%s", exception.getMessage()));
+            return packet;
+        }
+    }
+
+    public static ResponsePacket processSaveSystemData(RequestPacket request, RequestHandlerData userData) {
         AoXiangToDoListSystem.getInstance().localSaveSystemData(AoXiangToDoListSystem.getInstance().systemDataJsonPath);
         return makeDefaultResponse().withSuccessResponse();
     }
+
     /**
      * 处理获取指定上下文的下一个通知的请求。
      *
@@ -413,8 +440,7 @@ public class RequestController {
     }
 
     public static ResponsePacket processEnumerateToDoWorkItemListRequest(RequestPacket request, RequestHandlerData userData) {
-        ResponsePacket packet = new ResponsePacket();
-        packet.setStatus(ResponseStatus.Failure);
+        ResponsePacket packet = makeDefaultResponse();
 
         var collection = getSystemToDoWorkItemCollection();
         var itemsArray = collection.toArray();
@@ -426,8 +452,7 @@ public class RequestController {
             return packet;
         }
         packet.setContent(json);
-        packet.setStatus(ResponseStatus.Success);
-        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        packet.withSuccessResponse();
         return packet;
     }
 
@@ -672,6 +697,23 @@ public class RequestController {
         }
     }
 
+    /**
+     * 通过innerId字符串获取番茄钟记录。
+     *
+     * @param innerIdStr innerId字符串。
+     * @return 获取到的番茄钟记录（若正常返回，保证非空）。
+     * @throws IllegalArgumentException 字符串转换失败、找不到待办事项时抛出。
+     */
+    private static PomodoroRecord getPomodoroRecordByInnerId(String innerIdStr) throws IllegalArgumentException {
+        int innerId;
+        try {
+            innerId = Integer.parseInt(innerIdStr);
+            return getPomodoroRecordByInnerId(innerId);
+        } catch (Exception exception) {
+            throw new IllegalArgumentException(exception.getMessage());
+        }
+    }
+
     private static void validateToDoWork(ToDoWorkItem item) throws FormatException {
         if (item.getTitle().isBlank()) throw new FormatException("ToDoWorkItem的主标题不能为空。");
     }
@@ -681,6 +723,14 @@ public class RequestController {
         var optionalItem = collection.stream().filter(i -> innerId == i.getInnerId()).findAny();
         if (optionalItem.isEmpty())
             throw new IllegalArgumentException(String.format("系统中找不到innerId为%s的待办事项。", innerId));
+        return optionalItem.get();
+    }
+
+    private static PomodoroRecord getPomodoroRecordByInnerId(int innerId) throws IllegalArgumentException {
+        var collection = getSystemPomodoroCollection();
+        var optionalItem = collection.stream().filter(i -> innerId == i.getInnerId()).findAny();
+        if (optionalItem.isEmpty())
+            throw new IllegalArgumentException(String.format("系统中找不到innerId为%s的番茄钟记录", innerId));
         return optionalItem.get();
     }
 

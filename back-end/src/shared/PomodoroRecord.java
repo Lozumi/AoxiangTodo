@@ -48,7 +48,7 @@ public class PomodoroRecord implements Observable<PomodoroRecord> {
      */
     public void setEndTime(Instant endTime) {
         if (!Objects.equals(this.endTime, endTime)) {
-            this.endTime = startTime;
+            this.endTime = endTime;
             notifyObservers();
         }
     }

@@ -128,7 +128,7 @@ public class Pomodoro implements Observable<Pomodoro> {
     }
 
     public Duration timeSpanBeforeEnd() {
-        Instant now = Instant.now();
+        Instant now = Instant.now();    
         if (now.isBefore(expectedWorkEndTime)) {
             return Duration.between(Instant.now(), expectedWorkEndTime);
         }
@@ -190,7 +190,11 @@ public class Pomodoro implements Observable<Pomodoro> {
         var status = Instant.now().isAfter(expectedWorkEndTime) ? PomodoroStatus.Finished : PomodoroStatus.Interrupted;
         var recordStatus = Instant.now().isAfter(expectedWorkEndTime) ? PomodoroRecordStatus.Finished : PomodoroRecordStatus.Interrupted;
         setPomodoroStatus(status);
-        pomodoroRecord.setEndTime(expectedRestEndTime);
+        if(recordStatus == PomodoroRecordStatus.Finished) {
+            pomodoroRecord.setEndTime(expectedRestEndTime);
+        }else{
+            pomodoroRecord.setEndTime(Instant.now());
+        }
         pomodoroRecord.setPomodoroRecordStatus(recordStatus);
         AoXiangToDoListSystem.getInstance().getPomodoroRecordsCollection().add(pomodoroRecord);
         boundToDoWork.getPomodoroRecordInnerIdList().add(pomodoroRecord.getInnerId());

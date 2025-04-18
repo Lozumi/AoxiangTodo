@@ -26,5 +26,7 @@ public enum RequestType {
     GetNotification,
     ClearNotification,
     TrapConnectionForNotifications,
-    SaveSystemData
+    SaveSystemData,
+    QueryPomodoroRecord,
+    EnumeratePomodoroRecords,
 }
