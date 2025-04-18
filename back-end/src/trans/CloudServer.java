@@ -94,6 +94,7 @@ public class CloudServer {
     }
 
     public static String urlEncoderUTF8(String str){
+        if(str == null) return "";
         return URLEncoder.encode(str, StandardCharsets.UTF_8);
     }
 }

@@ -1,13 +1,8 @@
-package user;
+package shared;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import shared.JsonConvertable;
-import util.Encrypt;
 import util.JsonUtility;
 
 import java.io.InputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 

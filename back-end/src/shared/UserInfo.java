@@ -4,7 +4,7 @@ package shared;
  * 用来传输的用户信息。
  */
 public class UserInfo implements JsonConvertable{
-    String userName, account, password;
+    String userName, account, password,newPassword;
 
     public String getUserName() {
         return userName;
@@ -28,5 +28,13 @@ public class UserInfo implements JsonConvertable{
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
     }
 }

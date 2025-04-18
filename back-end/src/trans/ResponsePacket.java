@@ -1,5 +1,6 @@
 package trans;
 
+import sys.Messages;
 import util.JsonUtility;
 
 import java.io.InputStream;
@@ -43,5 +44,14 @@ public class ResponsePacket extends TransmissionPacket {
 
     public static ResponsePacket fromJsonStream(InputStream stream, int expectedLength) throws Exception{
         return JsonUtility.objectFromInputStream(stream, expectedLength, ResponsePacket.class);
+    }
+    /**
+     * 将指定响应包的相关信息设为成功。 包括status和message
+     * @return 传入的响应包。注意返回值是同一个引用。
+     */
+    public ResponsePacket withSuccessResponse(){
+        this.setMessage(Messages.ZH_CN.SUCCESS);
+        this.setStatus(ResponseStatus.Success);
+        return this;
     }
 }

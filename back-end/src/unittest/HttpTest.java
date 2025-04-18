@@ -6,7 +6,6 @@ import trans.RequestPacket;
 import trans.RequestType;
 import trans.ResponsePacket;
 import trans.ResponseStatus;
-import user.User;
 
 import java.io.IOException;
 import java.io.PrintStream;

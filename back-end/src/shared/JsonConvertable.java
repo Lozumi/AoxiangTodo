@@ -9,7 +9,7 @@ import java.io.*;
  * 实现将对象转换为JSON字符串和字节数组的接口。
  * @author 贾聪毅
  */
-@JsonTypeInfo(use= JsonTypeInfo.Id.CLASS)
+@JsonTypeInfo(use= JsonTypeInfo.Id.NONE)
 public interface JsonConvertable {
     /**
      * 将对象转换为JSON utf8编码格式的字符串。

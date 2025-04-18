@@ -1,6 +1,7 @@
 package shared;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -26,6 +27,7 @@ public class SharedConfigurations {
     private static void generateObjectMapper()
     {
         defaultObjectMapper = new ObjectMapper();
+        defaultObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
         SimpleModule module = new SimpleModule();
         module.addSerializer(Instant.class,new InstantSerializer());
         module.addDeserializer(Instant.class,new InstantDeserializer());

@@ -1,18 +1,13 @@
 package sys;
 
 import shared.*;
-import trans.CloudServer;
-import trans.RequestPacket;
-import trans.RequestType;
-import trans.ResponsePacket;
-import trans.ResponseStatus;
-import user.FormatException;
-import user.User;
+import trans.*;
+import exception.FormatException;
+import shared.User;
 import util.Encrypt;
 import util.JsonUtility;
 
 import java.io.IOException;
-import java.security.spec.ECField;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -23,6 +18,113 @@ import java.util.Optional;
  */
 public class RequestController {
 
+
+    public static ResponsePacket processEnumeratePomodoroRecordRequest(RequestPacket request, RequestHandlerData userData){
+        ResponsePacket response = makeDefaultResponse();
+        try {
+            String json = JsonUtility.objectToJsonString(getSystemPomodoroCollection().toArray());
+            response.withSuccessResponse().setContent(json);
+            return response;
+        }catch (Exception exception){
+            response.setMessage("查询所有番茄钟记录错误：" + exception.getMessage());
+            return response;
+        }
+    }
+    public static ResponsePacket processQueryPomodoroRecord(RequestPacket requestPacket, RequestHandlerData userData) {
+        ResponsePacket packet = makeDefaultResponse();
+        PomodoroRecord record;
+        try {
+            record = getPomodoroRecordByInnerId(requestPacket.getContent());
+            packet.setContent(JsonUtility.objectToJsonString(record));
+            packet.withSuccessResponse();
+            return packet;
+        } catch (Exception exception) {
+            packet.setMessage(String.format("查询番茄钟记录错误：%s", exception.getMessage()));
+            return packet;
+        }
+    }
+
+    public static ResponsePacket processSaveSystemData(RequestPacket request, RequestHandlerData userData) {
+        AoXiangToDoListSystem.getInstance().localSaveSystemData(AoXiangToDoListSystem.getInstance().systemDataJsonPath);
+        return makeDefaultResponse().withSuccessResponse();
+    }
+
+    /**
+     * 处理获取指定上下文的下一个通知的请求。
+     *
+     * @param request  请求包。
+     * @param userData 用户数据，未使用。
+     * @return 响应包。
+     */
+    public static ResponsePacket processGetNotification(RequestPacket request, RequestHandlerData userData) {
+        ResponsePacket packet = makeDefaultResponse();
+        NotificationPacket notification;
+        try {
+            //此方法会造成堵塞，直到指定上下文的通知队列至少有一个通知可用。
+            notification = AoXiangToDoListSystem.getInstance().getNotificationController().pollNotificationForContext(request.getContent());
+            packet.setContent(JsonUtility.objectToJsonString(notification));
+        } catch (Exception exception) {
+            packet.setMessage(exception.getMessage());
+            return packet;
+        }
+        return packet.withSuccessResponse();
+    }
+
+
+    public static ResponsePacket processGetPomodoro(RequestPacket request, RequestHandlerData userData) {
+        ResponsePacket response = makeDefaultResponse();
+        try {
+            response.setContent(JsonUtility.objectToJsonString(AoXiangToDoListSystem.getInstance().getPomodoro()));
+        } catch (Exception ex) {
+            response.setMessage(ex.getMessage());
+            return response;
+        }
+
+        return response.withSuccessResponse();
+    }
+
+    /**
+     * 处理注销通知上下文的请求。
+     *
+     * @param request  请求包。
+     * @param userData 用户数据。
+     * @return 响应包。
+     */
+    public static ResponsePacket processUnregisterNotificationContext(RequestPacket request, RequestHandlerData userData) {
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+        try {
+            AoXiangToDoListSystem.getInstance().getNotificationController().unregisterContext(request.getContent());
+        } catch (Exception ex) {
+            packet.setMessage(ex.getMessage());
+            return packet;
+        }
+        packet.setStatus(ResponseStatus.Success);
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        return packet;
+    }
+
+    public static ResponsePacket processRegisterNotificationContext(RequestPacket request, RequestHandlerData userData) {
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+        NotificationContext context;
+        try {
+            context = JsonUtility.objectFromJsonString(request.getContent(), NotificationContext.class);
+        } catch (Exception exception) {
+            packet.setMessage(String.format("无法将\"%s\"解析为NotificationContext对象：%s", packet.getContent(), exception.getMessage()));
+            return packet;
+        }
+        try {
+            AoXiangToDoListSystem.getInstance().getNotificationController().registerContext(context);
+        } catch (Exception exception) {
+            packet.setMessage(exception.getMessage());
+            return packet;
+        }
+
+        packet.setStatus(ResponseStatus.Success);
+        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        return packet;
+    }
 
     public static ResponsePacket processExitApplication(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
@@ -99,7 +201,14 @@ public class RequestController {
             return packet;
         }
 
-        AoXiangToDoListSystem.getInstance().updateSystemDataLastModifiedInstant();
+        if (pomodoroInfo.getRestTime() < 0 || pomodoroInfo.getRestTime() > 90) {
+            packet.setMessage(String.format("参数错误：番茄钟休息时间应当大于10分钟且小于90分钟，当前尝试将休息时间设为 %s 分钟", pomodoroInfo.getWorkTime()));
+            return packet;
+        }
+
+        var pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
+        pomodoro.setWorkTime(pomodoroInfo.getWorkTime());
+        pomodoro.setRestTime(pomodoroInfo.getRestTime());
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         packet.setStatus(ResponseStatus.Success);
         return packet;
@@ -168,12 +277,6 @@ public class RequestController {
             return packet;
         }
 
-        var currentUser = AoXiangToDoListSystem.getInstance().getCurrentUser();
-        if (currentUser != null && currentUser.getAccount().equals(userInfo.getAccount())) {
-            packet.setMessage("不能重复登录同一个用户。");
-            return packet;
-        }
-
         User user = new User();
         user.setEncryptedPassword(Encrypt.md5Hash(userInfo.getPassword()));
         user.setAccount(userInfo.getAccount());
@@ -194,10 +297,8 @@ public class RequestController {
                 throw new Exception("登录失败，请检查账号与密码是否正确。");
             } else { //获取到token，登录成功
                 user.setToken(token);
-                if(currentUser != null) AoXiangToDoListSystem.getInstance().synchronizeSystemData();
-                AoXiangToDoListSystem.getInstance().innerUserLogout(); //注销之前登录的用户
-                AoXiangToDoListSystem.getInstance().systemData.setCurrentUser(user);
-
+                AoXiangToDoListSystem.getInstance().getSystemData().setCurrentUser(user);
+                AoXiangToDoListSystem.getInstance().synchronizeSystemData();
                 //todo:在登录用户后，自动进行一次数据同步。
             }
         } catch (Exception exception) {
@@ -235,23 +336,37 @@ public class RequestController {
     public static ResponsePacket processUserModifyInformation(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
-        User newUser;
+        UserInfo userInfo;
         try {
-            newUser = User.fromJsonString(request.getContent());
+            userInfo = JsonUtility.objectFromJsonString(request.getContent(), UserInfo.class);
         } catch (Exception exception) {
-            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为User\n%s", request.getContent(), exception.getMessage()));
+            packet.setMessage(String.format("参数错误：无法将字符串\"%s\" 解析为UserInfo\n%s", request.getContent(), exception.getMessage()));
             return packet;
         }
 
-        String jsonString;
-        try {
-            jsonString = newUser.toJsonString();
-        } catch (IOException ioException) {
-            var errString = "内部错误：内部发生转换错误。";
-            packet.setMessage(errString);
+        User currentUser = AoXiangToDoListSystem.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            packet.setMessage("不能修改用户信息，因为当前没有登录任何用户。");
             return packet;
         }
-        packet.setContent(jsonString);
+
+        String newHashedPwd = Encrypt.md5Hash(userInfo.getNewPassword());
+        //旧密码验证成功
+        boolean success;
+        try {
+            success = CloudServer.sendChangeUserInfoRequest(currentUser.getToken(), userInfo.getUserName(), currentUser.getEncryptedPassword(), newHashedPwd);
+        } catch (IOException e) {
+            packet.setMessage(String.format("连接服务器发生错误：%s", e.getMessage()));
+            return packet;
+        }
+        if (!success) {
+            packet.setMessage("修改失败，旧密码可能错误。");
+            return packet;
+        }
+
+        //修改成功
+        currentUser.setEncryptedPassword(newHashedPwd);
+        currentUser.setUserName(userInfo.getUserName());
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         packet.setStatus(ResponseStatus.Success);
         return packet;
@@ -288,9 +403,10 @@ public class RequestController {
         var toDoWorkItemList = getSystemToDoWorkItemCollection();
         requestItem.setCreateTime(Instant.now());
         requestItem.setInnerId(toDoWorkItemList.getNextAvailableInnerId());
+
+        //添加该事项
         toDoWorkItemList.add(requestItem);
 
-        AoXiangToDoListSystem.getInstance().updateSystemDataLastModifiedInstant();
         //操作成功响应
         packet.setMessage(Messages.ZH_CN.SUCCESS);
         packet.setStatus(ResponseStatus.Success);
@@ -324,8 +440,7 @@ public class RequestController {
     }
 
     public static ResponsePacket processEnumerateToDoWorkItemListRequest(RequestPacket request, RequestHandlerData userData) {
-        ResponsePacket packet = new ResponsePacket();
-        packet.setStatus(ResponseStatus.Failure);
+        ResponsePacket packet = makeDefaultResponse();
 
         var collection = getSystemToDoWorkItemCollection();
         var itemsArray = collection.toArray();
@@ -337,12 +452,11 @@ public class RequestController {
             return packet;
         }
         packet.setContent(json);
-        packet.setStatus(ResponseStatus.Success);
-        packet.setMessage(Messages.ZH_CN.SUCCESS);
+        packet.withSuccessResponse();
         return packet;
     }
 
-    public static ResponsePacket processDeleteToDoWorkRequest(RequestPacket request, RequestHandlerData userData) {
+    public static synchronized ResponsePacket processDeleteToDoWorkRequest(RequestPacket request, RequestHandlerData userData) {
         ResponsePacket packet = new ResponsePacket();
         packet.setStatus(ResponseStatus.Failure);
 //        int innerId;
@@ -388,6 +502,7 @@ public class RequestController {
             ToDoWorkItem targetItem = getToDoWorkItemByInnerId(innerId);
 
             //设置各种属性。注意不能设置innerId和createTime
+            targetItem.suppressNotify();
             targetItem.setTitle(toDoWorkItem.getTitle());
             targetItem.setSubtitle(toDoWorkItem.getSubtitle());
             targetItem.setLayer(toDoWorkItem.getLayer());
@@ -397,8 +512,8 @@ public class RequestController {
             targetItem.setEmergencyPriority(toDoWorkItem.getEmergencyPriority());
             targetItem.setImportancePriority(toDoWorkItem.getImportancePriority());
             targetItem.setStartTime(toDoWorkItem.getStartTime());
+            targetItem.resumeAndNotifyOnceOnChanged();
 
-            AoXiangToDoListSystem.getInstance().updateSystemDataLastModifiedInstant();
             packet.setMessage(Messages.ZH_CN.SUCCESS);
             packet.setStatus(ResponseStatus.Success);
         } catch (Exception exception) {
@@ -495,10 +610,9 @@ public class RequestController {
             if (request.getContent() == null || request.getContent().isBlank())
                 throw new Exception(Messages.ZH_CN.POMODORO_INNER_ID_MISSING);
 
-            ToDoWorkItem item = getToDoWorkItemByInnerId(request.getContent());
             Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
             // 开始番茄钟
-            pomodoro.startPomodoro();
+            pomodoro.start(Integer.parseInt(request.getContent()));
         } catch (Exception e) {
             packet.setMessage(e.getMessage());
             return packet;
@@ -526,7 +640,7 @@ public class RequestController {
             Pomodoro pomodoro = AoXiangToDoListSystem.getInstance().getPomodoro();
             var pomodoroList = getSystemPomodoroCollection();
             // 打断后台计时
-            pomodoro.endPomodoro();
+            pomodoro.stop();
 
         } catch (Exception e) {
             packet.setMessage(e.getMessage());
@@ -583,6 +697,23 @@ public class RequestController {
         }
     }
 
+    /**
+     * 通过innerId字符串获取番茄钟记录。
+     *
+     * @param innerIdStr innerId字符串。
+     * @return 获取到的番茄钟记录（若正常返回，保证非空）。
+     * @throws IllegalArgumentException 字符串转换失败、找不到待办事项时抛出。
+     */
+    private static PomodoroRecord getPomodoroRecordByInnerId(String innerIdStr) throws IllegalArgumentException {
+        int innerId;
+        try {
+            innerId = Integer.parseInt(innerIdStr);
+            return getPomodoroRecordByInnerId(innerId);
+        } catch (Exception exception) {
+            throw new IllegalArgumentException(exception.getMessage());
+        }
+    }
+
     private static void validateToDoWork(ToDoWorkItem item) throws FormatException {
         if (item.getTitle().isBlank()) throw new FormatException("ToDoWorkItem的主标题不能为空。");
     }
@@ -595,6 +726,14 @@ public class RequestController {
         return optionalItem.get();
     }
 
+    private static PomodoroRecord getPomodoroRecordByInnerId(int innerId) throws IllegalArgumentException {
+        var collection = getSystemPomodoroCollection();
+        var optionalItem = collection.stream().filter(i -> innerId == i.getInnerId()).findAny();
+        if (optionalItem.isEmpty())
+            throw new IllegalArgumentException(String.format("系统中找不到innerId为%s的番茄钟记录", innerId));
+        return optionalItem.get();
+    }
+
     private static ToDoWorkItemCollection getSystemToDoWorkItemCollection() {
         return AoXiangToDoListSystem.getInstance().getToDoWorkItemCollection();
     }
@@ -602,6 +741,14 @@ public class RequestController {
     private static PomodoroRecordCollection getSystemPomodoroCollection() {
         return AoXiangToDoListSystem.getInstance().getPomodoroRecordsCollection();
     }
+
+    private static ResponsePacket makeDefaultResponse() {
+        ResponsePacket packet = new ResponsePacket();
+        packet.setStatus(ResponseStatus.Failure);
+        packet.setMessage("");
+        return packet;
+    }
+
 
     private static User getSystemCurrentUser() {
         return AoXiangToDoListSystem.getInstance().getCurrentUser();

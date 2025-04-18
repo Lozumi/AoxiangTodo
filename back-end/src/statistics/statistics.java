@@ -1,7 +1,7 @@
 package statistics;
 
 import shared.PomodoroRecord;
-import shared.PomodoroStatus;
+import shared.PomodoroRecordStatus;
 import shared.ToDoWorkItem;
 import shared.WorkItemStatus;
 import sys.AoXiangToDoListSystem;
@@ -110,7 +110,7 @@ public class statistics {
     private int setYesterdayPomodoroFinishedNumber(){
         int temp = 0;
         for(PomodoroRecord pomodoroRecord:this.yesterdayPomodoros){
-            if(pomodoroRecord.getPomodoroStatus().equals(PomodoroStatus.Finished)){temp+=1;}
+            if(pomodoroRecord.getPomodoroRecordStatus().equals(PomodoroRecordStatus.Finished)){temp+=1;}
         }
         return temp;
     }

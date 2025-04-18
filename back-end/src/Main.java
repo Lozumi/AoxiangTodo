@@ -1,24 +1,18 @@
+import shared.NetworkProtocol;
 import shared.ToDoWorkItem;
-import shared.UserInfo;
-import shared.WorkItemStatus;
 import sys.AoXiangToDoListSystem;
 import sys.RequestController;
 import sys.RequestHandlerInfo;
 import trans.*;
 import unittest.HttpTest;
-import unittest.SocketTest;
-import user.User;
-import util.Encrypt;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.http.HttpClient;
 import java.time.Instant;
-import java.util.Vector;
 
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
-        AoXiangToDoListSystem.getInstance().runHttpServer(new BackEndHttpServerStartupInfo(20220,12));
+        AoXiangToDoListSystem.getInstance().runHttpServer(new BackEndHttpServerStartupInfo(20220, 12));
+        AoXiangToDoListSystem.getInstance().runSocketServer(new BackEndServerStartupInfo("127.0.0.1", 20221, 12));
 
         var controller = AoXiangToDoListSystem.getInstance().getSystemController();
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.CreateToDoWork, RequestController::processToDoWorkCreation));
@@ -32,10 +26,18 @@ public class Main {
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.UserRegister, RequestController::processUserRegister));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.UserLogin, RequestController::processUserLogin));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.UserLogout, RequestController::processUserLogout));
-        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.GetCurrentUser, RequestController::processGetCurrentUser));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.GetCurrentUser, RequestController::processGetCurrentUser_FullInfo));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.Synchronize, RequestController::processSynchronization));
         controller.registerRequestHandler(new RequestHandlerInfo(RequestType.ExitApplication, RequestController::processExitApplication));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.ModifyUserInfo, RequestController::processUserModifyInformation));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.RegisterNotificationContext, RequestController::processRegisterNotificationContext));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.UnregisterNotificationContext, RequestController::processUnregisterNotificationContext));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.GetNotification, RequestController::processGetNotification));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.GetPomodoro, RequestController::processGetPomodoro));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.SaveSystemData, RequestController::processSaveSystemData));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.EnumeratePomodoroRecords, RequestController::processEnumeratePomodoroRecordRequest));
+        controller.registerRequestHandler(new RequestHandlerInfo(RequestType.QueryPomodoroRecord, RequestController::processQueryPomodoroRecord));
 
-        HttpTest httpTest = new HttpTest("localhost:20220");
+        var notifyController = AoXiangToDoListSystem.getInstance().getNotificationController();
     }
 }
