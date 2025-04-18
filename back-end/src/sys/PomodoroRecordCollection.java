@@ -13,6 +13,7 @@ import java.util.*;
 public class PomodoroRecordCollection extends Vector<PomodoroRecord> implements Listenable<PomodoroRecord> {
       private final Vector<ListListener<PomodoroRecord>> listeners = new Vector<>();
 
+
     /**
      * 获取下一个可用的番茄钟记录ID。
      *

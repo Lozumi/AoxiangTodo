@@ -1,5 +1,6 @@
 package unittest;
 
+import shared.ToDoWorkItem;
 import shared.UserInfo;
 import trans.RequestPacket;
 import trans.RequestType;
@@ -39,6 +40,15 @@ public class HttpTest {
         }
     }
 
+
+    public ResponsePacket tryRequestCreateToDoWork(ToDoWorkItem item) throws IOException {
+        RequestPacket requestPacket = new RequestPacket();
+        requestPacket.setRequestType(RequestType.CreateToDoWork);
+        requestPacket.setContent(item.toJsonString());
+        var response = tryRequest(requestPacket);
+        printTrace(requestPacket,response);
+        return response;
+    }
     public ResponsePacket tryRequestEnumeration() {
         RequestPacket requestPacket = new RequestPacket();
         requestPacket.setRequestType(RequestType.EnumerateToDoWorkList);
@@ -77,6 +87,10 @@ public class HttpTest {
         return tryBasicRequest(RequestType.Synchronize);
     }
 
+    public ResponsePacket tryRequestGetUser(){
+        return tryBasicRequest(RequestType.GetCurrentUser,null);
+    }
+
     public  ResponsePacket tryRequestUserRegister(UserInfo info) throws IOException {
         return tryBasicRequest(RequestType.UserRegister,info.toJsonString());
     }
@@ -92,6 +106,13 @@ public class HttpTest {
         return response;
     }
 
+    public ResponsePacket tryRequestLogout(){
+        RequestPacket packet = new RequestPacket();
+        packet.setRequestType(RequestType.UserLogout);
+        var response = tryRequest(packet);
+        printTrace(packet,response);
+        return tryRequest(packet);
+    }
     ResponsePacket tryBasicRequest(RequestType requestType) {
         return tryBasicRequest(requestType,"");
     }
